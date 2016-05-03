@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:src="@android:drawable/ic_menu_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:id="@+id/imageView1"
+        android:layout_marginBottom="0.0dp" />
+    <Button
+        android:text="Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/button1" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout1">
+        <TextView
+            android:text="Width"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/textView1" />
+        <EditText
+            android:inputType="numberDecimal"
+            android:layout_width="72.0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/widthTextBox" />
+        <TextView
+            android:text="Height"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/textView1"
+            android:paddingLeft="10dp" />
+        <EditText
+            android:inputType="numberDecimal"
+            android:layout_width="72.0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/heightTextBox" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout1">
+        <TextView
+            android:text="Cell Size"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/textView1" />
+        <EditText
+            android:inputType="numberDecimal"
+            android:layout_width="72.0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/sizeTextBox" />
+        <TextView
+            android:text="Variability"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/textView1"
+            android:paddingLeft="10dp" />
+        <EditText
+            android:inputType="numberDecimal"
+            android:layout_width="72.0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/varTextBox" />
+    </LinearLayout>
+</LinearLayout>

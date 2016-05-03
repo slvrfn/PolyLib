@@ -1,0 +1,63 @@
+﻿using Android.App;
+using Android.Widget;
+using Android.OS;
+using System.Collections.Generic;
+using System;
+using Android.Graphics;
+using Android.Graphics.Drawables;
+
+namespace LowPoly
+{
+	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon")]
+	public class MainActivity : Activity
+	{
+		Button button;
+		ImageView imagePanel;
+		TextView widthTB, heightTB, varTB, sizeTB;
+		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
+
+		protected override void OnCreate (Bundle savedInstanceState)
+		{
+//			MotionEvent t;
+
+			base.OnCreate (savedInstanceState);
+
+			// Set our view from the "main" layout resource
+			SetContentView (Resource.Layout.Main);
+
+			// Get our button from the layout resource,
+			// and attach an event to it
+			button = FindViewById<Button> (Resource.Id.button1);
+			button.Click += Generate;
+
+			imagePanel = FindViewById<ImageView> (Resource.Id.imageView1);
+
+			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
+			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
+			varTB = FindViewById<TextView> (Resource.Id.varTextBox);
+			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
+
+			widthTB.Text = "1024";
+			heightTB.Text = "768";
+			varTB.Text = _lowPoly.setVariance.ToString ();
+			sizeTB.Text = _lowPoly.cell_size.ToString ();
+
+
+
+		}
+
+		public void Generate (object sender, EventArgs e){
+			_lowPoly.width = Int32.Parse (widthTB.Text);
+			_lowPoly.height = Int32.Parse (heightTB.Text);
+
+			_lowPoly.setVariance = double.Parse(varTB.Text);
+			_lowPoly.cell_size = double.Parse(sizeTB.Text);
+
+			imagePanel.SetImageDrawable (new BitmapDrawable (_lowPoly.GenerateNew ()));
+
+		}
+
+	}
+}
+
+
