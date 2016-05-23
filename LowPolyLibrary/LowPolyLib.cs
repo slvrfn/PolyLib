@@ -17,6 +17,8 @@ namespace LowPolyLibrary
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
 
+		Random rand = new Random();
+
 		public Bitmap GenerateNew()
 		{
 			UpdateVars();
@@ -39,8 +41,9 @@ namespace LowPolyLibrary
 			Canvas canvas = new Canvas (drawingCanvas);
 
 			Paint paint = new Paint();
-			paint.StrokeWidth = 0;
-			paint.SetStyle (Paint.Style.Fill);
+
+			paint.StrokeWidth = .5f;
+			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
 
 			var gradient = getGradient();
@@ -60,14 +63,14 @@ namespace LowPolyLibrary
 
 				var center = centroid(triangulatedPoints[i]);
 
-				paint.Color = getColor (gradient, center);
+				paint.Color = getTriangleColor (gradient, center);
 
 				canvas.DrawPath (path, paint);
 			}
 			return drawingCanvas;
 		}
 
-		private Android.Graphics.Color getColor(Bitmap gradient, System.Drawing.Point center)
+		private Android.Graphics.Color getTriangleColor(Bitmap gradient, System.Drawing.Point center)
 		{
 			if (center.X < 0)
 				center.X += (int)bleed_x;
@@ -88,40 +91,70 @@ namespace LowPolyLibrary
 			return triColor;
 		}
 
+		private	int[] getGradientColors()
+		{
+			//get all gradient codes
+			var values = Enum.GetValues(typeof(ColorBru.Code));
+			ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
+			//gets specified colors in gradient length: #
+			var brewColors = ColorBru.GetHtmlCodes (randomCode, 4);
+			//array of ints converted from brewColors
+			var colorArray = new int[brewColors.Length];
+			for (int i = 0; i < brewColors.Length; i++) {
+				colorArray [i] = Android.Graphics.Color.ParseColor (brewColors [i]);
+			}
+			return colorArray;
+		}
+
 		private Bitmap getGradient()
 		{
-			LinearGradient temp = new LinearGradient (
-				0, 
-				0, 
-				width, 
-				height, 
-				Android.Graphics.Color.Honeydew, 
-				Android.Graphics.Color.Cyan, 
-				Shader.TileMode.Repeat
-			);
+			var colorArray = getGradientColors ();
 
-			var colorArray = new int[] {
-				Android.Graphics.Color.Crimson.ToArgb (), 
-				Android.Graphics.Color.ForestGreen.ToArgb (),
-				Android.Graphics.Color.DeepSkyBlue.ToArgb ()
-			};
+			Shader gradientShader;
 
-//			SweepGradient temp = new SweepGradient (
-//				((float)width / 2),
-//				((float)height / 2),
-//			    colorArray,
-//				//new float[]{ }
-//				null
-//			);
-
-//			RadialGradient temp = new RadialGradient (
-//				((float)width / 2),
-//				((float)height / 2),
-//				((float) width/2),
-//				colorArray,
-//				null,
-//				Shader.TileMode.Clamp
-//			);
+			switch (rand.Next(3)) {
+			case 0:
+				gradientShader = new LinearGradient (
+					                      0,
+					                      0,
+					                      width,
+					                      height,
+					                      colorArray,
+					                      null,
+					                      Shader.TileMode.Repeat
+				                      );
+				break;
+			case 1:
+				gradientShader = new SweepGradient (
+					((float)width / 2),
+					((float)height / 2),
+					colorArray,
+					//new float[]{ }
+					null
+				);
+				break;
+			case 2:
+				gradientShader = new RadialGradient (
+					                        ((float)width / 2),
+					                        ((float)height / 2),
+					                        ((float)width / 2),
+					                        colorArray,
+					                        null,
+					                        Shader.TileMode.Clamp
+				                        );
+				break;
+			default:
+				gradientShader = new LinearGradient (
+					0,
+					0,
+					width,
+					height,
+					colorArray,
+					null,
+					Shader.TileMode.Repeat
+				);
+				break;
+			}
 
 //			LinearGradientBrush brush = new LinearGradientBrush(
 //				new System.Drawing.Point(0,0),
@@ -135,14 +168,13 @@ namespace LowPolyLibrary
 			Canvas canvas = new Canvas (bmp);
 			Paint pnt = new Paint();
 			pnt.SetStyle (Paint.Style.Fill);
-			pnt.SetShader (temp);
+			pnt.SetShader (gradientShader);
 			canvas.DrawRect(0,0,width,height,pnt);
 			return bmp;
 		}
 
 		public List<ceometric.DelaunayTriangulator.Point> GeneratePoints()
 		{
-			Random rand = new Random();
 			var points = new List<ceometric.DelaunayTriangulator.Point>();
 			for (var i = - bleed_x; i < width + bleed_x; i += cell_size) 
 			{

@@ -1,14 +1,14 @@
 ﻿<Properties StartupItem="LowPoly/LowPoly.csproj" RefactoringSettings.EnableRefactorings="True">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Android.Squared_AVD" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="LowPolyLibrary/LowPolyLib.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="LowPoly/MainActivity.cs">
     <Files>
-      <File FileName="LowPoly/MainActivity.cs" Line="21" Column="17" />
-      <File FileName="LowPolyLibrary/LowPolyLib.cs" Line="56" Column="27" />
+      <File FileName="LowPoly/MainActivity.cs" Line="1" Column="1" />
+      <File FileName="LowPolyLibrary/LowPolyLib.cs" Line="155" Column="7" />
+      <File FileName="LowPolyLibrary/ColorBru.cs" Line="638" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.ItemProperties.LowPoly AndroidDesignerPreferredDevice="Nexus 4" />
 </Properties>
