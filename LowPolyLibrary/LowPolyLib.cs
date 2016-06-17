@@ -97,7 +97,7 @@ namespace LowPolyLibrary
 			var values = Enum.GetValues(typeof(ColorBru.Code));
 			ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
 			//gets specified colors in gradient length: #
-			var brewColors = ColorBru.GetHtmlCodes (randomCode, 4);
+			var brewColors = ColorBru.GetHtmlCodes (randomCode, 6);
 			//array of ints converted from brewColors
 			var colorArray = new int[brewColors.Length];
 			for (int i = 0; i < brewColors.Length; i++) {

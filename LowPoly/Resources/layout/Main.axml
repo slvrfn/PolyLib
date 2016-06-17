@@ -76,4 +76,12 @@
             android:layout_height="match_parent"
             android:id="@+id/varTextBox" />
     </LinearLayout>
+    <TextView
+        android:text="XX:XX"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/timeElapsed"
+        android:paddingLeft="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"/>
 </LinearLayout>

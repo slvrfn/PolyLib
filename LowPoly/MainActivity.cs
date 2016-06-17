@@ -3,6 +3,8 @@ using Android.Widget;
 using Android.OS;
 using System.Collections.Generic;
 using System;
+using System.Diagnostics;
+using System.Timers;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 
@@ -13,7 +15,7 @@ namespace LowPoly
 	{
 		Button button;
 		ImageView imagePanel;
-		TextView widthTB, heightTB, varTB, sizeTB;
+		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
 
 		protected override void OnCreate (Bundle savedInstanceState)
@@ -36,8 +38,9 @@ namespace LowPoly
 			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
 			varTB = FindViewById<TextView> (Resource.Id.varTextBox);
 			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
+            timeElapsed = FindViewById<TextView>(Resource.Id.timeElapsed);
 
-			widthTB.Text = "1024";
+            widthTB.Text = "1024";
 			heightTB.Text = "768";
 			varTB.Text = _lowPoly.setVariance.ToString ();
 			sizeTB.Text = _lowPoly.cell_size.ToString ();
@@ -47,13 +50,22 @@ namespace LowPoly
 		}
 
 		public void Generate (object sender, EventArgs e){
-			_lowPoly.width = Int32.Parse (widthTB.Text);
+            var temp = new Stopwatch();
+            temp.Start();
+            _lowPoly.width = Int32.Parse (widthTB.Text);
 			_lowPoly.height = Int32.Parse (heightTB.Text);
 
 			_lowPoly.setVariance = double.Parse(varTB.Text);
 			_lowPoly.cell_size = double.Parse(sizeTB.Text);
 
-			imagePanel.SetImageDrawable (new BitmapDrawable (_lowPoly.GenerateNew ()));
+            temp.Start();
+            var generatedBitmap = _lowPoly.GenerateNew();
+            temp.Stop();
+
+            imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
+            
+		    timeElapsed.Text = temp.Elapsed.ToString();
+
 
 		}
 
