@@ -10,7 +10,8 @@ namespace LowPolyLibrary
 	{
 		private DelaunayTriangulation2d _delaunay = new DelaunayTriangulation2d();
 		private List<ceometric.DelaunayTriangulator.Point> _points;
-		public int width;
+	    private List<Triangle> triangulatedPoints;
+        public int width;
 		public int height;
 		public double cell_size = 75;
 		public double setVariance = .75;
@@ -46,50 +47,98 @@ namespace LowPolyLibrary
 			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
 
+		    var overlays = createOverlays(12);
+            List<Triangle>[] framedTriangles = new List<Triangle>[12];
+		    for (int i = 0; i < framedTriangles.Length; i++)
+		    {
+		        framedTriangles[i] = new List<Triangle>();
+		    }
+
 			var gradient = getGradient();
-			var triangulatedPoints = _delaunay.Triangulate(_points);
+			triangulatedPoints = _delaunay.Triangulate(_points);
 			for (int i = 0; i < triangulatedPoints.Count; i++)
 			{
 				System.Drawing.PointF a = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex1.X, (float)triangulatedPoints [i].Vertex1.Y);
 				System.Drawing.PointF b = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex2.X, (float)triangulatedPoints [i].Vertex2.Y);
 				System.Drawing.PointF c = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex3.X, (float)triangulatedPoints [i].Vertex3.Y);
-
-				Path path = new Path();
-				path.SetFillType (Path.FillType.EvenOdd);
-				path.MoveTo(b.X, b.Y);
-				path.LineTo(c.X, c.Y);
-				path.LineTo(a.X, a.Y);
-				path.Close();
+                
+			    Path trianglePath = drawTrianglePath(a, b, c);
 
 				var center = centroid(triangulatedPoints[i]);
 
-				paint.Color = getTriangleColor (gradient, center);
+                //annimation logic
+                for (int j = 0; j<overlays.Length; j++)
+                {
+                    var adjustedCenter = keepInPicBounds(center);
+                    //if the rectangle contains the center of a given triangle
+                    if (overlays[j].Contains(adjustedCenter))
+                    {
+                        //add a reference of the triangle to the list of the rectangle it is inside
+                        framedTriangles[j].Add(triangulatedPoints[i]);
+                    }
+                }
 
-				canvas.DrawPath (path, paint);
+			    paint.Color = getTriangleColor (gradient, center);
+
+				canvas.DrawPath (trianglePath, paint);
 			}
 			return drawingCanvas;
 		}
 
+	    private RectangleF[] createOverlays(int numFrames)
+	    {
+            //get width of frame when there are 12 rectangles on screen
+            var frameWidth = width / numFrames;
+            //represents the left edge of the rectangles
+            var currentX = 0;
+            //array size numFrames of rectangles. each array entry serves as the list of triangles in the corresponding rectangle
+            RectangleF[] frames = new RectangleF[numFrames];
+            for (int i = 0; i < numFrames; i++)
+            {
+                System.Drawing.RectangleF overlay = new RectangleF(currentX, 0, frameWidth, height);
+                frames[i] = overlay;
+                currentX += frameWidth;
+            }
+	        return frames;
+	    }
+
+	    private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
+	    {
+            Path path = new Path();
+            path.SetFillType(Path.FillType.EvenOdd);
+            path.MoveTo(b.X, b.Y);
+            path.LineTo(c.X, c.Y);
+            path.LineTo(a.X, a.Y);
+            path.Close();
+            return path;
+        }
+
 		private Android.Graphics.Color getTriangleColor(Bitmap gradient, System.Drawing.Point center)
 		{
-			if (center.X < 0)
-				center.X += (int)bleed_x;
-			else if (center.X > width)
-				center.X -= (int) bleed_x;
-			else if (center.X == width)
-				center.X -= (int) bleed_x-1;
-			if (center.Y < 0)
-				center.Y += (int) bleed_y;
-			else if (center.Y > height)
-				center.Y -= (int) bleed_y+1;
-			else if (center.Y == height)
-				center.Y -= (int) bleed_y-1;
+		    center = keepInPicBounds(center);
 
 			var colorFromRGB = System.Drawing.Color.FromArgb( gradient.GetPixel(center.X, center.Y));
 
 			Android.Graphics.Color triColor = Android.Graphics.Color.Rgb (colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
 			return triColor;
 		}
+
+	    private System.Drawing.Point keepInPicBounds(System.Drawing.Point center)
+	    {
+            if (center.X < 0)
+                center.X += (int)bleed_x;
+            else if (center.X > width)
+                center.X -= (int)bleed_x;
+            else if (center.X == width)
+                center.X -= (int)bleed_x - 1;
+            if (center.Y < 0)
+                center.Y += (int)bleed_y;
+            else if (center.Y > height)
+                center.Y -= (int)bleed_y + 1;
+            else if (center.Y == height)
+                center.Y -= (int)bleed_y - 1;
+	        return center;
+	    }
 
 		private	int[] getGradientColors()
 		{
