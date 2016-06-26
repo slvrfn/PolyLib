@@ -52,8 +52,8 @@ namespace LowPoly
 		public void Generate (object sender, EventArgs e){
             var temp = new Stopwatch();
             temp.Start();
-            _lowPoly.width = Int32.Parse (widthTB.Text);
-			_lowPoly.height = Int32.Parse (heightTB.Text);
+            _lowPoly.boundsWidth = Int32.Parse (widthTB.Text);
+			_lowPoly.boundsHeight = Int32.Parse (heightTB.Text);
 
 			_lowPoly.setVariance = double.Parse(varTB.Text);
 			_lowPoly.cell_size = double.Parse(sizeTB.Text);

@@ -1,14 +1,17 @@
 ﻿<Properties StartupItem="LowPoly/LowPoly.csproj" RefactoringSettings.EnableRefactorings="True">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Android.Squared_AVD" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="LowPoly/MainActivity.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="LowPolyLibrary/LowPolyLib.cs">
     <Files>
       <File FileName="LowPoly/MainActivity.cs" Line="1" Column="1" />
-      <File FileName="LowPolyLibrary/LowPolyLib.cs" Line="155" Column="7" />
-      <File FileName="LowPolyLibrary/ColorBru.cs" Line="638" Column="1" />
+      <File FileName="LowPolyLibrary/LowPolyLib.cs" Line="70" Column="46" />
+      <File FileName="LowPolyLibrary/ColorBru.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/cameron/Repositories/Xamarin/LowPoly/LowPolyLibrary/LowPolyLib.cs" line="80" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.LowPoly PreferredExecutionTarget="Android.Nexus_5_API_22_x86" />
 </Properties>

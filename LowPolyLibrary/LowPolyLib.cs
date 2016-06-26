@@ -11,12 +11,14 @@ namespace LowPolyLibrary
 		private DelaunayTriangulation2d _delaunay = new DelaunayTriangulation2d();
 		private List<ceometric.DelaunayTriangulator.Point> _points;
 	    private List<Triangle> triangulatedPoints;
-        public int width;
-		public int height;
+        public int boundsWidth;
+		public int boundsHeight;
 		public double cell_size = 75;
 		public double setVariance = .75;
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
+		private static int numFrames = 12; //static necessary for creation of framedTriangles list
+		List<Triangle>[] framedTriangles = new List<Triangle>[numFrames];
 
 		Random rand = new Random();
 
@@ -24,21 +26,21 @@ namespace LowPolyLibrary
 		{
 			UpdateVars();
 			_points = GeneratePoints();
-			return DrawIt();
+			return createBitmap();
 		}
 
 		private void UpdateVars()
 		{
 			calcVariance = cell_size * setVariance / 2;
-			cells_x = Math.Floor((width + 4 * cell_size) / cell_size);
-			cells_y = Math.Floor((height + 4 * cell_size) / cell_size);
-			bleed_x = ((cells_x * cell_size) - width) / 2;
-			bleed_y = ((cells_y * cell_size) - height) / 2;
+			cells_x = Math.Floor((boundsWidth + 4 * cell_size) / cell_size);
+			cells_y = Math.Floor((boundsHeight + 4 * cell_size) / cell_size);
+			bleed_x = ((cells_x * cell_size) - boundsWidth) / 2;
+			bleed_y = ((cells_y * cell_size) - boundsHeight) / 2;
 		}
 
-		private Bitmap DrawIt()
+		private Bitmap createBitmap()
 		{
-			Bitmap drawingCanvas = Bitmap.CreateBitmap (width, height, Bitmap.Config.Rgb565);
+			Bitmap drawingCanvas = Bitmap.CreateBitmap (boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
 			Canvas canvas = new Canvas (drawingCanvas);
 
 			Paint paint = new Paint();
@@ -47,8 +49,7 @@ namespace LowPolyLibrary
 			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
 
-		    var overlays = createOverlays(12);
-            List<Triangle>[] framedTriangles = new List<Triangle>[12];
+		    var overlays = createOverlays();
 		    for (int i = 0; i < framedTriangles.Length; i++)
 		    {
 		        framedTriangles[i] = new List<Triangle>();
@@ -85,17 +86,29 @@ namespace LowPolyLibrary
 			return drawingCanvas;
 		}
 
-	    private RectangleF[] createOverlays(int numFrames)
+	    private RectangleF[] createOverlays()
 	    {
-            //get width of frame when there are 12 rectangles on screen
-            var frameWidth = width / numFrames;
+            //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
+			//all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
+
+			//get width of frame when there are 12 rectangles on screen
+            var frameWidth = boundsWidth / numFrames;
             //represents the left edge of the rectangles
             var currentX = 0;
-            //array size numFrames of rectangles. each array entry serves as the list of triangles in the corresponding rectangle
+			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
             RectangleF[] frames = new RectangleF[numFrames];
             for (int i = 0; i < numFrames; i++)
             {
-                System.Drawing.RectangleF overlay = new RectangleF(currentX, 0, frameWidth, height);
+				System.Drawing.RectangleF overlay;
+				//if the first rectangle
+				if (i == 0)
+					overlay = new RectangleF(currentX - (boundsWidth / 2), 0 - (boundsHeight / 2), frameWidth, boundsHeight + (boundsHeight / 2));
+				//if the last rectangle
+				else if (i == numFrames - 1)
+					overlay = new RectangleF(currentX, 0 - (boundsHeight / 2), frameWidth + (boundsWidth / 2), boundsHeight + (boundsHeight / 2));
+				else
+					overlay = new RectangleF(currentX, 0 - (boundsHeight / 2), frameWidth, boundsHeight + (boundsHeight / 2));
+				
                 frames[i] = overlay;
                 currentX += frameWidth;
             }
@@ -127,15 +140,15 @@ namespace LowPolyLibrary
 	    {
             if (center.X < 0)
                 center.X += (int)bleed_x;
-            else if (center.X > width)
+            else if (center.X > boundsWidth)
                 center.X -= (int)bleed_x;
-            else if (center.X == width)
+            else if (center.X == boundsWidth)
                 center.X -= (int)bleed_x - 1;
             if (center.Y < 0)
                 center.Y += (int)bleed_y;
-            else if (center.Y > height)
+            else if (center.Y > boundsHeight)
                 center.Y -= (int)bleed_y + 1;
-            else if (center.Y == height)
+            else if (center.Y == boundsHeight)
                 center.Y -= (int)bleed_y - 1;
 	        return center;
 	    }
@@ -166,8 +179,8 @@ namespace LowPolyLibrary
 				gradientShader = new LinearGradient (
 					                      0,
 					                      0,
-					                      width,
-					                      height,
+					                      boundsWidth,
+					                      boundsHeight,
 					                      colorArray,
 					                      null,
 					                      Shader.TileMode.Repeat
@@ -175,8 +188,8 @@ namespace LowPolyLibrary
 				break;
 			case 1:
 				gradientShader = new SweepGradient (
-					((float)width / 2),
-					((float)height / 2),
+					((float)boundsWidth / 2),
+					((float)boundsHeight / 2),
 					colorArray,
 					//new float[]{ }
 					null
@@ -184,9 +197,9 @@ namespace LowPolyLibrary
 				break;
 			case 2:
 				gradientShader = new RadialGradient (
-					                        ((float)width / 2),
-					                        ((float)height / 2),
-					                        ((float)width / 2),
+					                        ((float)boundsWidth / 2),
+					                        ((float)boundsHeight / 2),
+					                        ((float)boundsWidth / 2),
 					                        colorArray,
 					                        null,
 					                        Shader.TileMode.Clamp
@@ -196,8 +209,8 @@ namespace LowPolyLibrary
 				gradientShader = new LinearGradient (
 					0,
 					0,
-					width,
-					height,
+					boundsWidth,
+					boundsHeight,
 					colorArray,
 					null,
 					Shader.TileMode.Repeat
@@ -212,22 +225,22 @@ namespace LowPolyLibrary
 //				Color.FromArgb(255,0,255,0));
 
 //			Bitmap temp = new Bitmap(width, height);
-			Bitmap bmp = Bitmap.CreateBitmap (width, height, Bitmap.Config.Rgb565);
+			Bitmap bmp = Bitmap.CreateBitmap (boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
 //			Graphics graphics = Graphics.FromImage(temp);
 			Canvas canvas = new Canvas (bmp);
 			Paint pnt = new Paint();
 			pnt.SetStyle (Paint.Style.Fill);
 			pnt.SetShader (gradientShader);
-			canvas.DrawRect(0,0,width,height,pnt);
+			canvas.DrawRect(0,0,boundsWidth,boundsHeight,pnt);
 			return bmp;
 		}
 
 		public List<ceometric.DelaunayTriangulator.Point> GeneratePoints()
 		{
 			var points = new List<ceometric.DelaunayTriangulator.Point>();
-			for (var i = - bleed_x; i < width + bleed_x; i += cell_size) 
+			for (var i = - bleed_x; i < boundsWidth + bleed_x; i += cell_size) 
 			{
-				for (var j = - bleed_y; j < height + bleed_y; j += cell_size) 
+				for (var j = - bleed_y; j < boundsHeight + bleed_y; j += cell_size) 
 				{
 					var x = i + cell_size/2 + _map(rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
 					var y = j + cell_size/2 + _map(rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
