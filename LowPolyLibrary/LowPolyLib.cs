@@ -102,7 +102,7 @@ namespace LowPolyLibrary
 				System.Drawing.RectangleF overlay;
 				//if the first rectangle
 				if (i == 0)
-					overlay = new RectangleF(currentX - (boundsWidth / 2), 0 - (boundsHeight / 2), frameWidth, boundsHeight + (boundsHeight / 2));
+					overlay = new RectangleF(currentX - (boundsWidth / 2), 0 - (boundsHeight / 2), frameWidth + (boundsWidth / 2), boundsHeight + (boundsHeight / 2));
 				//if the last rectangle
 				else if (i == numFrames - 1)
 					overlay = new RectangleF(currentX, 0 - (boundsHeight / 2), frameWidth + (boundsWidth / 2), boundsHeight + (boundsHeight / 2));
