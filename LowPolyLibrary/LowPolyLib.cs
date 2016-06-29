@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using ceometric.DelaunayTriangulator;
 using Android.Graphics;
+using Java.Util;
 
 namespace LowPolyLibrary
 {
@@ -18,9 +19,11 @@ namespace LowPolyLibrary
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
 		private static int numFrames = 12; //static necessary for creation of framedTriangles list
-		List<Triangle>[] framedTriangles = new List<Triangle>[numFrames];
+		List<System.Drawing.PointF>[] framedTriangles = new List<System.Drawing.PointF>[numFrames];
 
-		Random rand = new Random();
+        Dictionary<System.Drawing.PointF, List<Triangle>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
+
+		System.Random rand = new System.Random();
 
 		public Bitmap GenerateNew()
 		{
@@ -48,11 +51,11 @@ namespace LowPolyLibrary
 			paint.StrokeWidth = .5f;
 			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
-
-		    var overlays = createOverlays();
-		    for (int i = 0; i < framedTriangles.Length; i++)
+            
+            var overlays = createOverlays();
+            for (int i = 0; i < framedTriangles.Length; i++)
 		    {
-		        framedTriangles[i] = new List<Triangle>();
+		        framedTriangles[i] = new List<System.Drawing.PointF>();
 		    }
 
 			var gradient = getGradient();
@@ -67,24 +70,43 @@ namespace LowPolyLibrary
 
 				var center = centroid(triangulatedPoints[i]);
 
-                //annimation logic
-                for (int j = 0; j<overlays.Length; j++)
-                {
-                    var adjustedCenter = keepInPicBounds(center);
-                    //if the rectangle contains the center of a given triangle
-                    if (overlays[j].Contains(adjustedCenter))
-                    {
-                        //add a reference of the triangle to the list of the rectangle it is inside
-                        framedTriangles[j].Add(triangulatedPoints[i]);
-                    }
-                }
+                //animation logic
+                divyTris(a, overlays, i);
+                divyTris(b, overlays, i);
+                divyTris(c,overlays, i);
 
-			    paint.Color = getTriangleColor (gradient, center);
+                paint.Color = getTriangleColor (gradient, center);
 
 				canvas.DrawPath (trianglePath, paint);
 			}
 			return drawingCanvas;
 		}
+
+	    private void divyTris(System.Drawing.PointF point, RectangleF[] overlays, int arrayLoc)
+	    {
+            //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
+            if (poTriDic.ContainsKey(point))
+                poTriDic[point].Add(triangulatedPoints[arrayLoc]);
+            //if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
+            else
+            {
+                poTriDic[point] = new List<Triangle>();
+                poTriDic[point].Add(triangulatedPoints[arrayLoc]);
+            }
+            for (int j = 0; j < overlays.Length; j++)
+            {
+                //if the rectangle overlay contains a point
+                if (overlays[j].Contains(point))
+                {
+                    //if the point has not already been added to the overlay's point list
+                    if(!framedTriangles[j].Contains(point))
+                        //add it
+                        framedTriangles[j].Add(point);
+                }
+            }
+
+	        var testGet = poTriDic[point];
+	    }
 
 	    private RectangleF[] createOverlays()
 	    {
@@ -97,17 +119,21 @@ namespace LowPolyLibrary
             var currentX = 0;
 			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
             RectangleF[] frames = new RectangleF[numFrames];
+
+	        var tempWidth = boundsWidth/2;
+	        var tempHeight = boundsHeight/2;
+
             for (int i = 0; i < numFrames; i++)
             {
 				System.Drawing.RectangleF overlay;
 				//if the first rectangle
 				if (i == 0)
-					overlay = new RectangleF(currentX - (boundsWidth / 2), 0 - (boundsHeight / 2), frameWidth + (boundsWidth / 2), boundsHeight + (boundsHeight / 2));
+					overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight*2));
 				//if the last rectangle
 				else if (i == numFrames - 1)
-					overlay = new RectangleF(currentX, 0 - (boundsHeight / 2), frameWidth + (boundsWidth / 2), boundsHeight + (boundsHeight / 2));
+					overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
 				else
-					overlay = new RectangleF(currentX, 0 - (boundsHeight / 2), frameWidth, boundsHeight + (boundsHeight / 2));
+					overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
 				
                 frames[i] = overlay;
                 currentX += frameWidth;
