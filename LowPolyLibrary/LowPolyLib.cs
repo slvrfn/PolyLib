@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ceometric.DelaunayTriangulator;
 using Android.Graphics;
 using Java.Util;
+using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary
 {
@@ -18,8 +19,8 @@ namespace LowPolyLibrary
 		public double setVariance = .75;
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
-		private static int numFrames = 12; //static necessary for creation of framedTriangles list
-		List<System.Drawing.PointF>[] framedTriangles = new List<System.Drawing.PointF>[numFrames];
+		private static int numFrames = 12; //static necessary for creation of framedPoints list
+		List<System.Drawing.PointF>[] framedPoints = new List<System.Drawing.PointF>[numFrames];
 
         Dictionary<System.Drawing.PointF, List<Triangle>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
 
@@ -53,9 +54,9 @@ namespace LowPolyLibrary
 			paint.AntiAlias = true;
             
             var overlays = createOverlays();
-            for (int i = 0; i < framedTriangles.Length; i++)
+            for (int i = 0; i < framedPoints.Length; i++)
 		    {
-		        framedTriangles[i] = new List<System.Drawing.PointF>();
+		        framedPoints[i] = new List<System.Drawing.PointF>();
 		    }
 
 			var gradient = getGradient();
@@ -82,6 +83,23 @@ namespace LowPolyLibrary
 			return drawingCanvas;
 		}
 
+	    private Bitmap animateFrame(int frameNum)
+	    {
+            //get array of points contained in a specified frame
+	        var pointList = framedPoints[numFrames];
+	        foreach (var workingPoint in pointList)
+	        {
+                //get list of tris at given workingPoint in given frame
+	            var tris = poTriDic[workingPoint];
+	            foreach (var triangle in tris)
+	            {
+	                //animate each triangle
+                    //triangle.animate();
+	            }
+	        }
+	        return null;
+	    }
+
 	    private void divyTris(System.Drawing.PointF point, RectangleF[] overlays, int arrayLoc)
 	    {
             //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
@@ -99,9 +117,9 @@ namespace LowPolyLibrary
                 if (overlays[j].Contains(point))
                 {
                     //if the point has not already been added to the overlay's point list
-                    if(!framedTriangles[j].Contains(point))
+                    if(!framedPoints[j].Contains(point))
                         //add it
-                        framedTriangles[j].Add(point);
+                        framedPoints[j].Add(point);
                 }
             }
 
@@ -120,25 +138,36 @@ namespace LowPolyLibrary
 			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
             RectangleF[] frames = new RectangleF[numFrames];
 
-	        var tempWidth = boundsWidth/2;
-	        var tempHeight = boundsHeight/2;
+            #region AllPointsLogic
+            //this logic is for grabbing all points (even those outside the visible drawing area)
+            //        var tempWidth = boundsWidth / 2;
+            //        var tempHeight = boundsHeight / 2;
+            //        for (int i = 0; i < numFrames; i++)
+            //        {
+            //System.Drawing.RectangleF overlay;
+            ////if the first rectangle
+            //if (i == 0)
+            //	overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight*2));
+            ////if the last rectangle
+            //else if (i == numFrames - 1)
+            //	overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
+            //else
+            //	overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
 
+            //            frames[i] = overlay;
+            //            currentX += frameWidth;
+            //        }
+            #endregion
+            //logic for grabbing points only in visible drawing area
             for (int i = 0; i < numFrames; i++)
             {
-				System.Drawing.RectangleF overlay;
-				//if the first rectangle
-				if (i == 0)
-					overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight*2));
-				//if the last rectangle
-				else if (i == numFrames - 1)
-					overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
-				else
-					overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
-				
+                RectangleF overlay = new RectangleF(currentX, 0, frameWidth, boundsHeight);
+
                 frames[i] = overlay;
                 currentX += frameWidth;
             }
-	        return frames;
+
+            return frames;
 	    }
 
 	    private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
