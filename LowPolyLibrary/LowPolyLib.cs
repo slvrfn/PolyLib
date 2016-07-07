@@ -1,9 +1,12 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Collections.Generic;
 using ceometric.DelaunayTriangulator;
 using Android.Graphics;
+using Java.Lang;
 using Java.Util;
+using Double = System.Double;
+using Enum = System.Enum;
+using Math = System.Math;
 using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary
@@ -91,16 +94,62 @@ namespace LowPolyLibrary
 	        {
                 //get list of tris at given workingPoint in given frame
 	            var tris = poTriDic[workingPoint];
-	            foreach (var triangle in tris)
+                var distCanMove = shortestDistance(workingPoint, tris);
+                foreach (var triangle in tris)
 	            {
 	                //animate each triangle
                     //triangle.animate();
 	            }
 	        }
-	        return null;
+	        return null; //temp
 	    }
 
-	    private void divyTris(System.Drawing.PointF point, RectangleF[] overlays, int arrayLoc)
+        private double shortestDistance(PointF workingPoint, List<Triangle> tris)
+        {
+            //shortest distance between a workingPoint and all points of a tri
+            double shortest = -1;
+            foreach (var tri in tris)
+            {
+                //get distances between a workingPoint and each vertex of a tri
+                var vert1Distance = dist(workingPoint, tri.Vertex1);
+                var vert2Distance = dist(workingPoint, tri.Vertex2);
+                var vert3Distance = dist(workingPoint, tri.Vertex3);
+
+                double tempShortest;
+                //only one vertex distance can be 0. So if vert1 is 0, assign vert 2 for initial distance comparrison
+                //(will be changed later if there is a shorter distance
+                if (vert1Distance!=0)
+                    tempShortest = vert1Distance;
+                else
+                    tempShortest = vert2Distance;
+                //if a vertex distance is less than the current tempShortest and not 0, it is the new shortest distance
+                if (vert1Distance < tempShortest && vert1Distance != 0)
+                    tempShortest = vert1Distance;
+                if (vert2Distance < tempShortest && vert2Distance != 0)
+                    tempShortest = vert2Distance;
+                if (vert3Distance < tempShortest && vert3Distance != 0)
+                    tempShortest = vert3Distance;
+                //tempshortest is now the shortest distance between a workingPoint and tri vertices, save it
+                //if this is the first run (shortest == -1) then tempShortest is the smalled distance
+                if (shortest == -1)
+                    shortest = tempShortest;
+                //if not the first run, only assign shortest if tempShortest is smaller
+                else
+                    if (tempShortest<shortest)
+                        shortest = tempShortest;
+
+            }
+            return shortest;
+        }
+
+	    private double dist(PointF workingPoint, ceometric.DelaunayTriangulator.Point vertex)
+	    {
+            var xSquare = (workingPoint.X + vertex.X) * (workingPoint.X + vertex.X);
+            var ySquare = (workingPoint.Y + vertex.Y) * (workingPoint.Y + vertex.Y);
+            return Math.Sqrt(xSquare + ySquare);
+        }
+
+        private void divyTris(System.Drawing.PointF point, RectangleF[] overlays, int arrayLoc)
 	    {
             //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
             if (poTriDic.ContainsKey(point))
@@ -122,8 +171,6 @@ namespace LowPolyLibrary
                         framedPoints[j].Add(point);
                 }
             }
-
-	        var testGet = poTriDic[point];
 	    }
 
 	    private RectangleF[] createOverlays()
