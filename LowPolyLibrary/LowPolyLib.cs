@@ -117,21 +117,21 @@ namespace LowPolyLibrary
 
                 double tempShortest;
                 //only one vertex distance can be 0. So if vert1 is 0, assign vert 2 for initial distance comparrison
-                //(will be changed later if there is a shorter distance
-                if (vert1Distance!=0)
-                    tempShortest = vert1Distance;
+                //(will be changed later if there is a shorter distance)
+                if (vert1Distance.CompareTo(0) == 0) // if ver1Distance == 0
+                    tempShortest = vert2Distance;
                 else
-                    tempShortest = vert2Distance;
-                //if a vertex distance is less than the current tempShortest and not 0, it is the new shortest distance
-                if (vert1Distance < tempShortest && vert1Distance != 0)
                     tempShortest = vert1Distance;
-                if (vert2Distance < tempShortest && vert2Distance != 0)
+                //if a vertex distance is less than the current tempShortest and not 0, it is the new shortest distance
+                if (vert1Distance < tempShortest && vert1Distance.CompareTo(0) == 0)// or if vertice == 0
+                    tempShortest = vert1Distance;
+                if (vert2Distance < tempShortest && vert2Distance.CompareTo(0) == 0)// or if vertice == 0
                     tempShortest = vert2Distance;
-                if (vert3Distance < tempShortest && vert3Distance != 0)
+                if (vert3Distance < tempShortest && vert3Distance.CompareTo(0) == 0)// or if vertice == 0
                     tempShortest = vert3Distance;
                 //tempshortest is now the shortest distance between a workingPoint and tri vertices, save it
                 //if this is the first run (shortest == -1) then tempShortest is the smalled distance
-                if (shortest == -1)
+                if (shortest.CompareTo(-1) == 0) //if shortest == -1
                     shortest = tempShortest;
                 //if not the first run, only assign shortest if tempShortest is smaller
                 else
