@@ -86,23 +86,72 @@ namespace LowPolyLibrary
 			return drawingCanvas;
 		}
 
-	    private Bitmap animateFrame(int frameNum)
+		private Dictionary<System.Drawing.PointF, List<Triangle>>[] makeAnimation(int numFrames2)
+		{
+			var animationFrames = new Dictionary<System.Drawing.PointF, List<Triangle>>[numFrames2];
+			for (int i = 0; i < numFrames2; i++)
+			{
+				animationFrames[i] = makeFrame(i, numFrames2);
+			}
+			return animationFrames;
+		}
+
+		private Dictionary<System.Drawing.PointF, List<Triangle>> makeFrame(int frameNum, int totalFrames)
 	    {
-            //get array of points contained in a specified frame
-	        var pointList = framedPoints[numFrames];
-	        foreach (var workingPoint in pointList)
+			//temporary copy of the poTriDic. This copy will serve as a 'frame' in the animationFrames array
+			var tempPoTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>(poTriDic);
+			//get array of points contained in a specified frame
+	        var pointList = framedPoints[frameNum];
+			var direction = get360Direction();
+	        
+			foreach (var workingPoint in pointList)
 	        {
                 //get list of tris at given workingPoint in given frame
-	            var tris = poTriDic[workingPoint];
+	            var tris = tempPoTriDic[workingPoint];
                 var distCanMove = shortestDistance(workingPoint, tris);
+				var xComponent = getXComponent(direction, distCanMove);
+				var yComponent = getYComponent(direction, distCanMove);
                 foreach (var triangle in tris)
 	            {
-	                //animate each triangle
-                    //triangle.animate();
+					//animate each triangle
+					//triangle.animate();
+					if (triangle.Vertex1.Equals(workingPoint)){
+						triangle.Vertex1.X = frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex1.Y = frameLocation(frameNum, totalFrames, yComponent);
+					}else if (triangle.Vertex2.Equals(workingPoint)){
+						triangle.Vertex2.X = frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex2.Y = frameLocation(frameNum, totalFrames, yComponent);
+					}else{
+						triangle.Vertex3.X = frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex3.Y = frameLocation(frameNum, totalFrames, yComponent);
+					}
 	            }
 	        }
-	        return null; //temp
+	        return tempPoTriDic;
 	    }
+
+		private double frameLocation(int frame, int totalFrames, Double distanceToCcover)
+		{
+			var ratioToFinalMovement = frame / (Double)totalFrames;
+			var thisCoord = ratioToFinalMovement * distanceToCcover;
+			return thisCoord;//temp
+		}
+
+		private double getXComponent(int angle, double length)
+		{
+			return length * Math.Cos(angle);
+		}
+
+		private double getYComponent(int angle, double length)
+		{
+			return length * Math.Sin(angle);
+		}
+
+		private int get360Direction()
+		{
+			//return a int from 0 to 359 that represents the direction a point will move
+			return rand.Next(360);
+		}
 
         private double shortestDistance(PointF workingPoint, List<Triangle> tris)
         {
