@@ -18,6 +18,8 @@ namespace LowPoly
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
 
+		int frameNum = 0;
+
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 //			MotionEvent t;
@@ -67,6 +69,7 @@ namespace LowPoly
             imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
             
 		    timeElapsed.Text = temp.Elapsed.ToString();
+			frameNum = 0;
 
 
 		}
@@ -77,7 +80,7 @@ namespace LowPoly
 
 
 			temp.Start();
-			var generatedBitmap = _lowPoly.createAnimBitmap(1);
+			var generatedBitmap = _lowPoly.createAnimBitmap(frameNum++);
 			temp.Stop();
 
 			imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));

@@ -66,6 +66,10 @@ namespace LowPolyLibrary
 
 			gradient = getGradient();
 			triangulatedPoints = _delaunay.Triangulate(_points);
+			//generating a new base triangulation. if an old one exists get rid of it
+			if (poTriDic != null)
+				poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
+
 			for (int i = 0; i < triangulatedPoints.Count; i++)
 			{
 				System.Drawing.PointF a = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex1.X, (float)triangulatedPoints [i].Vertex1.Y);
@@ -122,7 +126,7 @@ namespace LowPolyLibrary
 
 		public Bitmap createAnimBitmap(int frame)
 		{
-			var frameDic = makeFrame(1, 24);
+			var frameDic = makeFrame(frame, 24);
 			var frameBitmap = drawFrame(frameDic);
 			return frameBitmap;
 		}
@@ -152,36 +156,22 @@ namespace LowPolyLibrary
                 var distCanMove = shortestDistance(workingPoint, tris);
 				var xComponent = getXComponent(direction, distCanMove);
 				var yComponent = getYComponent(direction, distCanMove);
-				//           foreach (var triangle in tris)
-				//        {
-				////animate each triangle
-				////triangle.animate();
-				//if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0){
-				//	triangle.Vertex1.X = frameLocation(frameNum, totalFrames, xComponent);
-				//	triangle.Vertex1.Y = frameLocation(frameNum, totalFrames, yComponent);
-				//}else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0){
-				//	triangle.Vertex2.X = frameLocation(frameNum, totalFrames, xComponent);
-				//	triangle.Vertex2.Y = frameLocation(frameNum, totalFrames, yComponent);
-				//}else{
-				//	triangle.Vertex3.X = frameLocation(frameNum, totalFrames, xComponent);
-				//	triangle.Vertex3.Y = frameLocation(frameNum, totalFrames, yComponent);
-				//}
-				//        }
-				var triangle = tris[3];
-				if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0)
+				foreach (var triangle in tris)
 				{
-					triangle.Vertex1.X = frameLocation(frameNum, totalFrames, xComponent);
-					triangle.Vertex1.Y = frameLocation(frameNum, totalFrames, yComponent);
-				}
-				else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0)
-				{
-					triangle.Vertex2.X = frameLocation(frameNum, totalFrames, xComponent);
-					triangle.Vertex2.Y = frameLocation(frameNum, totalFrames, yComponent);
-				}
-				else if (triangle.Vertex3.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex3.Y.CompareTo(workingPoint.Y) == 0) 
-				{
-					triangle.Vertex3.X = frameLocation(frameNum, totalFrames, xComponent);
-					triangle.Vertex3.Y = frameLocation(frameNum, totalFrames, yComponent);
+					//animate each triangle
+					//triangle.animate();
+					if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0){
+						triangle.Vertex1.X += frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex1.Y += frameLocation(frameNum, totalFrames, yComponent);
+					}
+					else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0){
+						triangle.Vertex2.X += frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex2.Y += frameLocation(frameNum, totalFrames, yComponent);
+					}
+					else if (triangle.Vertex3.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex3.Y.CompareTo(workingPoint.Y) == 0){
+						triangle.Vertex3.X += frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex3.Y += frameLocation(frameNum, totalFrames, yComponent);
+					}
 				}
 	        }
 	        return tempPoTriDic;
