@@ -25,6 +25,8 @@ namespace LowPolyLibrary
 		private static int numFrames = 12; //static necessary for creation of framedPoints list
 		List<System.Drawing.PointF>[] framedPoints = new List<System.Drawing.PointF>[numFrames];
 
+		Bitmap gradient;
+
         Dictionary<System.Drawing.PointF, List<Triangle>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
 
 		System.Random rand = new System.Random();
@@ -62,7 +64,7 @@ namespace LowPolyLibrary
 		        framedPoints[i] = new List<System.Drawing.PointF>();
 		    }
 
-			var gradient = getGradient();
+			gradient = getGradient();
 			triangulatedPoints = _delaunay.Triangulate(_points);
 			for (int i = 0; i < triangulatedPoints.Count; i++)
 			{
@@ -84,6 +86,45 @@ namespace LowPolyLibrary
 				canvas.DrawPath (trianglePath, paint);
 			}
 			return drawingCanvas;
+		}
+
+		private Bitmap drawFrame(Dictionary<System.Drawing.PointF, List<Triangle>> frameDic)
+		{
+			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+			Canvas canvas = new Canvas(drawingCanvas);
+
+			Paint paint = new Paint();
+			paint.StrokeWidth = .5f;
+			paint.SetStyle(Paint.Style.FillAndStroke);
+			paint.AntiAlias = true;
+
+			foreach (KeyValuePair<System.Drawing.PointF, List<Triangle>> entry in frameDic)
+			{
+				// do something with entry.Value or entry.Key
+				var frameTriList = entry.Value;
+				foreach (var tri in frameTriList)
+				{
+					System.Drawing.PointF a = new System.Drawing.PointF((float)tri.Vertex1.X, (float)tri.Vertex1.Y);
+					System.Drawing.PointF b = new System.Drawing.PointF((float)tri.Vertex2.X, (float)tri.Vertex2.Y);
+					System.Drawing.PointF c = new System.Drawing.PointF((float)tri.Vertex3.X, (float)tri.Vertex3.Y);
+
+					Path trianglePath = drawTrianglePath(a, b, c);
+
+					var center = centroid(tri);
+
+					paint.Color = getTriangleColor(gradient, center);
+
+					canvas.DrawPath(trianglePath, paint);
+				}
+			}
+			return drawingCanvas;
+		}
+
+		public Bitmap createAnimBitmap(int frame)
+		{
+			var frameDic = makeFrame(1, 24);
+			var frameBitmap = drawFrame(frameDic);
+			return frameBitmap;
 		}
 
 		private Dictionary<System.Drawing.PointF, List<Triangle>>[] makeAnimation(int numFrames2)
@@ -111,21 +152,37 @@ namespace LowPolyLibrary
                 var distCanMove = shortestDistance(workingPoint, tris);
 				var xComponent = getXComponent(direction, distCanMove);
 				var yComponent = getYComponent(direction, distCanMove);
-                foreach (var triangle in tris)
-	            {
-					//animate each triangle
-					//triangle.animate();
-					if (triangle.Vertex1.Equals(workingPoint)){
-						triangle.Vertex1.X = frameLocation(frameNum, totalFrames, xComponent);
-						triangle.Vertex1.Y = frameLocation(frameNum, totalFrames, yComponent);
-					}else if (triangle.Vertex2.Equals(workingPoint)){
-						triangle.Vertex2.X = frameLocation(frameNum, totalFrames, xComponent);
-						triangle.Vertex2.Y = frameLocation(frameNum, totalFrames, yComponent);
-					}else{
-						triangle.Vertex3.X = frameLocation(frameNum, totalFrames, xComponent);
-						triangle.Vertex3.Y = frameLocation(frameNum, totalFrames, yComponent);
-					}
-	            }
+				//           foreach (var triangle in tris)
+				//        {
+				////animate each triangle
+				////triangle.animate();
+				//if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0){
+				//	triangle.Vertex1.X = frameLocation(frameNum, totalFrames, xComponent);
+				//	triangle.Vertex1.Y = frameLocation(frameNum, totalFrames, yComponent);
+				//}else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0){
+				//	triangle.Vertex2.X = frameLocation(frameNum, totalFrames, xComponent);
+				//	triangle.Vertex2.Y = frameLocation(frameNum, totalFrames, yComponent);
+				//}else{
+				//	triangle.Vertex3.X = frameLocation(frameNum, totalFrames, xComponent);
+				//	triangle.Vertex3.Y = frameLocation(frameNum, totalFrames, yComponent);
+				//}
+				//        }
+				var triangle = tris[3];
+				if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0)
+				{
+					triangle.Vertex1.X = frameLocation(frameNum, totalFrames, xComponent);
+					triangle.Vertex1.Y = frameLocation(frameNum, totalFrames, yComponent);
+				}
+				else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0)
+				{
+					triangle.Vertex2.X = frameLocation(frameNum, totalFrames, xComponent);
+					triangle.Vertex2.Y = frameLocation(frameNum, totalFrames, yComponent);
+				}
+				else if (triangle.Vertex3.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex3.Y.CompareTo(workingPoint.Y) == 0) 
+				{
+					triangle.Vertex3.X = frameLocation(frameNum, totalFrames, xComponent);
+					triangle.Vertex3.Y = frameLocation(frameNum, totalFrames, yComponent);
+				}
 	        }
 	        return tempPoTriDic;
 	    }
@@ -281,7 +338,15 @@ namespace LowPolyLibrary
 		{
 		    center = keepInPicBounds(center);
 
-			var colorFromRGB = System.Drawing.Color.FromArgb( gradient.GetPixel(center.X, center.Y));
+			System.Drawing.Color colorFromRGB;
+			try
+			{
+				colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetPixel(center.X, center.Y));
+			}
+			catch
+			{
+				colorFromRGB = System.Drawing.Color.Cyan;
+			}
 
 			Android.Graphics.Color triColor = Android.Graphics.Color.Rgb (colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
 			return triColor;

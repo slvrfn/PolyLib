@@ -13,7 +13,7 @@ namespace LowPoly
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon")]
 	public class MainActivity : Activity
 	{
-		Button button;
+		Button button, animButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
@@ -31,6 +31,8 @@ namespace LowPoly
 			// and attach an event to it
 			button = FindViewById<Button> (Resource.Id.button1);
 			button.Click += Generate;
+			animButton = FindViewById<Button>(Resource.Id.animButton);
+			animButton.Click += stepAnimation;
 
 			imagePanel = FindViewById<ImageView> (Resource.Id.imageView1);
 
@@ -69,6 +71,21 @@ namespace LowPoly
 
 		}
 
+		public void stepAnimation(object sender, EventArgs e)
+		{
+			var temp = new Stopwatch();
+
+
+			temp.Start();
+			var generatedBitmap = _lowPoly.createAnimBitmap(1);
+			temp.Stop();
+
+			imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));
+
+			timeElapsed.Text = temp.Elapsed.ToString();
+
+
+		}
 	}
 }
 
