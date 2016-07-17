@@ -153,24 +153,25 @@ namespace LowPolyLibrary
 	        {
                 //get list of tris at given workingPoint in given frame
 	            var tris = tempPoTriDic[workingPoint];
-                var distCanMove = shortestDistance(workingPoint, tris);
-				var xComponent = getXComponent(direction, distCanMove);
-				var yComponent = getYComponent(direction, distCanMove);
+
+                var distCanMove = shortestDistance(workingPoint, tris, direction);
+				var xComponent = getXComponent(direction, distCanMove)/12;
+				var yComponent = getYComponent(direction, distCanMove)/12;
 				foreach (var triangle in tris)
 				{
 					//animate each triangle
 					//triangle.animate();
 					if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0){
-						triangle.Vertex1.X += frameLocation(frameNum, totalFrames, xComponent);
-						triangle.Vertex1.Y += frameLocation(frameNum, totalFrames, yComponent);
+						triangle.Vertex1.X += xComponent;//frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex1.Y += yComponent;//frameLocation(frameNum, totalFrames, yComponent);
 					}
 					else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0){
-						triangle.Vertex2.X += frameLocation(frameNum, totalFrames, xComponent);
-						triangle.Vertex2.Y += frameLocation(frameNum, totalFrames, yComponent);
+						triangle.Vertex2.X += xComponent;//frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex2.Y += yComponent;//frameLocation(frameNum, totalFrames, yComponent);
 					}
 					else if (triangle.Vertex3.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex3.Y.CompareTo(workingPoint.Y) == 0){
-						triangle.Vertex3.X += frameLocation(frameNum, totalFrames, xComponent);
-						triangle.Vertex3.Y += frameLocation(frameNum, totalFrames, yComponent);
+						triangle.Vertex3.X += xComponent;//frameLocation(frameNum, totalFrames, xComponent);
+						triangle.Vertex3.Y += yComponent;//frameLocation(frameNum, totalFrames, yComponent);
 					}
 				}
 	        }
@@ -181,7 +182,7 @@ namespace LowPolyLibrary
 		{
 			var ratioToFinalMovement = frame / (Double)totalFrames;
 			var thisCoord = ratioToFinalMovement * distanceToCcover;
-			return thisCoord;//temp
+			return thisCoord;
 		}
 
 		private double getXComponent(int angle, double length)
@@ -200,11 +201,61 @@ namespace LowPolyLibrary
 			return rand.Next(360);
 		}
 
-        private double shortestDistance(PointF workingPoint, List<Triangle> tris)
+		private List<Triangle> quadList(List<Triangle> tris, int degree, PointF workingPoint)
+		{
+			var direction = "empty";
+
+			if (degree > 270)
+				direction = "quad4";
+			else if (degree > 180)
+				direction = "quad3";
+			else if (degree > 90)
+				direction = "quad2";
+			else
+				direction = "quad1";
+
+			var quad1 = new List<Triangle>();
+			var quad2 = new List<Triangle>();
+			var quad3 = new List<Triangle>();
+			var quad4 = new List<Triangle>();
+
+			foreach (var tri in tris)
+			{
+				//var angle = getAngle(workingPoint, centroid(tri));
+				var triCenter = centroid(tri);
+				//if x,y of new triCenter > x,y of working point, then in the 1st quardant
+				if (triCenter.X > workingPoint.X && triCenter.Y > workingPoint.Y)
+					quad1.Add(tri);
+				else if (triCenter.X < workingPoint.X && triCenter.Y > workingPoint.Y)
+					quad2.Add(tri);
+				else if (triCenter.X > workingPoint.X && triCenter.Y < workingPoint.Y)
+					quad3.Add(tri);
+				else if(triCenter.X > workingPoint.X && triCenter.Y < workingPoint.Y)
+					quad4.Add(tri);
+			}
+			switch (direction)
+			{
+				case "quad1":
+					return quad1;
+				case "quad2":
+					return quad2;
+				case "quad3":
+					return quad3;
+				case "quad4":
+					return quad4;
+				default:
+					return quad1;
+			}
+
+		}
+
+        private double shortestDistance(PointF workingPoint, List<Triangle> tris, int degree)
         {
-            //shortest distance between a workingPoint and all points of a tri
-            double shortest = -1;
-            foreach (var tri in tris)
+			var quadTris = quadList(tris, degree, workingPoint);
+
+			//shortest distance between a workingPoint and all points of a tri
+			double shortest = -1;
+            foreach (var tri in quadTris)
             {
                 //get distances between a workingPoint and each vertex of a tri
                 var vert1Distance = dist(workingPoint, tri.Vertex1);
