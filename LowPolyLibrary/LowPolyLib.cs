@@ -58,11 +58,11 @@ namespace LowPolyLibrary
 			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
             
-            var overlays = createOverlays();
-            for (int i = 0; i < framedPoints.Length; i++)
-		    {
-		        framedPoints[i] = new List<System.Drawing.PointF>();
-		    }
+      //      var overlays = createOverlays();
+      //      for (int i = 0; i < framedPoints.Length; i++)
+		    //{
+		    //    framedPoints[i] = new List<System.Drawing.PointF>();
+		    //}
 
 			gradient = getGradient();
 			triangulatedPoints = _delaunay.Triangulate(_points);
@@ -81,9 +81,9 @@ namespace LowPolyLibrary
 				var center = centroid(triangulatedPoints[i]);
 
                 //animation logic
-                divyTris(a, overlays, i);
-                divyTris(b, overlays, i);
-                divyTris(c,overlays, i);
+                //divyTris(a, overlays, i);
+                //divyTris(b, overlays, i);
+                //divyTris(c,overlays, i);
 
                 paint.Color = getTriangleColor (gradient, center);
 
@@ -141,11 +141,36 @@ namespace LowPolyLibrary
 			return animationFrames;
 		}
 
+		private List<ceometric.DelaunayTriangulator.Point> seperatePoints(List<ceometric.DelaunayTriangulator.Point> points)
+		{
+			var overlays = createOverlays();
+			for (int i = 0; i < framedPoints.Length; i++)
+			{
+				framedPoints[i] = new List<System.Drawing.PointF>();
+			}
+
+			for (int i = 0; i < overlays.Length; i++)
+			{
+				//if the rectangle overlay contains a point
+				if (overlays[j].Contains(point))
+				{
+					//if the point has not already been added to the overlay's point list
+					if (!framedPoints[j].Contains(point))
+						//add it
+						framedPoints[j].Add(point);
+				}
+			}
+			return null;
+
+		}
+
 		private Dictionary<System.Drawing.PointF, List<Triangle>> makeFrame(int frameNum, int totalFrames)
 	    {
-			//temporary copy of the poTriDic. This copy will serve as a 'frame' in the animationFrames array
-			var tempPoTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>(poTriDic);
+			//temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
+			var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
 			//get array of points contained in a specified frame
+
+
 	        var pointList = framedPoints[frameNum];
 			var direction = get360Direction();
 	        
