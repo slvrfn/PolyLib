@@ -66,6 +66,7 @@ namespace LowPolyLibrary
 
 			gradient = getGradient();
 			triangulatedPoints = _delaunay.Triangulate(_points);
+			seperatePointsIntoFrames(_points);
 			//generating a new base triangulation. if an old one exists get rid of it
 			if (poTriDic != null)
 				poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
@@ -141,27 +142,35 @@ namespace LowPolyLibrary
 			return animationFrames;
 		}
 
-		private List<ceometric.DelaunayTriangulator.Point> seperatePoints(List<ceometric.DelaunayTriangulator.Point> points)
+		private void seperatePointsIntoFrames(List<ceometric.DelaunayTriangulator.Point> points)
 		{
 			var overlays = createOverlays();
+			framedPoints = new List<PointF>[numFrames];
+
 			for (int i = 0; i < framedPoints.Length; i++)
 			{
 				framedPoints[i] = new List<System.Drawing.PointF>();
 			}
 
-			for (int i = 0; i < overlays.Length; i++)
+			foreach (var point in points)
 			{
-				//if the rectangle overlay contains a point
-				if (overlays[j].Contains(point))
+				var newPoint = new PointF();
+				newPoint.X = (float)point.X;
+				newPoint.Y = (float)point.Y;
+
+				for (int i = 0; i < overlays.Length; i++)
 				{
-					//if the point has not already been added to the overlay's point list
-					if (!framedPoints[j].Contains(point))
-						//add it
-						framedPoints[j].Add(point);
+					//if the rectangle overlay contains a point
+					if (overlays[i].Contains(newPoint))
+					{
+						//if the point has not already been added to the overlay's point list
+						if (!framedPoints[i].Contains(newPoint))
+							//add it
+							framedPoints[i].Add(newPoint);
+						break;//hopefully break out of for loop. If point was added, it shouldn't be added somewhere else.
+					}
 				}
 			}
-			return null;
-
 		}
 
 		private Dictionary<System.Drawing.PointF, List<Triangle>> makeFrame(int frameNum, int totalFrames)
@@ -169,17 +178,16 @@ namespace LowPolyLibrary
 			//temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
 			var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
 			//get array of points contained in a specified frame
+			var pointList = framedPoints[frameNum];
 
-
-	        var pointList = framedPoints[frameNum];
 			var direction = get360Direction();
 	        
 			foreach (var workingPoint in pointList)
 	        {
                 //get list of tris at given workingPoint in given frame
-	            var tris = tempPoTriDic[workingPoint];
+	            //var tris = tempPoTriDic[workingPoint];
 
-                var distCanMove = shortestDistance(workingPoint, tris, direction);
+                var distCanMove = shortestDistanceFromPoints(workingPoint, pointList, direction);
 				var xComponent = getXComponent(direction, distCanMove)/12;
 				var yComponent = getYComponent(direction, distCanMove)/12;
 				foreach (var triangle in tris)
@@ -226,7 +234,53 @@ namespace LowPolyLibrary
 			return rand.Next(360);
 		}
 
-		private List<Triangle> quadList(List<Triangle> tris, int degree, PointF workingPoint)
+		private List<PointF> quadListFromPoints(List<PointF> points, int degree, PointF workingPoint)
+		{
+			var direction = "empty";
+
+			if (degree > 270)
+				direction = "quad4";
+			else if (degree > 180)
+				direction = "quad3";
+			else if (degree > 90)
+				direction = "quad2";
+			else
+				direction = "quad1";
+
+			var quad1 = new List<PointF>();
+			var quad2 = new List<PointF>();
+			var quad3 = new List<PointF>();
+			var quad4 = new List<PointF>();
+
+			foreach (var point in points)
+			{
+				//if x,y of new triCenter > x,y of working point, then in the 1st quardant
+				if (point.X > workingPoint.X && point.Y > workingPoint.Y)
+					quad1.Add(point);
+				else if (point.X < workingPoint.X && point.Y > workingPoint.Y)
+					quad2.Add(point);
+				else if (point.X > workingPoint.X && point.Y < workingPoint.Y)
+					quad3.Add(point);
+				else if(point.X > workingPoint.X && point.Y < workingPoint.Y)
+					quad4.Add(point);
+			}
+			switch (direction)
+			{
+				case "quad1":
+					return quad1;
+				case "quad2":
+					return quad2;
+				case "quad3":
+					return quad3;
+				case "quad4":
+					return quad4;
+				default:
+					return quad1;
+			}
+
+		}
+
+		private List<Triangle> quadListFromTris(List<Triangle> tris, int degree, PointF workingPoint)
 		{
 			var direction = "empty";
 
@@ -255,7 +309,7 @@ namespace LowPolyLibrary
 					quad2.Add(tri);
 				else if (triCenter.X > workingPoint.X && triCenter.Y < workingPoint.Y)
 					quad3.Add(tri);
-				else if(triCenter.X > workingPoint.X && triCenter.Y < workingPoint.Y)
+				else if (triCenter.X > workingPoint.X && triCenter.Y < workingPoint.Y)
 					quad4.Add(tri);
 			}
 			switch (direction)
@@ -274,9 +328,49 @@ namespace LowPolyLibrary
 
 		}
 
-        private double shortestDistance(PointF workingPoint, List<Triangle> tris, int degree)
+		private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> points, int degree)
+		{
+			var quadTris = quadListFromPoints(points, degree, workingPoint);//just changed to quad points
+
+			//shortest distance between a workingPoint and all points of a tri
+			double shortest = -1;
+			foreach (var tri in quadTris)
+			{
+				//get distances between a workingPoint and each vertex of a tri
+				var vert1Distance = dist(workingPoint, tri.Vertex1);
+				var vert2Distance = dist(workingPoint, tri.Vertex2);
+				var vert3Distance = dist(workingPoint, tri.Vertex3);
+
+				double tempShortest;
+				//only one vertex distance can be 0. So if vert1 is 0, assign vert 2 for initial distance comparrison
+				//(will be changed later if there is a shorter distance)
+				if (vert1Distance.CompareTo(0) == 0) // if ver1Distance == 0
+					tempShortest = vert2Distance;
+				else
+					tempShortest = vert1Distance;
+				//if a vertex distance is less than the current tempShortest and not 0, it is the new shortest distance
+				if (vert1Distance < tempShortest && vert1Distance.CompareTo(0) == 0)// or if vertice == 0
+					tempShortest = vert1Distance;
+				if (vert2Distance < tempShortest && vert2Distance.CompareTo(0) == 0)// or if vertice == 0
+					tempShortest = vert2Distance;
+				if (vert3Distance < tempShortest && vert3Distance.CompareTo(0) == 0)// or if vertice == 0
+					tempShortest = vert3Distance;
+				//tempshortest is now the shortest distance between a workingPoint and tri vertices, save it
+				//if this is the first run (shortest == -1) then tempShortest is the smalled distance
+				if (shortest.CompareTo(-1) == 0) //if shortest == -1
+					shortest = tempShortest;
+				//if not the first run, only assign shortest if tempShortest is smaller
+				else
+					if (tempShortest < shortest)
+					shortest = tempShortest;
+
+			}
+			return shortest;
+		}
+
+        private double shortestDistanceFromTris(PointF workingPoint, List<Triangle> tris, int degree)
         {
-			var quadTris = quadList(tris, degree, workingPoint);
+			var quadTris = quadListFromTris(tris, degree, workingPoint);
 
 			//shortest distance between a workingPoint and all points of a tri
 			double shortest = -1;
@@ -332,17 +426,17 @@ namespace LowPolyLibrary
                 poTriDic[point] = new List<Triangle>();
                 poTriDic[point].Add(triangulatedPoints[arrayLoc]);
             }
-            for (int j = 0; j < overlays.Length; j++)
-            {
-                //if the rectangle overlay contains a point
-                if (overlays[j].Contains(point))
-                {
-                    //if the point has not already been added to the overlay's point list
-                    if(!framedPoints[j].Contains(point))
-                        //add it
-                        framedPoints[j].Add(point);
-                }
-            }
+            //for (int j = 0; j < overlays.Length; j++)
+            //{
+            //    //if the rectangle overlay contains a point
+            //    if (overlays[j].Contains(point))
+            //    {
+            //        //if the point has not already been added to the overlay's point list
+            //        if(!framedPoints[j].Contains(point))
+            //            //add it
+            //            framedPoints[j].Add(point);
+            //    }
+            //}
 	    }
 
 	    private RectangleF[] createOverlays()
