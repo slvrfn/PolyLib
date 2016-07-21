@@ -80,6 +80,8 @@ namespace LowPoly
 
 
 			temp.Start();
+		    if (frameNum > 23)
+		        frameNum = 0;
 			var generatedBitmap = _lowPoly.createAnimBitmap(frameNum++);
 			temp.Stop();
 

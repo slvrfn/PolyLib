@@ -22,10 +22,11 @@ namespace LowPolyLibrary
 		public double setVariance = .75;
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
-		private static int numFrames = 12; //static necessary for creation of framedPoints list
+		private static int numFrames = 24; //static necessary for creation of framedPoints list
 		List<System.Drawing.PointF>[] framedPoints = new List<System.Drawing.PointF>[numFrames];
+        List<System.Drawing.PointF>[] wideFramedPoints = new List<System.Drawing.PointF>[numFrames];
 
-		Bitmap gradient;
+        Bitmap gradient;
 
         Dictionary<System.Drawing.PointF, List<Triangle>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
 
@@ -58,7 +59,7 @@ namespace LowPolyLibrary
 			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
             
-      //      var overlays = createOverlays();
+      //      var overlays = createVisibleOverlays();
       //      for (int i = 0; i < framedPoints.Length; i++)
 		    //{
 		    //    framedPoints[i] = new List<System.Drawing.PointF>();
@@ -125,28 +126,26 @@ namespace LowPolyLibrary
 			return drawingCanvas;
 		}
 
-        private Bitmap drawPointFrame(List<PointF> frameList)
+        private Bitmap drawPointFrame(List<PointF>[] frameList)
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
             Canvas canvas = new Canvas(drawingCanvas);
 
             Paint paint = new Paint();
-            paint.StrokeWidth = .5f;
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
             var convertedPoints = new List<ceometric.DelaunayTriangulator.Point>();
             //can we just stay in ceometric.DelaunayTriangulator.Point's?
-
-
-            foreach (var point in frameList)
+            foreach (var frame in frameList)
             {
-                convertedPoints.Add(new ceometric.DelaunayTriangulator.Point(point.X, point.Y, 0));
+                foreach (var point in frame)
+                {
+                    convertedPoints.Add(new ceometric.DelaunayTriangulator.Point(point.X, point.Y, 0));
+                }
             }
 
-
             var newTriangulatedPoints = _delaunay.Triangulate(convertedPoints);
-            //seperatePointsIntoFrames(_points);
             for (int i = 0; i < newTriangulatedPoints.Count; i++)
             {
                 System.Drawing.PointF a = new System.Drawing.PointF((float)newTriangulatedPoints[i].Vertex1.X, (float)newTriangulatedPoints[i].Vertex1.Y);
@@ -183,13 +182,17 @@ namespace LowPolyLibrary
 
 		private void seperatePointsIntoFrames(List<ceometric.DelaunayTriangulator.Point> points)
 		{
-			var overlays = createOverlays();
+			var overlays = createVisibleOverlays();
+		    var wideOverlays = createWideOverlays();
 			framedPoints = new List<PointF>[numFrames];
+            wideFramedPoints = new List<PointF>[numFrames];
 
-			for (int i = 0; i < framedPoints.Length; i++)
+
+            for (int i = 0; i < framedPoints.Length; i++)
 			{
 				framedPoints[i] = new List<System.Drawing.PointF>();
-			}
+                wideFramedPoints[i] = new List<System.Drawing.PointF>();
+            }
 
 			foreach (var point in points)
 			{
@@ -206,19 +209,27 @@ namespace LowPolyLibrary
 						if (!framedPoints[i].Contains(newPoint))
 							//add it
 							framedPoints[i].Add(newPoint);
-						break;//hopefully break out of for loop. If point was added, it shouldn't be added somewhere else.
 					}
+                    //if overlays[i] does not contain the point, but wideOverlays does, add it. (The point lies outside the visible area and still needs to be maintained).
+                    else if (wideOverlays[i].Contains(newPoint))
+                    {
+                        //if the point has not already been added to the overlay's point list
+                        if (!wideFramedPoints[i].Contains(newPoint))
+                            //add it
+                            wideFramedPoints[i].Add(newPoint);
+                    }
+
 				}
 			}
 		}
 
-		private List<PointF> makePointsFrame(int frameNum, int totalFrames)
+		private List<PointF>[] makePointsFrame(int frameNum, int totalFrames)
 	    {
 			//temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
 			//var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
 			
             //get array of points contained in a specified frame
-		    var pointList = new List<PointF>(framedPoints[frameNum]);
+		    var framePoints = new List<PointF>();
 
             ////get list of points contained in a specified frame
             ////this frame checking handles adding all the points that are close to a working point
@@ -239,21 +250,34 @@ namespace LowPolyLibrary
             //}
 
             var direction = get360Direction();
-	        
-			foreach (var point in pointList)
+		    
+
+            foreach (var point in framedPoints[frameNum])
 			{
 			    var wPoint = new PointF(point.X, point.Y);
                 //get list of tris at given workingPoint in given frame
 	            //var tris = tempPoTriDic[workingPoint];
 
-                var distCanMove = shortestDistanceFromPoints(wPoint, pointList, direction);
+                var distCanMove = shortestDistanceFromPoints(wPoint, framedPoints[frameNum], direction);
 				var xComponent = getXComponent(direction, distCanMove);
 				var yComponent = getYComponent(direction, distCanMove);
 
                 wPoint.X += (float)xComponent;
                 wPoint.Y += (float)yComponent;
-	        }
-	        return pointList;
+			    framePoints.Add(wPoint);
+			}
+
+		    var temp = new List<PointF>[framedPoints.Length];
+            framedPoints.CopyTo(temp,0);
+
+		    temp[frameNum] = framePoints;
+
+		    for (int i = 0; i < numFrames; i++)
+		    {
+		        temp[i].AddRange(wideFramedPoints[i]);
+		    }
+
+	        return temp;
 	    }
 
         //private Dictionary<System.Drawing.PointF, List<Triangle>> makeTrisFrame(int frameNum, int totalFrames)
@@ -346,9 +370,9 @@ namespace LowPolyLibrary
 				else if (point.X < workingPoint.X && point.Y > workingPoint.Y)
 					quad2.Add(point);
 				else if (point.X > workingPoint.X && point.Y < workingPoint.Y)
-					quad3.Add(point);
-				else if(point.X > workingPoint.X && point.Y < workingPoint.Y)
 					quad4.Add(point);
+				else if(point.X < workingPoint.X && point.Y < workingPoint.Y)
+					quad3.Add(point);
 			}
 			switch (direction)
 			{
@@ -416,7 +440,8 @@ namespace LowPolyLibrary
 
 		private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> points, int degree)
 		{
-			var quadPoints = quadListFromPoints(points, degree, workingPoint);//just changed to quad points
+            //this list consists of all the points in the same directional quardant as the working point.
+            var quadPoints = quadListFromPoints(points, degree, workingPoint);//just changed to quad points
 
 			//shortest distance between a workingPoint and all points of a given list
 			double shortest = -1;
@@ -514,38 +539,15 @@ namespace LowPolyLibrary
             //}
 	    }
 
-	    private RectangleF[] createOverlays()
+	    private RectangleF[] createVisibleOverlays()
 	    {
-            //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
-			//all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
-
-			//get width of frame when there are 12 rectangles on screen
+            //get width of frame when there are numFrames rectangles on screen
             var frameWidth = boundsWidth / numFrames;
             //represents the left edge of the rectangles
             var currentX = 0;
 			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
             RectangleF[] frames = new RectangleF[numFrames];
 
-            #region AllPointsLogic
-            //this logic is for grabbing all points (even those outside the visible drawing area)
-            //        var tempWidth = boundsWidth / 2;
-            //        var tempHeight = boundsHeight / 2;
-            //        for (int i = 0; i < numFrames; i++)
-            //        {
-            //System.Drawing.RectangleF overlay;
-            ////if the first rectangle
-            //if (i == 0)
-            //	overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight*2));
-            ////if the last rectangle
-            //else if (i == numFrames - 1)
-            //	overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
-            //else
-            //	overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
-
-            //            frames[i] = overlay;
-            //            currentX += frameWidth;
-            //        }
-            #endregion
             //logic for grabbing points only in visible drawing area
             for (int i = 0; i < numFrames; i++)
             {
@@ -558,7 +560,41 @@ namespace LowPolyLibrary
             return frames;
 	    }
 
-	    private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
+        private RectangleF[] createWideOverlays()
+        {
+            //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
+            //all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
+
+            //get width of frame when there are numFrames rectangles on screen
+            var frameWidth = boundsWidth / numFrames;
+            //represents the left edge of the rectangles
+            var currentX = 0;
+            //array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
+            RectangleF[] frames = new RectangleF[numFrames];
+
+            //this logic is for grabbing all points (even those outside the visible drawing area)
+            var tempWidth = boundsWidth / 2;
+            var tempHeight = boundsHeight / 2;
+            for (int i = 0; i < numFrames; i++)
+            {
+                System.Drawing.RectangleF overlay;
+                //if the first rectangle
+                if (i == 0)
+                    overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
+                //if the last rectangle
+                else if (i == numFrames - 1)
+                    overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
+                else
+                    overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
+
+                frames[i] = overlay;
+                currentX += frameWidth;
+            }
+
+            return frames;
+        }
+
+        private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
 	    {
             Path path = new Path();
             path.SetFillType(Path.FillType.EvenOdd);
