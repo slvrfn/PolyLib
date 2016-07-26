@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Timers;
 using Android.Graphics;
 using Android.Graphics.Drawables;
+using Android.Views.Animations;
 
 namespace LowPoly
 {
@@ -19,6 +20,8 @@ namespace LowPoly
 		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
 
 		int frameNum = 0;
+
+	    AnimationDrawable generatedAnimation;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -70,6 +73,7 @@ namespace LowPoly
             
 		    timeElapsed.Text = temp.Elapsed.ToString();
 			frameNum = 0;
+		    generatedAnimation = null;
 
 
 		}
@@ -77,17 +81,29 @@ namespace LowPoly
 		public void stepAnimation(object sender, EventArgs e)
 		{
 			var temp = new Stopwatch();
+            if (frameNum > 23)
+                frameNum = 0;
 
+   //         temp.Start();
+		 //   var generatedBitmap = _lowPoly.createAnimBitmap(frameNum++);
+			//temp.Stop();
 
-			temp.Start();
-		    if (frameNum > 23)
-		        frameNum = 0;
-			var generatedBitmap = _lowPoly.createAnimBitmap(frameNum++);
-			temp.Stop();
+            temp.Start();
+		    if (generatedAnimation == null)
+		    {
+                generatedAnimation = _lowPoly.makeAnimation(12);
+                imagePanel.SetImageDrawable(generatedAnimation);
+            }
+		    else
+		    {
+		        generatedAnimation.Stop();
+		    }
+            temp.Stop();
+            //imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));
+            //imagePanel.Background = generatedAnimation;
+            generatedAnimation.Start();
 
-			imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));
-
-			timeElapsed.Text = temp.Elapsed.ToString();
+            timeElapsed.Text = temp.Elapsed.ToString();
 
 
 		}

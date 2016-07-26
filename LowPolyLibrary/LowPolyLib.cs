@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ceometric.DelaunayTriangulator;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Java.Lang;
 using Java.Util;
 using Double = System.Double;
@@ -22,7 +23,7 @@ namespace LowPolyLibrary
 		public double setVariance = .75;
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
-		private static int numFrames = 24; //static necessary for creation of framedPoints list
+		private static int numFrames = 12; //static necessary for creation of framedPoints list
 		List<System.Drawing.PointF>[] framedPoints = new List<System.Drawing.PointF>[numFrames];
         List<System.Drawing.PointF>[] wideFramedPoints = new List<System.Drawing.PointF>[numFrames];
 
@@ -170,17 +171,22 @@ namespace LowPolyLibrary
 			return frameBitmap;
 		}
 
-		//private Dictionary<System.Drawing.PointF, List<Triangle>>[] makeAnimation(int numFrames2)
-		//{
-		//	var animationFrames = new Dictionary<System.Drawing.PointF, List<Triangle>>[numFrames2];
-		//	for (int i = 0; i < numFrames2; i++)
-		//	{
-		//		animationFrames[i] = makePointsFrame(i, numFrames2);
-		//	}
-		//	return animationFrames;
-		//}
+        public AnimationDrawable makeAnimation(int numFrames2)
+        {
+            AnimationDrawable animation = new AnimationDrawable();
+            animation.OneShot = true;
+            var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
+            
+            for (int i = 0; i < numFrames2; i++)
+            {
+                var frameBitmap = createAnimBitmap(i);
+                BitmapDrawable frame = new BitmapDrawable(frameBitmap);
+                animation.AddFrame(frame,duration);
+            }
+            return animation;
+        }
 
-		private void seperatePointsIntoFrames(List<ceometric.DelaunayTriangulator.Point> points)
+        private void seperatePointsIntoFrames(List<ceometric.DelaunayTriangulator.Point> points)
 		{
 			var overlays = createVisibleOverlays();
 		    var wideOverlays = createWideOverlays();
@@ -223,7 +229,7 @@ namespace LowPolyLibrary
 			}
 		}
 
-		private List<PointF>[] makePointsFrame(int frameNum, int totalFrames)
+		private List<PointF>[] makePointsFrame(int frameNum, int totalFrames, List<PointF>[] oldFramelist = null)
 	    {
 			//temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
 			//var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
@@ -250,9 +256,14 @@ namespace LowPolyLibrary
             //}
 
             var direction = get360Direction();
-		    
+            //workingFrameList is set either to the initial List<PointF>[] of points, or the one provided by calling this method
+            List<PointF>[] workingFrameList;
+		    if (oldFramelist == null)
+		        workingFrameList = framedPoints;
+		    else
+		        workingFrameList = oldFramelist;
 
-            foreach (var point in framedPoints[frameNum])
+            foreach (var point in workingFrameList[frameNum])
 			{
 			    var wPoint = new PointF(point.X, point.Y);
                 //get list of tris at given workingPoint in given frame
