@@ -11,5 +11,13 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)LowPolyLib.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ColorBru.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Hull.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Set.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Triad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Triangulator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Vertex.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Triangulation\" />
   </ItemGroup>
 </Project>

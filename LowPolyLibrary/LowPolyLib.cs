@@ -1,10 +1,11 @@
 ﻿using System.Drawing;
 using System.Collections.Generic;
-using ceometric.DelaunayTriangulator;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Java.Lang;
 using Java.Util;
+using Triangulator = DelaunayTriangulator.Triangulator;
+using Triad = DelaunayTriangulator.Triad;
 using Double = System.Double;
 using Enum = System.Enum;
 using Math = System.Math;
@@ -14,9 +15,9 @@ namespace LowPolyLibrary
 {
 	public class LowPolyLib
 	{
-		private DelaunayTriangulation2d _delaunay = new DelaunayTriangulation2d();
-		private List<ceometric.DelaunayTriangulator.Point> _points;
-	    private List<Triangle> triangulatedPoints;
+		private Triangulator angulator = new Triangulator();
+		private List<DelaunayTriangulator.Vertex> _points;
+	    private List<Triad> triangulatedPoints;
         public int boundsWidth;
 		public int boundsHeight;
 		public double cell_size = 75;
@@ -29,7 +30,7 @@ namespace LowPolyLibrary
 
         Bitmap gradient;
 
-        Dictionary<System.Drawing.PointF, List<Triangle>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
+        Dictionary<System.Drawing.PointF, List<Triad>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
 
 		System.Random rand = new System.Random();
 
@@ -67,17 +68,17 @@ namespace LowPolyLibrary
 		    //}
 
 			gradient = getGradient();
-			triangulatedPoints = _delaunay.Triangulate(_points);
+			triangulatedPoints = angulator.Triangulation(_points);
 			seperatePointsIntoFrames(_points);
 			//generating a new base triangulation. if an old one exists get rid of it
 			if (poTriDic != null)
-				poTriDic = new Dictionary<System.Drawing.PointF, List<Triangle>>();
+				poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
 
 			for (int i = 0; i < triangulatedPoints.Count; i++)
 			{
-				System.Drawing.PointF a = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex1.X, (float)triangulatedPoints [i].Vertex1.Y);
-				System.Drawing.PointF b = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex2.X, (float)triangulatedPoints [i].Vertex2.Y);
-				System.Drawing.PointF c = new System.Drawing.PointF ((float)triangulatedPoints [i].Vertex3.X, (float)triangulatedPoints [i].Vertex3.Y);
+				var a = new PointF((float)_points[triangulatedPoints[i].a].x, (float)_points[triangulatedPoints[i].a].y);
+				var b = new PointF((float)_points[triangulatedPoints[i].b].x, (float)_points[triangulatedPoints[i].b].y);
+				var c = new PointF((float)_points[triangulatedPoints[i].c].x, (float)_points[triangulatedPoints[i].c].y);
                 
 			    Path trianglePath = drawTrianglePath(a, b, c);
 
@@ -95,7 +96,7 @@ namespace LowPolyLibrary
 			return drawingCanvas;
 		}
 
-		private Bitmap drawTriFrame(Dictionary<System.Drawing.PointF, List<Triangle>> frameDic)
+		private Bitmap drawTriFrame(Dictionary<System.Drawing.PointF, List<Triad>> frameDic)
 		{
 			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
 			Canvas canvas = new Canvas(drawingCanvas);
@@ -105,15 +106,15 @@ namespace LowPolyLibrary
 			paint.SetStyle(Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
 
-			foreach (KeyValuePair<System.Drawing.PointF, List<Triangle>> entry in frameDic)
+			foreach (KeyValuePair<System.Drawing.PointF, List<Triad>> entry in frameDic)
 			{
 				// do something with entry.Value or entry.Key
 				var frameTriList = entry.Value;
 				foreach (var tri in frameTriList)
 				{
-					System.Drawing.PointF a = new System.Drawing.PointF((float)tri.Vertex1.X, (float)tri.Vertex1.Y);
-					System.Drawing.PointF b = new System.Drawing.PointF((float)tri.Vertex2.X, (float)tri.Vertex2.Y);
-					System.Drawing.PointF c = new System.Drawing.PointF((float)tri.Vertex3.X, (float)tri.Vertex3.Y);
+					var a = new PointF(_points[tri.a].x, _points[tri.a].y);
+					var b = new PointF(_points[tri.b].x, _points[tri.b].y);
+					var c = new PointF(_points[tri.c].x, _points[tri.c].y);
 
 					Path trianglePath = drawTrianglePath(a, b, c);
 
@@ -136,22 +137,22 @@ namespace LowPolyLibrary
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
-            var convertedPoints = new List<ceometric.DelaunayTriangulator.Point>();
+            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
             //can we just stay in ceometric.DelaunayTriangulator.Point's?
             foreach (var frame in frameList)
             {
                 foreach (var point in frame)
                 {
-                    convertedPoints.Add(new ceometric.DelaunayTriangulator.Point(point.X, point.Y, 0));
+                    convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
                 }
             }
 
-            var newTriangulatedPoints = _delaunay.Triangulate(convertedPoints);
+            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
             for (int i = 0; i < newTriangulatedPoints.Count; i++)
             {
-                System.Drawing.PointF a = new System.Drawing.PointF((float)newTriangulatedPoints[i].Vertex1.X, (float)newTriangulatedPoints[i].Vertex1.Y);
-                System.Drawing.PointF b = new System.Drawing.PointF((float)newTriangulatedPoints[i].Vertex2.X, (float)newTriangulatedPoints[i].Vertex2.Y);
-                System.Drawing.PointF c = new System.Drawing.PointF((float)newTriangulatedPoints[i].Vertex3.X, (float)newTriangulatedPoints[i].Vertex3.Y);
+                var a = new PointF((float)convertedPoints[newTriangulatedPoints[i].a].x, (float)convertedPoints[newTriangulatedPoints[i].a].y);
+				var b = new PointF((float)convertedPoints[newTriangulatedPoints[i].b].x, (float)convertedPoints[newTriangulatedPoints[i].b].y);
+				var c = new PointF((float)convertedPoints[newTriangulatedPoints[i].c].x, (float)convertedPoints[newTriangulatedPoints[i].c].y);
 
                 Path trianglePath = drawTrianglePath(a, b, c);
 
@@ -186,7 +187,7 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        private void seperatePointsIntoFrames(List<ceometric.DelaunayTriangulator.Point> points)
+        private void seperatePointsIntoFrames(List<DelaunayTriangulator.Vertex> points)
 		{
 			var overlays = createVisibleOverlays();
 		    var wideOverlays = createWideOverlays();
@@ -203,8 +204,8 @@ namespace LowPolyLibrary
 			foreach (var point in points)
 			{
 				var newPoint = new PointF();
-				newPoint.X = (float)point.X;
-				newPoint.Y = (float)point.Y;
+				newPoint.X = point.x;
+				newPoint.Y = point.y;
 
 				for (int i = 0; i < overlays.Length; i++)
 				{
@@ -269,7 +270,8 @@ namespace LowPolyLibrary
                 //get list of tris at given workingPoint in given frame
 	            //var tris = tempPoTriDic[workingPoint];
 
-                var distCanMove = shortestDistanceFromPoints(wPoint, framedPoints[frameNum], direction);
+                
+				var distCanMove = shortestDistanceFromPoints(wPoint, framedPoints[frameNum], direction);
 				var xComponent = getXComponent(direction, distCanMove);
 				var yComponent = getYComponent(direction, distCanMove);
 
@@ -401,7 +403,7 @@ namespace LowPolyLibrary
 
 		}
 
-		private List<Triangle> quadListFromTris(List<Triangle> tris, int degree, PointF workingPoint)
+		private List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint)
 		{
 			var direction = "empty";
 
@@ -414,10 +416,10 @@ namespace LowPolyLibrary
 			else
 				direction = "quad1";
 
-			var quad1 = new List<Triangle>();
-			var quad2 = new List<Triangle>();
-			var quad3 = new List<Triangle>();
-			var quad4 = new List<Triangle>();
+			var quad1 = new List<Triad>();
+			var quad2 = new List<Triad>();
+			var quad3 = new List<Triad>();
+			var quad4 = new List<Triad>();
 
 			foreach (var tri in tris)
 			{
@@ -472,7 +474,7 @@ namespace LowPolyLibrary
 			return shortest;
 		}
 
-        private double shortestDistanceFromTris(PointF workingPoint, List<Triangle> tris, int degree)
+        private double shortestDistanceFromTris(PointF workingPoint, List<Triad> tris, int degree)
         {
 			var quadTris = quadListFromTris(tris, degree, workingPoint);
 
@@ -481,9 +483,9 @@ namespace LowPolyLibrary
             foreach (var tri in quadTris)
             {
                 //get distances between a workingPoint and each vertex of a tri
-                var vert1Distance = dist(workingPoint, tri.Vertex1);
-                var vert2Distance = dist(workingPoint, tri.Vertex2);
-                var vert3Distance = dist(workingPoint, tri.Vertex3);
+                var vert1Distance = dist(workingPoint, _points[tri.a]);
+                var vert2Distance = dist(workingPoint, _points[tri.a]);
+                var vert3Distance = dist(workingPoint, _points[tri.a]);
 
                 double tempShortest;
                 //only one vertex distance can be 0. So if vert1 is 0, assign vert 2 for initial distance comparrison
@@ -512,10 +514,10 @@ namespace LowPolyLibrary
             return shortest;
         }
 
-	    private double dist(PointF workingPoint, ceometric.DelaunayTriangulator.Point vertex)
+	    private double dist(PointF workingPoint, DelaunayTriangulator.Vertex vertex)
 	    {
-            var xSquare = (workingPoint.X + vertex.X) * (workingPoint.X + vertex.X);
-            var ySquare = (workingPoint.Y + vertex.Y) * (workingPoint.Y + vertex.Y);
+            var xSquare = (workingPoint.X + vertex.x) * (workingPoint.X + vertex.x);
+            var ySquare = (workingPoint.Y + vertex.y) * (workingPoint.Y + vertex.y);
             return Math.Sqrt(xSquare + ySquare);
         }
 
@@ -534,7 +536,7 @@ namespace LowPolyLibrary
             //if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
             else
             {
-                poTriDic[point] = new List<Triangle>();
+                poTriDic[point] = new List<Triad>();
                 poTriDic[point].Add(triangulatedPoints[arrayLoc]);
             }
             //for (int j = 0; j < overlays.Length; j++)
@@ -733,16 +735,16 @@ namespace LowPolyLibrary
 			return bmp;
 		}
 
-		public List<ceometric.DelaunayTriangulator.Point> GeneratePoints()
+		public List<DelaunayTriangulator.Vertex> GeneratePoints()
 		{
-			var points = new List<ceometric.DelaunayTriangulator.Point>();
+			var points = new List<DelaunayTriangulator.Vertex>();
 			for (var i = - bleed_x; i < boundsWidth + bleed_x; i += cell_size) 
 			{
 				for (var j = - bleed_y; j < boundsHeight + bleed_y; j += cell_size) 
 				{
 					var x = i + cell_size/2 + _map(rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
 					var y = j + cell_size/2 + _map(rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
-					points.Add(new ceometric.DelaunayTriangulator.Point(Math.Floor(x),Math.Floor(y),0));
+					points.Add(new DelaunayTriangulator.Vertex((float)Math.Floor(x),(float)Math.Floor(y)));
 				}
 			}
 			return points;
@@ -753,10 +755,10 @@ namespace LowPolyLibrary
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}
 
-		private System.Drawing.Point centroid(Triangle triangle)
+		private System.Drawing.Point centroid(Triad triangle)
 		{
-			int x = (int)((triangle.Vertex1.X + triangle.Vertex2.X + triangle.Vertex3.X)/3);
-			int y = (int)((triangle.Vertex1.Y + triangle.Vertex2.Y + triangle.Vertex3.Y) / 3);
+			var x = (int)((_points[triangle.a].x + _points[triangle.b].x + _points[triangle.c].x) / 3);
+			var y = (int)((_points[triangle.a].y + _points[triangle.b].y + _points[triangle.c].y) / 3);
 
 			return new System.Drawing.Point(x,y);
 		}
