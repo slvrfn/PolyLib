@@ -82,7 +82,7 @@ namespace LowPolyLibrary
                 
 			    Path trianglePath = drawTrianglePath(a, b, c);
 
-				var center = centroid(triangulatedPoints[i]);
+				var center = centroid(triangulatedPoints[i], _points);
 
                 //animation logic
                 //divyTris(a, overlays, i);
@@ -118,7 +118,7 @@ namespace LowPolyLibrary
 
 					Path trianglePath = drawTrianglePath(a, b, c);
 
-					var center = centroid(tri);
+					var center = centroid(tri, _points);
 
 					paint.Color = getTriangleColor(gradient, center);
 
@@ -138,7 +138,7 @@ namespace LowPolyLibrary
             paint.AntiAlias = true;
 
             var convertedPoints = new List<DelaunayTriangulator.Vertex>();
-            //can we just stay in ceometric.DelaunayTriangulator.Point's?
+            //can we just stay in PointF's?
             foreach (var frame in frameList)
             {
                 foreach (var point in frame)
@@ -156,7 +156,7 @@ namespace LowPolyLibrary
 
                 Path trianglePath = drawTrianglePath(a, b, c);
 
-                var center = centroid(newTriangulatedPoints[i]);
+                var center = centroid(newTriangulatedPoints[i], convertedPoints);
 
                 paint.Color = getTriangleColor(gradient, center);
 
@@ -258,15 +258,18 @@ namespace LowPolyLibrary
 
             var direction = get360Direction();
             //workingFrameList is set either to the initial List<PointF>[] of points, or the one provided by calling this method
-            List<PointF>[] workingFrameList;
+            List<PointF>[] workingFrameList = new List<PointF>[framedPoints.Length];
 		    if (oldFramelist == null)
-		        workingFrameList = framedPoints;
+                //workingFrameList = framedPoints;
+                //think a direct assignment was causing issues with extra points getting added to framedPoints
+                framedPoints.CopyTo(workingFrameList,0);
 		    else
 		        workingFrameList = oldFramelist;
 
             foreach (var point in workingFrameList[frameNum])
 			{
-			    var wPoint = new PointF(point.X, point.Y);
+                //created bc cant modify point
+                var wPoint = new PointF(point.X, point.Y);
                 //get list of tris at given workingPoint in given frame
 	            //var tris = tempPoTriDic[workingPoint];
 
@@ -279,18 +282,23 @@ namespace LowPolyLibrary
                 wPoint.Y += (float)yComponent;
 			    framePoints.Add(wPoint);
 			}
+            //created so we dont have to modify framedPoints
+            //var temp = new List<PointF>[framedPoints.Length];
+            //framedPoints.CopyTo(temp,0);
+            //temp[frameNum] = framePoints;
+            //for (int i = 0; i < numFrames; i++)
+            //{
+            //    temp[i].AddRange(wideFramedPoints[i]);
+            //}
+            workingFrameList[frameNum] = framePoints;
 
-		    var temp = new List<PointF>[framedPoints.Length];
-            framedPoints.CopyTo(temp,0);
 
-		    temp[frameNum] = framePoints;
-
-		    for (int i = 0; i < numFrames; i++)
+            for (int i = 0; i < numFrames; i++)
 		    {
-		        temp[i].AddRange(wideFramedPoints[i]);
+                workingFrameList[i].AddRange(wideFramedPoints[i]);
 		    }
 
-	        return temp;
+	        return workingFrameList;
 	    }
 
         //private Dictionary<System.Drawing.PointF, List<Triangle>> makeTrisFrame(int frameNum, int totalFrames)
@@ -403,7 +411,7 @@ namespace LowPolyLibrary
 
 		}
 
-		private List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint)
+		private List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint, List<DelaunayTriangulator.Vertex> points)
 		{
 			var direction = "empty";
 
@@ -424,7 +432,7 @@ namespace LowPolyLibrary
 			foreach (var tri in tris)
 			{
 				//var angle = getAngle(workingPoint, centroid(tri));
-				var triCenter = centroid(tri);
+				var triCenter = centroid(tri, points);
 				//if x,y of new triCenter > x,y of working point, then in the 1st quardant
 				if (triCenter.X > workingPoint.X && triCenter.Y > workingPoint.Y)
 					quad1.Add(tri);
@@ -474,9 +482,9 @@ namespace LowPolyLibrary
 			return shortest;
 		}
 
-        private double shortestDistanceFromTris(PointF workingPoint, List<Triad> tris, int degree)
+        private double shortestDistanceFromTris(PointF workingPoint, List<Triad> tris, int degree, List<DelaunayTriangulator.Vertex> points)
         {
-			var quadTris = quadListFromTris(tris, degree, workingPoint);
+			var quadTris = quadListFromTris(tris, degree, workingPoint, points);
 
 			//shortest distance between a workingPoint and all points of a tri
 			double shortest = -1;
@@ -755,10 +763,10 @@ namespace LowPolyLibrary
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}
 
-		private System.Drawing.Point centroid(Triad triangle)
+		private System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
 		{
-			var x = (int)((_points[triangle.a].x + _points[triangle.b].x + _points[triangle.c].x) / 3);
-			var y = (int)((_points[triangle.a].y + _points[triangle.b].y + _points[triangle.c].y) / 3);
+			var x = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
+			var y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);
 
 			return new System.Drawing.Point(x,y);
 		}
