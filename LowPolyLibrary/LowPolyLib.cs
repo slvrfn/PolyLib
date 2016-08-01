@@ -60,12 +60,6 @@ namespace LowPolyLibrary
 			paint.StrokeWidth = .5f;
 			paint.SetStyle (Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
-            
-      //      var overlays = createVisibleOverlays();
-      //      for (int i = 0; i < framedPoints.Length; i++)
-		    //{
-		    //    framedPoints[i] = new List<System.Drawing.PointF>();
-		    //}
 
 			gradient = getGradient();
 			triangulatedPoints = angulator.Triangulation(_points);
@@ -289,16 +283,7 @@ namespace LowPolyLibrary
                 wPoint.Y += (float)yComponent;
 			    framePoints.Add(wPoint);
 			}
-            //created so we dont have to modify framedPoints
-            //var temp = new List<PointF>[framedPoints.Length];
-            //framedPoints.CopyTo(temp,0);
-            //temp[frameNum] = framePoints;
-            //for (int i = 0; i < numFrames; i++)
-            //{
-            //    temp[i].AddRange(wideFramedPoints[i]);
-            //}
             workingFrameList[frameNum] = framePoints;
-
 
             for (int i = 0; i < numFrames; i++)
 		    {
