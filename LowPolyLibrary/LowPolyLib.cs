@@ -259,12 +259,19 @@ namespace LowPolyLibrary
             var direction = get360Direction();
             //workingFrameList is set either to the initial List<PointF>[] of points, or the one provided by calling this method
             List<PointF>[] workingFrameList = new List<PointF>[framedPoints.Length];
-		    if (oldFramelist == null)
-                //workingFrameList = framedPoints;
-                //think a direct assignment was causing issues with extra points getting added to framedPoints
-                framedPoints.CopyTo(workingFrameList,0);
-		    else
-		        workingFrameList = oldFramelist;
+			if (oldFramelist == null)
+			//workingFrameList = framedPoints;
+			//think a direct assignment was causing issues with extra points getting added to framedPoints
+			{
+				for (int i = 0; i < framedPoints.Length;i++)
+				{
+					workingFrameList[i] = new List<PointF>();
+					workingFrameList[i].AddRange(framedPoints[i]);
+				}
+				         
+			}
+			else
+				workingFrameList = oldFramelist;
 
             foreach (var point in workingFrameList[frameNum])
 			{
