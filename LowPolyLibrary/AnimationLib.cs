@@ -56,6 +56,10 @@ namespace LowPolyLibrary
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
+			//generating a new base triangulation. if an old one exists get rid of it
+			if (poTriDic != null)
+				poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
+
             var convertedPoints = new List<DelaunayTriangulator.Vertex>();
             //can we just stay in PointF's?
             foreach (var frame in frameList)
@@ -77,7 +81,12 @@ namespace LowPolyLibrary
 
                 var center = centroid(newTriangulatedPoints[i], convertedPoints);
 
-                paint.Color = getTriangleColor(gradient, center);
+				//animation logic
+				//divyTris(a, overlays, i);
+				//divyTris(b, overlays, i);
+				//divyTris(c,overlays, i);
+
+				paint.Color = getTriangleColor(gradient, center);
 
                 canvas.DrawPath(trianglePath, paint);
             }

@@ -37,7 +37,8 @@ namespace LowPolyLibrary
 		{
 			UpdateVars();
 			_points = GeneratePoints();
-			return createBitmap();
+			seperatePointsIntoFrames(_points);
+			return createAnimBitmap(0);
 		}
 
 		private void UpdateVars()
@@ -47,52 +48,12 @@ namespace LowPolyLibrary
 			cells_y = Math.Floor((boundsHeight + 4 * cell_size) / cell_size);
 			bleed_x = ((cells_x * cell_size) - boundsWidth) / 2;
 			bleed_y = ((cells_y * cell_size) - boundsHeight) / 2;
-		}
-
-		private Bitmap createBitmap()
-		{
-			Bitmap drawingCanvas = Bitmap.CreateBitmap (boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-			Canvas canvas = new Canvas (drawingCanvas);
-
-			Paint paint = new Paint();
-
-			paint.StrokeWidth = .5f;
-			paint.SetStyle (Paint.Style.FillAndStroke);
-			paint.AntiAlias = true;
-
 			gradient = getGradient();
-            var angulator = new Triangulator();
-            triangulatedPoints = angulator.Triangulation(_points);
-			seperatePointsIntoFrames(_points);
-			//generating a new base triangulation. if an old one exists get rid of it
-			if (poTriDic != null)
-				poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
-
-			for (int i = 0; i < triangulatedPoints.Count; i++)
-			{
-				var a = new PointF((float)_points[triangulatedPoints[i].a].x, (float)_points[triangulatedPoints[i].a].y);
-				var b = new PointF((float)_points[triangulatedPoints[i].b].x, (float)_points[triangulatedPoints[i].b].y);
-				var c = new PointF((float)_points[triangulatedPoints[i].c].x, (float)_points[triangulatedPoints[i].c].y);
-                
-			    Path trianglePath = drawTrianglePath(a, b, c);
-
-				var center = centroid(triangulatedPoints[i], _points);
-
-                //animation logic
-                //divyTris(a, overlays, i);
-                //divyTris(b, overlays, i);
-                //divyTris(c,overlays, i);
-
-                paint.Color = getTriangleColor (gradient, center);
-
-				canvas.DrawPath (trianglePath, paint);
-			}
-			return drawingCanvas;
 		}
 
 		
 
-        public AnimationDrawable makeAnimation(int numFrames2)
+		public AnimationDrawable makeAnimation(int numFrames2)
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
@@ -193,7 +154,6 @@ namespace LowPolyLibrary
 					((float)boundsWidth / 2),
 					((float)boundsHeight / 2),
 					colorArray,
-					//new float[]{ }
 					null
 				);
 				break;
@@ -220,16 +180,9 @@ namespace LowPolyLibrary
 				break;
 			}
 
-//			LinearGradientBrush brush = new LinearGradientBrush(
-//				new System.Drawing.Point(0,0),
-//				new System.Drawing.Point(width, height), 
-//				Color.FromArgb(255,0,0,255),
-//				Color.FromArgb(255,0,255,0));
+            Bitmap bmp = Bitmap.CreateBitmap (boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
 
-//			Bitmap temp = new Bitmap(width, height);
-			Bitmap bmp = Bitmap.CreateBitmap (boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-//			Graphics graphics = Graphics.FromImage(temp);
-			Canvas canvas = new Canvas (bmp);
+            Canvas canvas = new Canvas (bmp);
 			Paint pnt = new Paint();
 			pnt.SetStyle (Paint.Style.Fill);
 			pnt.SetShader (gradientShader);
