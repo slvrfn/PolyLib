@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Triad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Triangulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Vertex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AnimationLib.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulation\" />
