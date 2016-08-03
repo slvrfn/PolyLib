@@ -15,7 +15,7 @@ namespace LowPolyLibrary
 {
 	public partial class LowPolyLib
 	{
-		private List<DelaunayTriangulator.Vertex> _points;
+		//private List<DelaunayTriangulator.Vertex> _points;
 	    private List<Triad> triangulatedPoints;
         public int boundsWidth;
 		public int boundsHeight;
@@ -24,24 +24,31 @@ namespace LowPolyLibrary
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
 		private static int numFrames = 12; //static necessary for creation of framedPoints list
-		List<System.Drawing.PointF>[] framedPoints = new List<System.Drawing.PointF>[numFrames];
-        List<System.Drawing.PointF>[] wideFramedPoints = new List<System.Drawing.PointF>[numFrames];
+		List<PointF>[] framedPoints = new List<PointF>[numFrames];
+        List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
 
         Bitmap gradient;
 
-        Dictionary<System.Drawing.PointF, List<Triad>> poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
+        Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
 
 		System.Random rand = new System.Random();
 
 		public Bitmap GenerateNew()
 		{
 			UpdateVars();
-			_points = GeneratePoints();
-			seperatePointsIntoFrames(_points);
+			 var _points = GeneratePoints();
+			seperatePointsIntoRectangleFrames(_points);
 			return createAnimBitmap(0);
 		}
 
-		private void UpdateVars()
+        public Bitmap createAnimBitmap(int frame)
+        {
+            var frameList = makePointsFrame(frame, 24);
+            var frameBitmap = drawPointFrame(frameList);
+            return frameBitmap;
+        }
+
+        private void UpdateVars()
 		{
 			calcVariance = cell_size * setVariance / 2;
 			cells_x = Math.Floor((boundsWidth + 4 * cell_size) / cell_size);
@@ -67,8 +74,6 @@ namespace LowPolyLibrary
             }
             return animation;
         }
-
-        
 
         private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
 	    {

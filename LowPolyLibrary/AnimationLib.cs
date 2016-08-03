@@ -15,7 +15,7 @@ namespace LowPolyLibrary
 {
     public partial class LowPolyLib
     {
-        private Bitmap drawTriFrame(Dictionary<System.Drawing.PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
+        private Bitmap drawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
             Canvas canvas = new Canvas(drawingCanvas);
@@ -25,7 +25,7 @@ namespace LowPolyLibrary
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
-            foreach (KeyValuePair<System.Drawing.PointF, List<Triad>> entry in frameDic)
+            foreach (KeyValuePair<PointF, List<Triad>> entry in frameDic)
             {
                 // do something with entry.Value or entry.Key
                 var frameTriList = entry.Value;
@@ -93,14 +93,7 @@ namespace LowPolyLibrary
             return drawingCanvas;
         }
 
-        public Bitmap createAnimBitmap(int frame)
-        {
-            var frameList = makePointsFrame(frame, 24);
-            var frameBitmap = drawPointFrame(frameList);
-            return frameBitmap;
-        }
-
-        internal void seperatePointsIntoFrames(List<DelaunayTriangulator.Vertex> points)
+        private void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points)
         {
             var overlays = createVisibleOverlays();
             var wideOverlays = createWideOverlays();
