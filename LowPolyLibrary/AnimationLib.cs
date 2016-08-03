@@ -13,90 +13,18 @@ using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary
 {
-    public partial class LowPolyLib
+    public class AnimationLib
     {
-        private Bitmap drawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
+        private static int numFrames = 12; //static necessary for creation of framedPoints list
+        List<PointF>[] framedPoints = new List<PointF>[numFrames];
+        List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
+        Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
+        private List<Triad> triangulatedPoints;
+
+        internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight)
         {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-            Canvas canvas = new Canvas(drawingCanvas);
-
-            Paint paint = new Paint();
-            paint.StrokeWidth = .5f;
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
-
-            foreach (KeyValuePair<PointF, List<Triad>> entry in frameDic)
-            {
-                // do something with entry.Value or entry.Key
-                var frameTriList = entry.Value;
-                foreach (var tri in frameTriList)
-                {
-                    var a = new PointF(points[tri.a].x, points[tri.a].y);
-                    var b = new PointF(points[tri.b].x, points[tri.b].y);
-                    var c = new PointF(points[tri.c].x, points[tri.c].y);
-
-                    Path trianglePath = drawTrianglePath(a, b, c);
-
-                    var center = centroid(tri, points);
-
-                    paint.Color = getTriangleColor(gradient, center);
-
-                    canvas.DrawPath(trianglePath, paint);
-                }
-            }
-            return drawingCanvas;
-        }
-
-        private Bitmap drawPointFrame(List<PointF>[] frameList)
-        {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-            Canvas canvas = new Canvas(drawingCanvas);
-
-            Paint paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
-
-			//generating a new base triangulation. if an old one exists get rid of it
-			if (poTriDic != null)
-				poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
-
-            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
-            //can we just stay in PointF's?
-            foreach (var frame in frameList)
-            {
-                foreach (var point in frame)
-                {
-                    convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
-                }
-            }
-            var angulator = new Triangulator();
-            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
-            for (int i = 0; i < newTriangulatedPoints.Count; i++)
-            {
-                var a = new PointF((float)convertedPoints[newTriangulatedPoints[i].a].x, (float)convertedPoints[newTriangulatedPoints[i].a].y);
-                var b = new PointF((float)convertedPoints[newTriangulatedPoints[i].b].x, (float)convertedPoints[newTriangulatedPoints[i].b].y);
-                var c = new PointF((float)convertedPoints[newTriangulatedPoints[i].c].x, (float)convertedPoints[newTriangulatedPoints[i].c].y);
-
-                Path trianglePath = drawTrianglePath(a, b, c);
-
-                var center = centroid(newTriangulatedPoints[i], convertedPoints);
-
-				//animation logic
-				//divyTris(a, overlays, i);
-				//divyTris(b, overlays, i);
-				//divyTris(c,overlays, i);
-
-				paint.Color = getTriangleColor(gradient, center);
-
-                canvas.DrawPath(trianglePath, paint);
-            }
-            return drawingCanvas;
-        }
-
-        private void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points)
-        {
-            var overlays = createVisibleOverlays();
-            var wideOverlays = createWideOverlays();
+            var overlays = createVisibleRectangleOverlays(boundsWidth, boundsHeight);
+            var wideOverlays = createWideRectangleOverlays(boundsWidth, boundsHeight);
             framedPoints = new List<PointF>[numFrames];
             wideFramedPoints = new List<PointF>[numFrames];
 
@@ -136,7 +64,7 @@ namespace LowPolyLibrary
             }
         }
 
-        private List<PointF>[] makePointsFrame(int frameNum, int totalFrames, List<PointF>[] oldFramelist = null)
+        internal List<PointF>[] makePointsFrame(int frameNum, int totalFrames, List<PointF>[] oldFramelist = null)
         {
             //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
             //var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
@@ -265,6 +193,7 @@ namespace LowPolyLibrary
 
         private int get360Direction()
         {
+            var rand = new System.Random();
             //return a int from 0 to 359 that represents the direction a point will move
             return rand.Next(360);
         }
@@ -333,10 +262,12 @@ namespace LowPolyLibrary
             var quad3 = new List<Triad>();
             var quad4 = new List<Triad>();
 
+            var polyLib = new LowPolyLib();
+
             foreach (var tri in tris)
             {
                 //var angle = getAngle(workingPoint, centroid(tri));
-                var triCenter = centroid(tri, points);
+                var triCenter = polyLib.centroid(tri, points);
                 //if x,y of new triCenter > x,y of working point, then in the 1st quardant
                 if (triCenter.X > workingPoint.X && triCenter.Y > workingPoint.Y)
                     quad1.Add(tri);
@@ -464,7 +395,7 @@ namespace LowPolyLibrary
             //}
         }
 
-        private RectangleF[] createVisibleOverlays()
+        private RectangleF[] createVisibleRectangleOverlays(int boundsWidth, int boundsHeight)
         {
             //get width of frame when there are numFrames rectangles on screen
             var frameWidth = boundsWidth / numFrames;
@@ -485,7 +416,7 @@ namespace LowPolyLibrary
             return frames;
         }
 
-        private RectangleF[] createWideOverlays()
+        private RectangleF[] createWideRectangleOverlays(int boundsWidth, int boundsHeight)
         {
             //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
             //all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds

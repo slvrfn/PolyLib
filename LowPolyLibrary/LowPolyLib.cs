@@ -13,10 +13,11 @@ using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary
 {
-	public partial class LowPolyLib
+	public class LowPolyLib
 	{
-		//private List<DelaunayTriangulator.Vertex> _points;
-	    private List<Triad> triangulatedPoints;
+        //private List<DelaunayTriangulator.Vertex> _points;
+        AnimationLib animator = new AnimationLib();
+	    
         public int boundsWidth;
 		public int boundsHeight;
 		public double cell_size = 75;
@@ -29,21 +30,97 @@ namespace LowPolyLibrary
 
         Bitmap gradient;
 
-        Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
-
-		System.Random rand = new System.Random();
+        
 
 		public Bitmap GenerateNew()
 		{
 			UpdateVars();
 			 var _points = GeneratePoints();
-			seperatePointsIntoRectangleFrames(_points);
+			animator.seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight);
 			return createAnimBitmap(0);
 		}
 
+        private Bitmap drawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
+        {
+            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+            Canvas canvas = new Canvas(drawingCanvas);
+
+            Paint paint = new Paint();
+            paint.StrokeWidth = .5f;
+            paint.SetStyle(Paint.Style.FillAndStroke);
+            paint.AntiAlias = true;
+
+            foreach (KeyValuePair<PointF, List<Triad>> entry in frameDic)
+            {
+                // do something with entry.Value or entry.Key
+                var frameTriList = entry.Value;
+                foreach (var tri in frameTriList)
+                {
+                    var a = new PointF(points[tri.a].x, points[tri.a].y);
+                    var b = new PointF(points[tri.b].x, points[tri.b].y);
+                    var c = new PointF(points[tri.c].x, points[tri.c].y);
+
+                    Path trianglePath = drawTrianglePath(a, b, c);
+
+                    var center = centroid(tri, points);
+
+                    paint.Color = getTriangleColor(gradient, center);
+
+                    canvas.DrawPath(trianglePath, paint);
+                }
+            }
+            return drawingCanvas;
+        }
+
+        private Bitmap drawPointFrame(List<PointF>[] frameList)
+        {
+            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+            Canvas canvas = new Canvas(drawingCanvas);
+
+            Paint paint = new Paint();
+            paint.SetStyle(Paint.Style.FillAndStroke);
+            paint.AntiAlias = true;
+
+            //generating a new base triangulation. if an old one exists get rid of it
+            //if (poTriDic != null)
+            //    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
+
+            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
+            //can we just stay in PointF's?
+            foreach (var frame in frameList)
+            {
+                foreach (var point in frame)
+                {
+                    convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
+                }
+            }
+            var angulator = new Triangulator();
+            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
+            for (int i = 0; i < newTriangulatedPoints.Count; i++)
+            {
+                var a = new PointF((float)convertedPoints[newTriangulatedPoints[i].a].x, (float)convertedPoints[newTriangulatedPoints[i].a].y);
+                var b = new PointF((float)convertedPoints[newTriangulatedPoints[i].b].x, (float)convertedPoints[newTriangulatedPoints[i].b].y);
+                var c = new PointF((float)convertedPoints[newTriangulatedPoints[i].c].x, (float)convertedPoints[newTriangulatedPoints[i].c].y);
+
+                Path trianglePath = drawTrianglePath(a, b, c);
+
+                var center = centroid(newTriangulatedPoints[i], convertedPoints);
+
+                //animation logic
+                //divyTris(a, overlays, i);
+                //divyTris(b, overlays, i);
+                //divyTris(c,overlays, i);
+
+                paint.Color = getTriangleColor(gradient, center);
+
+                canvas.DrawPath(trianglePath, paint);
+            }
+            return drawingCanvas;
+        }
+
         public Bitmap createAnimBitmap(int frame)
         {
-            var frameList = makePointsFrame(frame, 24);
+            var frameList = animator.makePointsFrame(frame, 24);
             var frameBitmap = drawPointFrame(frameList);
             return frameBitmap;
         }
@@ -123,8 +200,9 @@ namespace LowPolyLibrary
 
 		private	int[] getGradientColors()
 		{
-			//get all gradient codes
-			var values = Enum.GetValues(typeof(ColorBru.Code));
+            var rand = new System.Random();
+            //get all gradient codes
+            var values = Enum.GetValues(typeof(ColorBru.Code));
 			ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
 			//gets specified colors in gradient length: #
 			var brewColors = ColorBru.GetHtmlCodes (randomCode, 6);
@@ -138,7 +216,8 @@ namespace LowPolyLibrary
 
 		private Bitmap getGradient()
 		{
-			var colorArray = getGradientColors ();
+            var rand = new System.Random();
+            var colorArray = getGradientColors ();
 
 			Shader gradientShader;
 
@@ -197,7 +276,8 @@ namespace LowPolyLibrary
 
 		public List<DelaunayTriangulator.Vertex> GeneratePoints()
 		{
-			var points = new List<DelaunayTriangulator.Vertex>();
+            var rand = new System.Random();
+            var points = new List<DelaunayTriangulator.Vertex>();
 			for (var i = - bleed_x; i < boundsWidth + bleed_x; i += cell_size) 
 			{
 				for (var j = - bleed_y; j < boundsHeight + bleed_y; j += cell_size) 
@@ -215,7 +295,7 @@ namespace LowPolyLibrary
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}
 
-		private System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
+		internal System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
 		{
 			var x = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
 			var y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);
