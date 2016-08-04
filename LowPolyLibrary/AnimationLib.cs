@@ -31,8 +31,8 @@ namespace LowPolyLibrary
 
             for (int i = 0; i < framedPoints.Length; i++)
             {
-                framedPoints[i] = new List<System.Drawing.PointF>();
-                wideFramedPoints[i] = new List<System.Drawing.PointF>();
+                framedPoints[i] = new List<PointF>();
+                wideFramedPoints[i] = new List<PointF>();
             }
 
             foreach (var point in points)
@@ -64,13 +64,10 @@ namespace LowPolyLibrary
             }
         }
 
-        internal List<PointF>[] makePointsFrame(int frameNum, int totalFrames, List<PointF>[] oldFramelist = null)
+        internal List<PointF>[] makePointsFrame(int frameNum, List<PointF>[] oldFramelist = null)
         {
             //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
             //var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
-
-            //get array of points contained in a specified frame
-            var framePoints = new List<PointF>();
 
             ////get list of points contained in a specified frame
             ////this frame checking handles adding all the points that are close to a working point
@@ -89,7 +86,7 @@ namespace LowPolyLibrary
             //{
             //    pointList = framedPoints[frameNum];
             //}
-
+            var framePoints = new List<PointF>();
             var direction = get360Direction();
             //workingFrameList is set either to the initial List<PointF>[] of points, or the one provided by calling this method
             List<PointF>[] workingFrameList = new List<PointF>[framedPoints.Length];
@@ -133,49 +130,50 @@ namespace LowPolyLibrary
             return workingFrameList;
         }
 
-        //private Dictionary<System.Drawing.PointF, List<Triangle>> makeTrisFrame(int frameNum, int totalFrames)
-        //{
-        //    //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
-        //    var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
-        //    //get array of points contained in a specified frame
-        //    var pointList = framedPoints[frameNum];
+        private List<DelaunayTriangulator.Vertex> makeTrisFrame(int frameNum, List<DelaunayTriangulator.Vertex> points)
+        {
+            //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
+            var tempPoList = new List<DelaunayTriangulator.Vertex>(points);
+            //get array of points contained in a specified frame
+            var pointList = framedPoints[frameNum];
 
-        //    var direction = get360Direction();
+            var direction = get360Direction();
 
-        //    foreach (var workingPoint in pointList)
-        //    {
-        //        //get list of tris at given workingPoint in given frame
-        //        //var tris = tempPoTriDic[workingPoint];
+            foreach (var workingPoint in pointList)
+            {
+                //get list of tris at given workingPoint in given frame
+                var tris = new List<Triad>(poTriDic[workingPoint]);
 
-        //        var distCanMove = shortestDistanceFromTris(workingPoint, pointList, direction);
-        //        var xComponent = getXComponent(direction, distCanMove);
-        //        var yComponent = getYComponent(direction, distCanMove);
-        //        foreach (var triangle in tris)
-        //        {
-        //            //animate each triangle
-        //            //triangle.animate();
-        //            if (triangle.Vertex1.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex1.Y.CompareTo(workingPoint.Y) == 0)
-        //            {
-        //                triangle.Vertex1.X += xComponent;//frameLocation(frameNum, totalFrames, xComponent);
-        //                triangle.Vertex1.Y += yComponent;//frameLocation(frameNum, totalFrames, yComponent);
-        //            }
-        //            else if (triangle.Vertex2.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex2.Y.CompareTo(workingPoint.Y) == 0)
-        //            {
-        //                triangle.Vertex2.X += xComponent;//frameLocation(frameNum, totalFrames, xComponent);
-        //                triangle.Vertex2.Y += yComponent;//frameLocation(frameNum, totalFrames, yComponent);
-        //            }
-        //            else if (triangle.Vertex3.X.CompareTo(workingPoint.X) == 0 && triangle.Vertex3.Y.CompareTo(workingPoint.Y) == 0)
-        //            {
-        //                triangle.Vertex3.X += xComponent;//frameLocation(frameNum, totalFrames, xComponent);
-        //                triangle.Vertex3.Y += yComponent;//frameLocation(frameNum, totalFrames, yComponent);
-        //            }
-        //        }
-        //    }
-        //    return tempPoTriDic;
-        //}
+                var distCanMove = shortestDistanceFromTris(workingPoint, tris, direction, points);
+                var xComponent = getXComponent(direction, distCanMove);
+                var yComponent = getYComponent(direction, distCanMove);
+                foreach (var triangle in tris)
+                {
+                    //animate each triangle
+                    //triangle.animate();
+                    if (points[triangle.a].x.CompareTo(workingPoint.X) == 0 && points[triangle.a].y.CompareTo(workingPoint.Y) == 0)
+                    {
+                        points[triangle.a].x += (float)xComponent;//frameLocation(frameNum, totalFrames, xComponent);
+                        points[triangle.a].y += (float)yComponent;//frameLocation(frameNum, totalFrames, yComponent);
+                    }
+                    else if (points[triangle.b].x.CompareTo(workingPoint.X) == 0 && points[triangle.b].y.CompareTo(workingPoint.Y) == 0)
+                    {
+                        points[triangle.b].x += (float)xComponent;//frameLocation(frameNum, totalFrames, xComponent);
+                        points[triangle.b].y += (float)yComponent;//frameLocation(frameNum, totalFrames, yComponent);
+                    }
+                    else if (points[triangle.c].x.CompareTo(workingPoint.X) == 0 && points[triangle.c].y.CompareTo(workingPoint.Y) == 0)
+                    {
+                        points[triangle.c].x += (float)xComponent;//frameLocation(frameNum, totalFrames, xComponent);
+                        points[triangle.c].y += (float)yComponent;//frameLocation(frameNum, totalFrames, yComponent);
+                    }
+                }
+            }
+            return points;
+        }
 
         private double frameLocation(int frame, int totalFrames, Double distanceToCcover)
         {
+            //method to be used when a final destination is known, and you want to get a proportional distance to have moved up to that point at this point in time
             var ratioToFinalMovement = frame / (Double)totalFrames;
             var thisCoord = ratioToFinalMovement * distanceToCcover;
             return thisCoord;
@@ -200,16 +198,16 @@ namespace LowPolyLibrary
 
         private List<PointF> quadListFromPoints(List<PointF> points, int degree, PointF workingPoint)
         {
-            var direction = "empty";
+            var direction = 0;
 
             if (degree > 270)
-                direction = "quad4";
+                direction = 4;
             else if (degree > 180)
-                direction = "quad3";
+                direction = 3;
             else if (degree > 90)
-                direction = "quad2";
+                direction = 2;
             else
-                direction = "quad1";
+                direction = 1;
 
             var quad1 = new List<PointF>();
             var quad2 = new List<PointF>();
@@ -230,13 +228,13 @@ namespace LowPolyLibrary
             }
             switch (direction)
             {
-                case "quad1":
+                case 1:
                     return quad1;
-                case "quad2":
+                case 2:
                     return quad2;
-                case "quad3":
+                case 3:
                     return quad3;
-                case "quad4":
+                case 4:
                     return quad4;
                 default:
                     return quad1;
@@ -246,16 +244,16 @@ namespace LowPolyLibrary
 
         private List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint, List<DelaunayTriangulator.Vertex> points)
         {
-            var direction = "empty";
+            var direction = 0;
 
             if (degree > 270)
-                direction = "quad4";
+                direction = 4;
             else if (degree > 180)
-                direction = "quad3";
+                direction = 3;
             else if (degree > 90)
-                direction = "quad2";
+                direction = 2;
             else
-                direction = "quad1";
+                direction = 1;
 
             var quad1 = new List<Triad>();
             var quad2 = new List<Triad>();
@@ -280,13 +278,13 @@ namespace LowPolyLibrary
             }
             switch (direction)
             {
-                case "quad1":
+                case 1:
                     return quad1;
-                case "quad2":
+                case 2:
                     return quad2;
-                case "quad3":
+                case 3:
                     return quad3;
-                case "quad4":
+                case 4:
                     return quad4;
                 default:
                     return quad1;
@@ -350,7 +348,7 @@ namespace LowPolyLibrary
                     shortest = tempShortest;
                 //if not the first run, only assign shortest if tempShortest is smaller
                 else
-                    if (tempShortest < shortest)
+                    if (tempShortest < shortest && tempShortest.CompareTo(0) != 0)//if the tempShortest < current shortest distance and not equal to 0
                     shortest = tempShortest;
 
             }
@@ -382,17 +380,6 @@ namespace LowPolyLibrary
                 poTriDic[point] = new List<Triad>();
                 poTriDic[point].Add(triangulatedPoints[arrayLoc]);
             }
-            //for (int j = 0; j < overlays.Length; j++)
-            //{
-            //    //if the rectangle overlay contains a point
-            //    if (overlays[j].Contains(point))
-            //    {
-            //        //if the point has not already been added to the overlay's point list
-            //        if(!framedPoints[j].Contains(point))
-            //            //add it
-            //            framedPoints[j].Add(point);
-            //    }
-            //}
         }
 
         private RectangleF[] createVisibleRectangleOverlays(int boundsWidth, int boundsHeight)

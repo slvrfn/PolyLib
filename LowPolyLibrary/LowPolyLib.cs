@@ -25,20 +25,47 @@ namespace LowPolyLibrary
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
 		private static int numFrames = 12; //static necessary for creation of framedPoints list
-		List<PointF>[] framedPoints = new List<PointF>[numFrames];
-        List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
-
         Bitmap gradient;
-
-        
 
 		public Bitmap GenerateNew()
 		{
 			UpdateVars();
-			 var _points = GeneratePoints();
+			var _points = GeneratePoints();
 			animator.seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight);
 			return createAnimBitmap(0);
 		}
+
+        private void UpdateVars()
+        {
+            calcVariance = cell_size * setVariance / 2;
+            cells_x = Math.Floor((boundsWidth + 4 * cell_size) / cell_size);
+            cells_y = Math.Floor((boundsHeight + 4 * cell_size) / cell_size);
+            bleed_x = ((cells_x * cell_size) - boundsWidth) / 2;
+            bleed_y = ((cells_y * cell_size) - boundsHeight) / 2;
+            gradient = getGradient();
+        }
+
+        public Bitmap createAnimBitmap(int frame)
+        {
+            var frameList = animator.makePointsFrame(frame);
+            var frameBitmap = drawPointFrame(frameList);
+            return frameBitmap;
+        }
+
+		public AnimationDrawable makeAnimation(int numFrames2)
+        {
+            AnimationDrawable animation = new AnimationDrawable();
+            animation.OneShot = true;
+            var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
+            
+            for (int i = 0; i < numFrames2; i++)
+            {
+                var frameBitmap = createAnimBitmap(i);
+                BitmapDrawable frame = new BitmapDrawable(frameBitmap);
+                animation.AddFrame(frame,duration);
+            }
+            return animation;
+        }
 
         private Bitmap drawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
         {
@@ -98,9 +125,9 @@ namespace LowPolyLibrary
             var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
             for (int i = 0; i < newTriangulatedPoints.Count; i++)
             {
-                var a = new PointF((float)convertedPoints[newTriangulatedPoints[i].a].x, (float)convertedPoints[newTriangulatedPoints[i].a].y);
-                var b = new PointF((float)convertedPoints[newTriangulatedPoints[i].b].x, (float)convertedPoints[newTriangulatedPoints[i].b].y);
-                var c = new PointF((float)convertedPoints[newTriangulatedPoints[i].c].x, (float)convertedPoints[newTriangulatedPoints[i].c].y);
+                var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
+                var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
+                var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
                 Path trianglePath = drawTrianglePath(a, b, c);
 
@@ -116,40 +143,6 @@ namespace LowPolyLibrary
                 canvas.DrawPath(trianglePath, paint);
             }
             return drawingCanvas;
-        }
-
-        public Bitmap createAnimBitmap(int frame)
-        {
-            var frameList = animator.makePointsFrame(frame, 24);
-            var frameBitmap = drawPointFrame(frameList);
-            return frameBitmap;
-        }
-
-        private void UpdateVars()
-		{
-			calcVariance = cell_size * setVariance / 2;
-			cells_x = Math.Floor((boundsWidth + 4 * cell_size) / cell_size);
-			cells_y = Math.Floor((boundsHeight + 4 * cell_size) / cell_size);
-			bleed_x = ((cells_x * cell_size) - boundsWidth) / 2;
-			bleed_y = ((cells_y * cell_size) - boundsHeight) / 2;
-			gradient = getGradient();
-		}
-
-		
-
-		public AnimationDrawable makeAnimation(int numFrames2)
-        {
-            AnimationDrawable animation = new AnimationDrawable();
-            animation.OneShot = true;
-            var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
-            
-            for (int i = 0; i < numFrames2; i++)
-            {
-                var frameBitmap = createAnimBitmap(i);
-                BitmapDrawable frame = new BitmapDrawable(frameBitmap);
-                animation.AddFrame(frame,duration);
-            }
-            return animation;
         }
 
         private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
