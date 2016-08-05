@@ -31,8 +31,9 @@ namespace LowPolyLibrary
 		{
 			UpdateVars();
 			var _points = GeneratePoints();
-			animator.seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight);
-			return createAnimBitmap(0);
+            var direction = animator.get360Direction();
+            animator.seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight, direction);
+            return createSweepAnimBitmap(0, direction);
 		}
 
         private void UpdateVars()
@@ -45,9 +46,9 @@ namespace LowPolyLibrary
             gradient = getGradient();
         }
 
-        public Bitmap createAnimBitmap(int frame)
+        public Bitmap createSweepAnimBitmap(int frame, int direction)
         {
-            var frameList = animator.makePointsFrame(frame);
+            var frameList = animator.makeSweepPointsFrame(frame, direction);
             var frameBitmap = drawPointFrame(frameList);
             return frameBitmap;
         }
@@ -57,10 +58,10 @@ namespace LowPolyLibrary
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
             var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
-            
+		    var direction = animator.get360Direction();
             for (int i = 0; i < numFrames2; i++)
             {
-                var frameBitmap = createAnimBitmap(i);
+                var frameBitmap =createSweepAnimBitmap(i, direction);
                 BitmapDrawable frame = new BitmapDrawable(frameBitmap);
                 animation.AddFrame(frame,duration);
             }
@@ -130,7 +131,7 @@ namespace LowPolyLibrary
                 var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
                 Path trianglePath = drawTrianglePath(a, b, c);
-
+                
                 var center = centroid(newTriangulatedPoints[i], convertedPoints);
 
                 //animation logic

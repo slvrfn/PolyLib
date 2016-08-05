@@ -51,9 +51,6 @@ namespace LowPoly
 			heightTB.Text = "768";
 			varTB.Text = _lowPoly.setVariance.ToString ();
 			sizeTB.Text = _lowPoly.cell_size.ToString ();
-
-
-
 		}
 
 		public void Generate (object sender, EventArgs e){
@@ -74,8 +71,6 @@ namespace LowPoly
 		    timeElapsed.Text = temp.Elapsed.ToString();
 			frameNum = 0;
 		    generatedAnimation = null;
-
-
 		}
 
 		public void stepAnimation(object sender, EventArgs e)
@@ -85,7 +80,7 @@ namespace LowPoly
                 frameNum = 0;
 
    //         temp.Start();
-		 //   var generatedBitmap = _lowPoly.createAnimBitmap(frameNum++);
+		 //   var generatedBitmap = _lowPoly.createSweepAnimBitmap(frameNum++);
 			//temp.Stop();
 
             temp.Start();
@@ -104,8 +99,6 @@ namespace LowPoly
             generatedAnimation.Start();
 
             timeElapsed.Text = temp.Elapsed.ToString();
-
-
 		}
 	}
 }
