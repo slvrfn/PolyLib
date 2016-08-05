@@ -24,7 +24,7 @@ namespace LowPolyLibrary
         internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
         {
             var overlays = createVisibleRectangleOverlays(boundsWidth, boundsHeight, angle);
-            var wideOverlays = createWideRectangleOverlays(boundsWidth, boundsHeight);
+            var wideOverlays = createWideRectangleOverlays(boundsWidth, boundsHeight, angle);
             framedPoints = new List<PointF>[numFrames];
             wideFramedPoints = new List<PointF>[numFrames];
 
@@ -113,7 +113,7 @@ namespace LowPolyLibrary
                 //var tris = tempPoTriDic[workingPoint];
 
 
-                var distCanMove = shortestDistanceFromPoints(wPoint, framedPoints[frameNum], direction);
+                var distCanMove = shortestDistanceFromPoints(wPoint, workingFrameList[frameNum], direction);
                 var xComponent = getXComponent(direction, distCanMove);
                 var yComponent = getYComponent(direction, distCanMove);
 
@@ -368,15 +368,15 @@ namespace LowPolyLibrary
 
         private double dist(PointF workingPoint, DelaunayTriangulator.Vertex vertex)
         {
-            var xSquare = (workingPoint.X + vertex.x) * (workingPoint.X + vertex.x);
-            var ySquare = (workingPoint.Y + vertex.y) * (workingPoint.Y + vertex.y);
+            var xSquare = (workingPoint.X - vertex.x) * (workingPoint.X - vertex.x);
+            var ySquare = (workingPoint.Y - vertex.y) * (workingPoint.Y - vertex.y);
             return Math.Sqrt(xSquare + ySquare);
         }
 
-        private double dist(PointF workingPoint, PointF vertex)
+        internal double dist(PointF workingPoint, PointF vertex)
         {
-            var xSquare = (workingPoint.X + vertex.X) * (workingPoint.X + vertex.X);
-            var ySquare = (workingPoint.Y + vertex.Y) * (workingPoint.Y + vertex.Y);
+            var xSquare = (workingPoint.X - vertex.X) * (workingPoint.X - vertex.X);
+            var ySquare = (workingPoint.Y - vertex.Y) * (workingPoint.Y - vertex.Y);
             return Math.Sqrt(xSquare + ySquare);
         }
 
@@ -425,7 +425,7 @@ namespace LowPolyLibrary
             return frames;
         }
 
-        private cRectangleF[] createWideRectangleOverlays(int boundsWidth, int boundsHeight)
+        private cRectangleF[] createWideRectangleOverlays(int boundsWidth, int boundsHeight, int angle)
         {
             //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
             //all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
@@ -448,10 +448,10 @@ namespace LowPolyLibrary
                     //overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
                     overlay = new cRectangleF
                     {
-                        A = new PointF(currentX -tempWidth, 0-tempHeight),
-                        B = new PointF(currentX + frameWidth, 0-tempHeight),
-                        C = new PointF(currentX + frameWidth, 0 - boundsHeight - (3 * tempHeight)),
-                        D = new PointF(currentX - tempWidth, 0 - boundsHeight - (3 * tempHeight))
+                        A = new PointF(currentX - tempWidth, 0 - tempHeight),
+                        B = new PointF(currentX + frameWidth, 0 - tempHeight),
+                        C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
+                        D = new PointF(currentX - tempWidth, 0 + boundsHeight + tempHeight)
                     };
                 //if the last rectangle
                 else if (i == numFrames - 1)
@@ -459,20 +459,24 @@ namespace LowPolyLibrary
                     overlay = new cRectangleF
                     {
                         A = new PointF(currentX, 0 - tempHeight),
-                        B = new PointF(currentX + frameWidth+tempWidth, 0 - tempHeight),
-                        C = new PointF(currentX +frameWidth+tempWidth, 0 - boundsHeight - (3 * tempHeight)),
-                        D = new PointF(currentX, 0 - boundsHeight - (3 * tempHeight))
+                        B = new PointF(currentX + frameWidth + tempWidth, 0 - tempHeight),
+                        C = new PointF(currentX + frameWidth + tempWidth, 0 + boundsHeight + tempHeight),
+                        D = new PointF(currentX, 0 + boundsHeight + tempHeight)
                     };
                 else
-                    //overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
+                //overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
                     overlay = new cRectangleF
                     {
                         A = new PointF(currentX, 0 - tempHeight),
                         B = new PointF(currentX + frameWidth, 0 - tempHeight),
-                        C = new PointF(currentX + frameWidth, 0 - boundsHeight - (3 * tempHeight)),
-                        D = new PointF(currentX, 0 - boundsHeight - (3 * tempHeight))
+                        C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
+                        D = new PointF(currentX, 0 + boundsHeight + tempHeight)
                     };
-
+                var boundsCenter = new PointF(boundsWidth / 2f, boundsHeight / 2f);
+                overlay.A = rotate_point(boundsCenter, overlay.A, angle);
+                overlay.B = rotate_point(boundsCenter, overlay.B, angle);
+                overlay.C = rotate_point(boundsCenter, overlay.C, angle);
+                overlay.D = rotate_point(boundsCenter, overlay.D, angle);
                 frames[i] = overlay;
                 currentX += frameWidth;
             }
@@ -512,34 +516,21 @@ namespace LowPolyLibrary
 
         private float triArea(PointF a, PointF b, PointF c)
         {
-            float triBase;
-            float triHeight;
-            if (a.X < b.X)
-                triBase = b.X - a.X;
-            else
-                triBase = a.X - b.X;
-            if (c.Y > a.Y)
-                triHeight = c.Y - a.Y;
-            else
-                triHeight = a.Y - c.Y;
-            var area = .5f*triBase*triHeight;
-            return area;
+            var tri1 = a.X*(b.Y - c.Y);
+            var tri2 = b.X*(c.Y - a.Y);
+            var tri3 = c.X*(a.Y - b.Y);
+            var sum = tri1 + tri2 + tri3;
+            var area = sum/2;
+            return Math.Abs(area);
         }
 
         private float recArea()
         {
-            float triBase;
-            float triHeight;
-            if (A.X < B.X)
-                triBase = B.X - A.X;
-            else
-                triBase = A.X - B.X;
-            if (C.Y > A.Y)
-                triHeight = C.Y - A.Y;
-            else
-                triHeight = A.Y - C.Y;
-            var area = triBase * triHeight;
-            return area;
+            AnimationLib anim = new AnimationLib();
+            var recHeight = anim.dist(A, B);
+            var recBase = anim.dist(B, C);
+            var area = recHeight*recBase;
+            return (float)area;
         }
 
         public bool Contains(PointF point)
