@@ -403,15 +403,25 @@ namespace LowPolyLibrary
             cRectangleF[] frames = new cRectangleF[numFrames];
 
             //logic for grabbing points only in visible drawing area
+            var tempHeight = boundsHeight/2f;
             for (int i = 0; i < numFrames; i++)
             {
                 //RectangleF overlay = new RectangleF(currentX, 0, frameWidth, boundsHeight);
+                //normal visible overlay
+                //var overlay = new cRectangleF
+                //{
+                //    A = new PointF(currentX, 0),
+                //    B = new PointF(currentX + frameWidth, 0),
+                //    C = new PointF(currentX + frameWidth, boundsHeight),
+                //    D = new PointF(currentX, boundsHeight)
+                //};
+                //visible overlay that is a little taller on top and bottom than the viewing area to compensate for rotation
                 var overlay = new cRectangleF
                 {
-                    A = new PointF(currentX, 0),
-                    B = new PointF(currentX + frameWidth, 0),
-                    C = new PointF(currentX + frameWidth, boundsHeight),
-                    D = new PointF(currentX, boundsHeight)
+                    A = new PointF(currentX, 0 - tempHeight),
+                    B = new PointF(currentX + frameWidth, 0 - tempHeight),
+                    C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
+                    D = new PointF(currentX, 0+ boundsHeight + tempHeight)
                 };
                 //var overlayCenter = new PointF((overlay.A.X + overlay.C.X) / 2f, (overlay.A.Y + overlay.C.Y) / 2f);
                 var boundsCenter = new PointF(boundsWidth/2f, boundsHeight/2f);
