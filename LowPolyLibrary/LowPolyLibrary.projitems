@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Triangulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation\Vertex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AnimationLib.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)cRectangleF.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulation\" />

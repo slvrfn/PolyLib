@@ -393,12 +393,41 @@ namespace LowPolyLibrary
             }
         }
 
+		private PointF getIntersectionF(float slope, PointF linePoint, PointF perpendicularLinePoint)
+		{
+			var A1 = -slope;
+			var B1 = 1;
+			var C1 = linePoint.Y-(slope*linePoint.X);
+
+			var slope2 = -(1 / slope);
+			var A2 = -slope2;
+			var B2 = 1;
+			var C2 = perpendicularLinePoint.Y-(slope2*perpendicularLinePoint.X);
+
+			var delta = A1 * B2 - A2 * B1;
+			if (delta.CompareTo(0) == 0) // if delta equals 0
+				throw new IllegalArgumentException("Lines are parrallel");
+			var x = (B2 * C1 - B1 * C2) / delta;
+			var y = (A1 * C2 - A2 * C1) / delta;
+			return new PointF(x,y);
+		}
+
+		private PointF walkLine(int angle, float distance, PointF startingPoint)
+		{
+			var endPoint = new PointF(startingPoint.X, startingPoint.Y);
+			var y = distance * ((float)Math.Sin(angle));
+			var x = distance * ((float)Math.Cos(angle));
+			endPoint.X += x;
+			endPoint.Y += y;
+			return endPoint;
+		}
+
         private cRectangleF[] createVisibleRectangleOverlays(int boundsWidth, int boundsHeight, int angle)
         {
             //get width of frame when there are numFrames rectangles on screen
-            var frameWidth = boundsWidth / numFrames;
+			//var frameWidth = boundsWidth / (float)numFrames;
             //represents the left edge of the rectangles
-            var currentX = 0;
+            var currentX = 0f;
             //array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
             cRectangleF[] frames = new cRectangleF[numFrames];
 
@@ -406,29 +435,73 @@ namespace LowPolyLibrary
             var tempHeight = boundsHeight/2f;
             for (int i = 0; i < numFrames; i++)
             {
-                //RectangleF overlay = new RectangleF(currentX, 0, frameWidth, boundsHeight);
-                //normal visible overlay
+				//normal visible overlay
+				//var overlay = new cRectangleF
+				//{
+				//    A = new PointF(currentX, 0),
+				//    B = new PointF(currentX + frameWidth, 0),
+				//    C = new PointF(currentX + frameWidth, boundsHeight),
+				//    D = new PointF(currentX, boundsHeight)
+				//};
+				//visible overlay that is a little taller on top and bottom than the viewing area to compensate for rotation
+
+				//slope of the given angle
+				var slope = (float)Math.Tan(angle);
+				float frameWidth = 0f;
+
+				PointF firstIntersection;
+				PointF secondIntersection;
+				var A = new PointF(0, 0);
+				var B = new PointF(boundsWidth, 0);
+				var C = new PointF(boundsWidth, boundsHeight);
+				var D = new PointF(0, boundsHeight);
+				if (angle < 90)
+				{
+					//quad1
+					firstIntersection = getIntersectionF(slope, A, D);
+					secondIntersection = getIntersectionF(slope, D, C);
+					frameWidth = (float)dist(D, B);
+					var walkedB = walkLine(angle, frameWidth, firstIntersection);
+					var walkedC = walkLine(angle, frameWidth, secondIntersection);
+				}
+				else if (angle < 180)
+				{
+					//quad2
+					firstIntersection = getIntersectionF(slope, D, C);
+					secondIntersection = getIntersectionF(slope, C, B);
+					frameWidth = (float)dist(C, A);
+				}
+				else if (angle < 270)
+				{
+					//quad3
+					firstIntersection = getIntersectionF(slope, C, B);
+					secondIntersection = getIntersectionF(slope, B, A);
+					frameWidth = (float)dist(B, D);
+				}
+				else
+				{
+					//quad4
+					firstIntersection = getIntersectionF(slope, B, A);
+					secondIntersection = getIntersectionF(slope, A, D);
+					frameWidth = (float)dist(A, C);
+				}
+
                 //var overlay = new cRectangleF
                 //{
-                //    A = new PointF(currentX, 0),
-                //    B = new PointF(currentX + frameWidth, 0),
-                //    C = new PointF(currentX + frameWidth, boundsHeight),
-                //    D = new PointF(currentX, boundsHeight)
+                //    A = new PointF(currentX, 0 - tempHeight),
+                //    B = new PointF(currentX + frameWidth, 0 - tempHeight),
+                //    C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
+                //    D = new PointF(currentX, 0+ boundsHeight + tempHeight)
                 //};
-                //visible overlay that is a little taller on top and bottom than the viewing area to compensate for rotation
-                var overlay = new cRectangleF
-                {
-                    A = new PointF(currentX, 0 - tempHeight),
-                    B = new PointF(currentX + frameWidth, 0 - tempHeight),
-                    C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
-                    D = new PointF(currentX, 0+ boundsHeight + tempHeight)
-                };
-                //var overlayCenter = new PointF((overlay.A.X + overlay.C.X) / 2f, (overlay.A.Y + overlay.C.Y) / 2f);
-                var boundsCenter = new PointF(boundsWidth/2f, boundsHeight/2f);
-                overlay.A = rotate_point(boundsCenter, overlay.A, angle);
-                overlay.B = rotate_point(boundsCenter, overlay.B, angle);
-                overlay.C = rotate_point(boundsCenter, overlay.C, angle);
-                overlay.D = rotate_point(boundsCenter, overlay.D, angle);
+				var overlay = new cRectangleF
+				{
+					A = firstIntersection,
+					B = new PointF(currentX + frameWidth, 0 - tempHeight),
+					C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
+					D = secondIntersection
+				};
+                //var boundsCenter = new PointF(boundsWidth/2f, boundsHeight/2f);
+                //overlay.A = rotate_point(boundsCenter, overlay.A, angle);
                 frames[i] = overlay;
                 currentX += frameWidth;
             }
@@ -455,7 +528,6 @@ namespace LowPolyLibrary
                 cRectangleF overlay;
                 //if the first rectangle
                 if (i == 0)
-                    //overlay = new RectangleF(currentX - tempWidth, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
                     overlay = new cRectangleF
                     {
                         A = new PointF(currentX - tempWidth, 0 - tempHeight),
@@ -465,7 +537,6 @@ namespace LowPolyLibrary
                     };
                 //if the last rectangle
                 else if (i == numFrames - 1)
-                    //overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth + tempWidth, boundsHeight + (tempHeight * 2));
                     overlay = new cRectangleF
                     {
                         A = new PointF(currentX, 0 - tempHeight),
@@ -474,86 +545,20 @@ namespace LowPolyLibrary
                         D = new PointF(currentX, 0 + boundsHeight + tempHeight)
                     };
                 else
-                //overlay = new RectangleF(currentX, 0 - tempHeight, frameWidth, boundsHeight + (tempHeight * 2));
-                    overlay = new cRectangleF
+	                overlay = new cRectangleF
                     {
                         A = new PointF(currentX, 0 - tempHeight),
                         B = new PointF(currentX + frameWidth, 0 - tempHeight),
                         C = new PointF(currentX + frameWidth, 0 + boundsHeight + tempHeight),
                         D = new PointF(currentX, 0 + boundsHeight + tempHeight)
                     };
-                var boundsCenter = new PointF(boundsWidth / 2f, boundsHeight / 2f);
-                overlay.A = rotate_point(boundsCenter, overlay.A, angle);
-                overlay.B = rotate_point(boundsCenter, overlay.B, angle);
-                overlay.C = rotate_point(boundsCenter, overlay.C, angle);
-                overlay.D = rotate_point(boundsCenter, overlay.D, angle);
+                //var boundsCenter = new PointF(boundsWidth / 2f, boundsHeight / 2f);
+                //overlay.A = rotate_point(boundsCenter, overlay.A, angle);
                 frames[i] = overlay;
                 currentX += frameWidth;
             }
 
             return frames;
-        }
-
-        private PointF rotate_point(PointF pivot, PointF point, float angle)
-        {
-            var s = Math.Sin(angle);
-            var c = Math.Cos(angle);
-
-            var cx = pivot.X;
-            var cy = pivot.Y;
-
-            // translate point back to origin:
-            point.X -= cx;
-            point.Y -= cy;
-
-            // rotate point
-            var xnew = point.X * c - point.Y * s;
-            var ynew = point.X * s + point.Y * c;
-
-            // translate point back:
-            point.X = (float)xnew + cx;
-            point.Y = (float)ynew + cy;
-            return point;
-        }
-    }
-
-    struct cRectangleF
-    {
-        public PointF A;
-        public PointF B;
-        public PointF C;
-        public PointF D;
-
-        private float triArea(PointF a, PointF b, PointF c)
-        {
-            var tri1 = a.X*(b.Y - c.Y);
-            var tri2 = b.X*(c.Y - a.Y);
-            var tri3 = c.X*(a.Y - b.Y);
-            var sum = tri1 + tri2 + tri3;
-            var area = sum/2;
-            return Math.Abs(area);
-        }
-
-        private float recArea()
-        {
-            AnimationLib anim = new AnimationLib();
-            var recHeight = anim.dist(A, B);
-            var recBase = anim.dist(B, C);
-            var area = recHeight*recBase;
-            return (float)area;
-        }
-
-        public bool Contains(PointF point)
-        {
-            var tAPD = triArea(A, point, D);
-            var tDPC = triArea(D, point, C);
-            var tCPB = triArea(C, point, B);
-            var tPBA = triArea(point, B, A);
-            var totalTriArea = tAPD + tDPC + tCPB + tPBA;
-            var rectangleArea = recArea();
-            if (totalTriArea > rectangleArea)
-                return false;
-            return true;
         }
     }
 }
