@@ -392,13 +392,16 @@ namespace LowPolyLibrary
             }
         }
 
-		private PointF getIntersection(float slope, int point2Offset, PointF perpendicularLinePoint, PointF linePoint)
+		private PointF getIntersection(float slope, PointF linePoint, PointF perpendicularLinePoint)
         {
             var linePoint2 = new PointF();
+		    var point2Offset = (float)(2*dist(linePoint, perpendicularLinePoint));
+		    if (slope > 0)
+		        point2Offset = -point2Offset;
             linePoint2.X = linePoint.X + point2Offset;
             linePoint2.Y = (slope * linePoint2.X);
 
-            var k = ((linePoint2.Y - linePoint.Y) * (perpendicularLinePoint.X - linePoint.X) - (linePoint2.X - linePoint.X) * (perpendicularLinePoint.Y - linePoint.Y)) / ((linePoint2.Y - linePoint.Y) * (linePoint2.Y - linePoint.Y) + (linePoint2.X - linePoint.X) * (linePoint2.X - linePoint.X));
+            var k = ((linePoint2.Y - linePoint.Y) * (perpendicularLinePoint.X - linePoint.X) - (linePoint2.X - linePoint.X) * (perpendicularLinePoint.Y - linePoint.Y)) / (((linePoint2.Y - linePoint.Y) * (linePoint2.Y - linePoint.Y)) + ((linePoint2.X - linePoint.X) * (linePoint2.X - linePoint.X)));
             var x4 = perpendicularLinePoint.X - k * (linePoint2.Y - linePoint.Y);
             var y4 = perpendicularLinePoint.Y + k * (linePoint2.X - linePoint.X);
 
@@ -421,7 +424,6 @@ namespace LowPolyLibrary
             cRectangleF[] frames = new cRectangleF[numFrames];
 
             var tempHeight = boundsHeight/2f;
-            var x2Offset = boundsWidth;
 
             
 			//normal visible overlay
@@ -435,14 +437,15 @@ namespace LowPolyLibrary
                 
             //slope of the given angle
 			var slope = (float)Math.Tan(degreesToRadians(angle));
+            var recipSlope = -1/slope;
             var reflectYAngle = 359-angle;
 
 			PointF firstIntersection;
 			PointF secondIntersection;
-			var drawingAreaA = new PointF(0, 0);
-			var drawingAreaB = new PointF(boundsWidth, 0);
-			var drawingAreaC = new PointF(boundsWidth, boundsHeight);
-			var drawingAreaD = new PointF(0, boundsHeight);
+			var drawingAreaA = new PointF(0, boundsHeight);
+			var drawingAreaB = new PointF(boundsWidth, boundsHeight);
+			var drawingAreaC = new PointF(boundsWidth, 0);
+			var drawingAreaD = new PointF(0, 0);
 
             PointF cornerA;
             PointF cornerB;
@@ -456,15 +459,14 @@ namespace LowPolyLibrary
                 cornerB = drawingAreaB;
                 cornerC = drawingAreaC;
                 cornerD = drawingAreaD;
-                x2Offset = -x2Offset;
             }
             else if (angle < 180)
             {
                 //quad2
-                cornerA = drawingAreaB;
-                cornerB = drawingAreaC;
-                cornerC = drawingAreaD;
-                cornerD = drawingAreaA;
+                cornerA = drawingAreaD;
+                cornerB = drawingAreaA;
+                cornerC = drawingAreaB;
+                cornerD = drawingAreaC;
             }
             else if (angle < 270)
             {
@@ -477,20 +479,19 @@ namespace LowPolyLibrary
             else
             {
                 //quad4
-                cornerA = drawingAreaD;
-                cornerB = drawingAreaA;
-                cornerC = drawingAreaB;
-                cornerD = drawingAreaC;
-                x2Offset = -x2Offset;
+                cornerA = drawingAreaB;
+                cornerB = drawingAreaC;
+                cornerC = drawingAreaD;
+                cornerD = drawingAreaA;
             }
 
-            firstIntersection = getIntersection(slope,x2Offset, cornerA, cornerD);
-            secondIntersection = getIntersection(slope,x2Offset, cornerC, cornerD);
+            firstIntersection = getIntersection(slope, cornerA, cornerD);
+            secondIntersection = getIntersection(recipSlope, cornerD, cornerC);
             var frameWidth = (float)dist(cornerD, cornerB)/numFrames;
             var wideOverlays = createWideRectangleOverlays(frameWidth, firstIntersection, secondIntersection, angle,boundsWidth, boundsHeight);
 
-            var walkedB = walkLine(reflectYAngle, frameWidth, firstIntersection);
-            var walkedC = walkLine(reflectYAngle, frameWidth, secondIntersection);
+            var walkedB = walkLine(angle, frameWidth, firstIntersection);
+            var walkedC = walkLine(angle, frameWidth, secondIntersection);
             frames[0] = new cRectangleF
             {
                 A = new PointF(firstIntersection.X, firstIntersection.Y),
@@ -505,8 +506,8 @@ namespace LowPolyLibrary
                 var overlay = new cRectangleF();
                 overlay.A = frames[i - 1].B;
                 overlay.D = frames[i - 1].C;
-                overlay.B = walkLine(reflectYAngle, frameWidth, overlay.A);
-                overlay.C = walkLine(reflectYAngle, frameWidth, overlay.D);
+                overlay.B = walkLine(angle, frameWidth, overlay.A);
+                overlay.C = walkLine(angle, frameWidth, overlay.D);
 
                 //overlay.A = frames[i - 1].D;
                 //overlay.B = frames[i - 1].C;
@@ -520,7 +521,7 @@ namespace LowPolyLibrary
             return returnList;
         }
 
-        private cRectangleF[] createWideRectangleOverlays(float frameWidth, PointF D, PointF A, int angle, int boundsWidth, int boundsHeight)
+        private cRectangleF[] createWideRectangleOverlays(float frameWidth, PointF A, PointF D, int angle, int boundsWidth, int boundsHeight)
         {
             //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
             //all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
@@ -528,7 +529,7 @@ namespace LowPolyLibrary
             //array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
             cRectangleF[] frames = new cRectangleF[numFrames];
 
-            var reflectYAngle = 359 - angle;
+            var reflectYAngle = angle + 90;
 
             //represents the corner A of the regular overlays
             var overlayA = new PointF(A.X, A.Y);
@@ -538,12 +539,12 @@ namespace LowPolyLibrary
             var tempHeight = boundsHeight / 2;
 
             frames[0] = new cRectangleF();
-            frames[0].A = walkLine(reflectYAngle + 90, tempHeight, overlayA);
-            frames[0].B = walkLine(reflectYAngle, frameWidth, frames[0].A);
-            frames[0].A = walkLine(reflectYAngle + 180, tempWidth, frames[0].A);
-            frames[0].D = walkLine(reflectYAngle + 270, tempHeight, overlayD);
-            frames[0].C = walkLine(reflectYAngle, frameWidth, frames[0].D);
-            frames[0].D = walkLine(reflectYAngle + 180, tempWidth, frames[0].D);
+            frames[0].A = walkLine(reflectYAngle, tempHeight, overlayA);
+            frames[0].B = walkLine(angle, frameWidth, frames[0].A);
+            frames[0].A = walkLine(reflectYAngle + 90, tempWidth, frames[0].A);
+            frames[0].D = walkLine(reflectYAngle + 180, tempHeight, overlayD);
+            frames[0].C = walkLine(angle, frameWidth, frames[0].D);
+            frames[0].D = walkLine(reflectYAngle + 90, tempWidth, frames[0].D);
 
 
             //this logic is for grabbing all points (even those outside the visible drawing area)
@@ -572,8 +573,8 @@ namespace LowPolyLibrary
                 {
                     overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
                     overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
-                    overlay.B = walkLine(reflectYAngle, frameWidth + tempWidth, overlay.A);
-                    overlay.C = walkLine(reflectYAngle, frameWidth + tempWidth, overlay.A);
+                    overlay.B = walkLine(angle, frameWidth + tempWidth, overlay.A);
+                    overlay.C = walkLine(angle, frameWidth + tempWidth, overlay.D);
                 }
                 else
                 //overlay = new cRectangleF
@@ -587,8 +588,8 @@ namespace LowPolyLibrary
                 {
                     overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
                     overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
-                    overlay.B = walkLine(reflectYAngle, frameWidth, overlay.A);
-                    overlay.C = walkLine(reflectYAngle, frameWidth, overlay.D);
+                    overlay.B = walkLine(angle, frameWidth, overlay.A);
+                    overlay.C = walkLine(angle, frameWidth, overlay.D);
                 }
                 frames[i] = overlay;
             }

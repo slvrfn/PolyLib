@@ -119,7 +119,12 @@ namespace LowPolyLibrary
             {
                 foreach (var point in frame)
                 {
-                    convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
+                    var currentlyExists = convertedPoints.Exists(x => 
+                        x.x.CompareTo(point.X) == 0 &&
+                        x.y.CompareTo(point.Y) == 0
+                    );
+                    if(!currentlyExists)
+                        convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
                 }
             }
             var angulator = new Triangulator();
