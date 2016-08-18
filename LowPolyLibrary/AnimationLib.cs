@@ -19,6 +19,7 @@ namespace LowPolyLibrary
         List<PointF>[] framedPoints = new List<PointF>[numFrames];
         List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
         Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
+        private int continuousAngle = 0;
         private List<Triad> triangulatedPoints;
 
         internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
@@ -408,7 +409,7 @@ namespace LowPolyLibrary
             return new PointF(x4, y4);
         }
 
-        private PointF walkLine(int angle, float distance, PointF startingPoint)
+        private PointF walkAngle(int angle, float distance, PointF startingPoint)
 		{
 			var endPoint = new PointF(startingPoint.X, startingPoint.Y);
 			var y = distance * ((float)Math.Sin(degreesToRadians(angle)));
@@ -417,6 +418,39 @@ namespace LowPolyLibrary
 			endPoint.Y += y;
 			return endPoint;
 		}
+
+        private PointF walkLine(PointF startingPoint, PointF referencePoint, float distance)
+        {
+            var slope = (referencePoint.Y - startingPoint.Y) / (referencePoint.X - startingPoint.X);
+            var newAngle = (int)Math.Atan(slope);
+            //check to determine which direction on the line to go
+            if (startingPoint.X > referencePoint.X && startingPoint.Y > referencePoint.Y)
+                newAngle += 180;
+            else if (startingPoint.X < referencePoint.X && startingPoint.Y > referencePoint.Y)
+                newAngle += 360;
+            else if (startingPoint.X > referencePoint.X && startingPoint.Y < referencePoint.Y)
+                newAngle += 180;
+            else if (startingPoint.X < referencePoint.X && startingPoint.Y < referencePoint.Y)
+                newAngle += 0;
+
+            continuousAngle = newAngle;
+            var endPoint = new PointF(startingPoint.X, startingPoint.Y);
+            var y = distance * ((float)Math.Sin(degreesToRadians(newAngle)));
+            var x = distance * ((float)Math.Cos(degreesToRadians(newAngle)));
+            endPoint.X += x;
+            endPoint.Y += y;
+            return endPoint;
+        }
+
+        private PointF walkLine(PointF startingPoint, float distance, int angle)
+        {
+            var endPoint = new PointF(startingPoint.X, startingPoint.Y);
+            var y = distance * ((float)Math.Sin(degreesToRadians(angle)));
+            var x = distance * ((float)Math.Cos(degreesToRadians(angle)));
+            endPoint.X += x;
+            endPoint.Y += y;
+            return endPoint;
+        }
 
         private List<cRectangleF[]> createRectangleOverlays(int boundsWidth, int boundsHeight, int angle)
         {
@@ -490,8 +524,8 @@ namespace LowPolyLibrary
             var frameWidth = (float)dist(cornerD, cornerB)/numFrames;
             var wideOverlays = createWideRectangleOverlays(frameWidth, firstIntersection, secondIntersection, angle,boundsWidth, boundsHeight);
 
-            var walkedB = walkLine(angle, frameWidth, firstIntersection);
-            var walkedC = walkLine(angle, frameWidth, secondIntersection);
+            var walkedB = walkLine(firstIntersection, cornerA, frameWidth);
+            var walkedC = walkLine(secondIntersection, cornerC, frameWidth);
             frames[0] = new cRectangleF
             {
                 A = new PointF(firstIntersection.X, firstIntersection.Y),
@@ -506,13 +540,8 @@ namespace LowPolyLibrary
                 var overlay = new cRectangleF();
                 overlay.A = frames[i - 1].B;
                 overlay.D = frames[i - 1].C;
-                overlay.B = walkLine(angle, frameWidth, overlay.A);
-                overlay.C = walkLine(angle, frameWidth, overlay.D);
-
-                //overlay.A = frames[i - 1].D;
-                //overlay.B = frames[i - 1].C;
-                //overlay.C = walkLine(recipAngle, frameWidth, overlay.B);
-                //overlay.D = walkLine(recipAngle, frameWidth, overlay.A);
+                overlay.B = walkLine(overlay.A, frameWidth, continuousAngle);
+                overlay.C = walkLine(overlay.D, frameWidth, continuousAngle);
                 frames[i] = overlay;
             }
             var returnList = new List<cRectangleF[]>();
@@ -539,12 +568,12 @@ namespace LowPolyLibrary
             var tempHeight = boundsHeight / 2;
 
             frames[0] = new cRectangleF();
-            frames[0].A = walkLine(reflectYAngle, tempHeight, overlayA);
-            frames[0].B = walkLine(angle, frameWidth, frames[0].A);
-            frames[0].A = walkLine(reflectYAngle + 90, tempWidth, frames[0].A);
-            frames[0].D = walkLine(reflectYAngle + 180, tempHeight, overlayD);
-            frames[0].C = walkLine(angle, frameWidth, frames[0].D);
-            frames[0].D = walkLine(reflectYAngle + 90, tempWidth, frames[0].D);
+            frames[0].A = walkAngle(reflectYAngle, tempHeight, overlayA);
+            frames[0].B = walkAngle(angle, frameWidth, frames[0].A);
+            frames[0].A = walkAngle(reflectYAngle + 90, tempWidth, frames[0].A);
+            frames[0].D = walkAngle(reflectYAngle + 180, tempHeight, overlayD);
+            frames[0].C = walkAngle(angle, frameWidth, frames[0].D);
+            frames[0].D = walkAngle(reflectYAngle + 90, tempWidth, frames[0].D);
 
 
             //this logic is for grabbing all points (even those outside the visible drawing area)
@@ -573,8 +602,8 @@ namespace LowPolyLibrary
                 {
                     overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
                     overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
-                    overlay.B = walkLine(angle, frameWidth + tempWidth, overlay.A);
-                    overlay.C = walkLine(angle, frameWidth + tempWidth, overlay.D);
+                    overlay.B = walkAngle(angle, frameWidth + tempWidth, overlay.A);
+                    overlay.C = walkAngle(angle, frameWidth + tempWidth, overlay.D);
                 }
                 else
                 //overlay = new cRectangleF
@@ -588,8 +617,8 @@ namespace LowPolyLibrary
                 {
                     overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
                     overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
-                    overlay.B = walkLine(angle, frameWidth, overlay.A);
-                    overlay.C = walkLine(angle, frameWidth, overlay.D);
+                    overlay.B = walkAngle(angle, frameWidth, overlay.A);
+                    overlay.C = walkAngle(angle, frameWidth, overlay.D);
                 }
                 frames[i] = overlay;
             }

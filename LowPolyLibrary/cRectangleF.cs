@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace LowPolyLibrary
 {
-	struct cRectangleF
+	internal class cRectangleF
 	{
 		public PointF A;
 		public PointF B;
