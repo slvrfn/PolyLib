@@ -10,17 +10,24 @@ namespace LowPolyLibrary
 		public PointF C;
 		public PointF D;
 
-		private float triArea(PointF a, PointF b, PointF c)
-		{
-			var tri1 = a.X * (b.Y - c.Y);
-			var tri2 = b.X * (c.Y - a.Y);
-			var tri3 = c.X * (a.Y - b.Y);
-			var sum = tri1 + tri2 + tri3;
-			var area = sum / 2;
-			return Math.Abs(area);
-		}
+	    internal cRectangleF()
+	    {
+	    }
 
-		private float recArea()
+	    private PointF vector(PointF p1, PointF p2)
+	    {
+	        var point = new PointF();
+	        point.X = p2.X - p1.X;
+	        point.Y = p2.Y - p1.Y;
+	        return point;
+	    }
+
+	    private float dot(PointF u, PointF v)
+	    {
+	        return u.X*v.X + u.Y*v.Y;
+	    }
+
+        private float recArea()
 		{
 			AnimationLib anim = new AnimationLib();
 			var recHeight = anim.dist(A, B);
@@ -29,18 +36,21 @@ namespace LowPolyLibrary
 			return (float)area;
 		}
 
-		public bool Contains(PointF point)
+		public bool Contains(PointF m)
 		{
-			var tAPD = triArea(A, point, D);
-			var tDPC = triArea(D, point, C);
-			var tCPB = triArea(C, point, B);
-			var tPBA = triArea(point, B, A);
-			var totalTriArea = tAPD + tDPC + tCPB + tPBA;
-			var rectangleArea = recArea();
-			if (totalTriArea > rectangleArea)
-				return false;
-			return true;
-		}
+            //all containst logic from
+            //http://math.stackexchange.com/a/190373
+            //http://stackoverflow.com/a/37865332/3344317
+            var AB = vector(A, B);
+            var AM = vector(A, m);
+            var BC = vector(B, C);
+            var BM = vector(B, m);
+            var dotABAM = dot(AB, AM);
+            var dotABAB = dot(AB, AB);
+            var dotBCBM = dot(BC, BM);
+            var dotBCBC = dot(BC, BC);
+            return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
+        }
 	}
 }
 
