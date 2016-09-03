@@ -1,13 +1,7 @@
 ﻿using System.Drawing;
 using System.Collections.Generic;
-using Android.Graphics;
-using Android.Graphics.Drawables;
-using Java.Lang;
-using Java.Util;
-using Triangulator = DelaunayTriangulator.Triangulator;
 using Triad = DelaunayTriangulator.Triad;
 using Double = System.Double;
-using Enum = System.Enum;
 using Math = System.Math;
 using PointF = System.Drawing.PointF;
 

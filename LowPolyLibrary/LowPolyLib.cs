@@ -219,48 +219,48 @@ namespace LowPolyLibrary
             var colorArray = getGradientColors ();
 
 			Shader gradientShader;
-
-			switch (rand.Next(3)) {
-			case 0:
-				gradientShader = new LinearGradient (
-					                      0,
-					                      0,
-					                      boundsWidth,
-					                      boundsHeight,
-					                      colorArray,
-					                      null,
-					                      Shader.TileMode.Repeat
-				                      );
-				break;
-			case 1:
-				gradientShader = new SweepGradient (
-					((float)boundsWidth / 2),
-					((float)boundsHeight / 2),
-					colorArray,
-					null
-				);
-				break;
-			case 2:
-				gradientShader = new RadialGradient (
-					                        ((float)boundsWidth / 2),
-					                        ((float)boundsHeight / 2),
-					                        ((float)boundsWidth / 2),
-					                        colorArray,
-					                        null,
-					                        Shader.TileMode.Clamp
-				                        );
-				break;
-			default:
-				gradientShader = new LinearGradient (
-					0,
-					0,
-					boundsWidth,
-					boundsHeight,
-					colorArray,
-					null,
-					Shader.TileMode.Repeat
-				);
-				break;
+            //set to 2, bc want to temporarily not make sweep gradient
+			switch (rand.Next(2)) {
+			    case 0:
+				    gradientShader = new LinearGradient (
+					                          0,
+					                          0,
+					                          boundsWidth,
+					                          boundsHeight,
+					                          colorArray,
+					                          null,
+					                          Shader.TileMode.Repeat
+				                          );
+				    break;
+			    case 1:
+				    gradientShader = new RadialGradient (
+					                            ((float)boundsWidth / 2),
+					                            ((float)boundsHeight / 2),
+					                            ((float)boundsWidth / 2),
+					                            colorArray,
+					                            null,
+					                            Shader.TileMode.Clamp
+				                            );
+				    break;
+               case 2:
+                        gradientShader = new SweepGradient(
+                            ((float)boundsWidth / 2),
+                            ((float)boundsHeight / 2),
+                            colorArray,
+                            null
+                        );
+                        break;
+              default:
+				    gradientShader = new LinearGradient (
+					    0,
+					    0,
+					    boundsWidth,
+					    boundsHeight,
+					    colorArray,
+					    null,
+					    Shader.TileMode.Repeat
+				    );
+				    break;
 			}
 
             Bitmap bmp = Bitmap.CreateBitmap (boundsWidth, boundsHeight, Bitmap.Config.Rgb565);

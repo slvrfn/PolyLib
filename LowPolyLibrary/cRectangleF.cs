@@ -10,8 +10,14 @@ namespace LowPolyLibrary
 		public PointF C;
 		public PointF D;
 
-	    internal cRectangleF()
+	    internal cRectangleF(){}
+
+	    internal cRectangleF(PointF a, PointF b, PointF c, PointF d)
 	    {
+	        A = new PointF(a.X, a.Y);
+	        B = new PointF(b.X, b.Y);
+	        C = new PointF(c.X, c.Y);
+	        D = new PointF(d.X, d.Y);
 	    }
 
 	    private PointF vector(PointF p1, PointF p2)
@@ -27,18 +33,9 @@ namespace LowPolyLibrary
 	        return u.X*v.X + u.Y*v.Y;
 	    }
 
-        private float recArea()
+        public bool Contains(PointF m)
 		{
-			AnimationLib anim = new AnimationLib();
-			var recHeight = anim.dist(A, B);
-			var recBase = anim.dist(B, C);
-			var area = recHeight * recBase;
-			return (float)area;
-		}
-
-		public bool Contains(PointF m)
-		{
-            //all containst logic from
+            //all contains logic from
             //http://math.stackexchange.com/a/190373
             //http://stackoverflow.com/a/37865332/3344317
             var AB = vector(A, B);
