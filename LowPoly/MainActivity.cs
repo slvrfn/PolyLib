@@ -8,11 +8,12 @@ using System.Timers;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views.Animations;
+using Android.Views;
 
 namespace LowPoly
 {
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon")]
-	public class MainActivity : Activity
+	public class MainActivity : Activity, View.IOnTouchListener
 	{
 		Button button, animButton;
 		ImageView imagePanel;
@@ -40,6 +41,8 @@ namespace LowPoly
 			animButton.Click += stepAnimation;
 
 			imagePanel = FindViewById<ImageView> (Resource.Id.imageView1);
+			imagePanel.SetOnTouchListener(this);
+
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
 			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
@@ -53,14 +56,19 @@ namespace LowPoly
 			sizeTB.Text = _lowPoly.cell_size.ToString ();
 		}
 
-		public void Generate (object sender, EventArgs e){
-            var temp = new Stopwatch();
-            temp.Start();
-            _lowPoly.boundsWidth = Int32.Parse (widthTB.Text);
-			_lowPoly.boundsHeight = Int32.Parse (heightTB.Text);
+		private void updatePolyLib()
+		{
+			_lowPoly.boundsWidth = Int32.Parse(widthTB.Text);
+			_lowPoly.boundsHeight = Int32.Parse(heightTB.Text);
 
 			_lowPoly.setVariance = double.Parse(varTB.Text);
 			_lowPoly.cell_size = double.Parse(sizeTB.Text);
+		}
+
+		public void Generate (object sender, EventArgs e){
+            var temp = new Stopwatch();
+
+			updatePolyLib();
 
             temp.Start();
             var generatedBitmap = _lowPoly.GenerateNew();
@@ -99,6 +107,23 @@ namespace LowPoly
             generatedAnimation.Start();
 
             timeElapsed.Text = temp.Elapsed.ToString();
+		}
+
+		public bool OnTouch(View v, MotionEvent e)
+		{
+			if (e.Action == MotionEventActions.Down)
+			{
+				var touchX = e.GetX();
+				var touchY = e.GetY();
+				return true;
+			}
+			if (e.Action == MotionEventActions.Up)
+			{
+				// do other stuff
+				return true;
+			}
+
+			return false;
 		}
 	}
 }
