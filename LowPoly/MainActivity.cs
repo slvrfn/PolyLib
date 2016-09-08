@@ -12,7 +12,7 @@ using Android.Views;
 
 namespace LowPoly
 {
-	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon")]
+	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
 		Button button, animButton;
@@ -50,8 +50,10 @@ namespace LowPoly
 			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
             timeElapsed = FindViewById<TextView>(Resource.Id.timeElapsed);
 
-            widthTB.Text = "1024";
-			heightTB.Text = "768";
+			var metrics = Resources.DisplayMetrics;
+
+			widthTB.Text = metrics.WidthPixels.ToString();
+			heightTB.Text = metrics.HeightPixels.ToString();
 			varTB.Text = _lowPoly.setVariance.ToString ();
 			sizeTB.Text = _lowPoly.cell_size.ToString ();
 		}
@@ -84,8 +86,6 @@ namespace LowPoly
 		public void stepAnimation(object sender, EventArgs e)
 		{
 			var temp = new Stopwatch();
-            if (frameNum > 23)
-                frameNum = 0;
 
    //         temp.Start();
 		 //   var generatedBitmap = _lowPoly.createSweepAnimBitmap(frameNum++);

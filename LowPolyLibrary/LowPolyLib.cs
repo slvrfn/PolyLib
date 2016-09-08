@@ -20,7 +20,7 @@ namespace LowPolyLibrary
 	    
         public int boundsWidth;
 		public int boundsHeight;
-		public double cell_size = 75;
+		public double cell_size = 150;
 		public double setVariance = .75;
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
