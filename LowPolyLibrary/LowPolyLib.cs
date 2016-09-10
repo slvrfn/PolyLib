@@ -24,7 +24,7 @@ namespace LowPolyLibrary
 		public double setVariance = .75;
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
-		private static int numFrames = 12; //static necessary for creation of framedPoints list
+		//private static int numFrames = 12; //static necessary for creation of framedPoints list
         Bitmap gradient;
 
 		public Bitmap GenerateNew()
@@ -53,13 +53,13 @@ namespace LowPolyLibrary
             return frameBitmap;
         }
 
-		public AnimationDrawable makeAnimation(int numFrames2)
+		public AnimationDrawable makeAnimation(int numFrames)
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
             var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
 		    var direction = animator.get360Direction();
-            for (int i = 0; i < numFrames2; i++)
+            for (int i = 0; i < numFrames; i++)
             {
                 var frameBitmap =createSweepAnimBitmap(i, direction);
                 BitmapDrawable frame = new BitmapDrawable(frameBitmap);

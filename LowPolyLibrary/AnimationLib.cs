@@ -13,7 +13,6 @@ namespace LowPolyLibrary
         List<PointF>[] framedPoints = new List<PointF>[numFrames];
         List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
         Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
-        private int continuousAngle = 0;
         private List<Triad> triangulatedPoints;
 
         internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
@@ -69,34 +68,12 @@ namespace LowPolyLibrary
 
         internal List<PointF>[] makeSweepPointsFrame(int frameNum, int direction, List<PointF>[] oldFramelist = null)
         {
-            //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
-            //var tempPoList = new List<ceometric.DelaunayTriangulator.Point>(_points);
-
-            ////get list of points contained in a specified frame
-            ////this frame checking handles adding all the points that are close to a working point
-            //List<PointF> pointList = new List<PointF>();
-            //if (frameNum == 0)
-            //{
-            //    pointList = framedPoints[frameNum];
-            //    pointList.AddRange(framedPoints[frameNum + 1]);                                              possible this chunck of code could be used elsewhere later
-            //}
-            //else if (frameNum == totalFrames - 1)
-            //{
-            //    pointList = framedPoints[frameNum];
-            //    pointList.AddRange(framedPoints[frameNum - 1]);
-            //}
-            //else
-            //{
-            //    pointList = framedPoints[frameNum];
-            //}
             var framePoints = new List<PointF>();
             //all the points will move within 15 degrees of the same general direction
             direction = getAngleInRange(direction, 15);
-            //workingFrameList is set either to the initial List<PointF>[] of points, or the one provided by calling this method
+            //workingFrameList is set either to the initial List<PointF>[] of points, or the one passed into this method
             List<PointF>[] workingFrameList = new List<PointF>[framedPoints.Length];
             if (oldFramelist == null)
-            //workingFrameList = framedPoints;
-            //think a direct assignment was causing issues with extra points getting added to framedPoints
             {
                 for (int i = 0; i < framedPoints.Length; i++)
                 {
@@ -112,11 +89,8 @@ namespace LowPolyLibrary
             {
                 //created bc cant modify point
                 var wPoint = new PointF(point.X, point.Y);
-                //get list of tris at given workingPoint in given frame
-                //var tris = tempPoTriDic[workingPoint];
 
-
-                var distCanMove = shortestDistanceFromPoints(wPoint, workingFrameList[frameNum], direction);
+                var distCanMove = shortestDistanceFromPoints(wPoint, workingFrameList, direction, frameNum);
                 var xComponent = getXComponent(direction, distCanMove);
                 var yComponent = getYComponent(direction, distCanMove);
 
@@ -210,9 +184,28 @@ namespace LowPolyLibrary
             return rand.Next(range_lower,range_upper);
         }
 
-        private List<PointF> quadListFromPoints(List<PointF> points, int degree, PointF workingPoint)
+        private List<PointF> quadListFromPoints(List<PointF>[] framePoints, int degree, PointF workingPoint, int frameNum)
         {
-            var direction = 0;
+			var pointList = new List<PointF>();
+			////this frame checking handles adding all the points that are close to a working point
+			if (frameNum == 0)
+			{
+				pointList.AddRange(framedPoints[frameNum]);
+			    pointList.AddRange(framedPoints[frameNum + 1]);
+			}
+			else if (frameNum == numFrames - 1)
+			{
+				pointList.AddRange(framedPoints[frameNum]);
+			    pointList.AddRange(framedPoints[frameNum - 1]);
+			}
+			else
+			{
+				pointList.AddRange(framedPoints[frameNum]);
+				pointList.AddRange(framedPoints[frameNum + 1]);
+				pointList.AddRange(framedPoints[frameNum - 1]);
+			}
+
+			var direction = 0;
 
             if (degree > 270)
                 direction = 4;
@@ -228,7 +221,7 @@ namespace LowPolyLibrary
             var quad3 = new List<PointF>();
             var quad4 = new List<PointF>();
 
-            foreach (var point in points)
+            foreach (var point in pointList)
             {
                 //if x,y of new triCenter > x,y of working point, then in the 1st quardant
                 if (point.X > workingPoint.X && point.Y > workingPoint.Y)
@@ -306,10 +299,10 @@ namespace LowPolyLibrary
 
         }
 
-        private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> points, int degree)
+        private double shortestDistanceFromPoints(PointF workingPoint, List<PointF>[] framePoints, int degree, int frameNum)
         {
-            //this list consists of all the points in the same directional quardant as the working point.
-            var quadPoints = quadListFromPoints(points, degree, workingPoint);//just changed to quad points
+			//this list consists of all the points in the same directional quardant as the working point.
+			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint, frameNum);//just changed to quad points
 
             //shortest distance between a workingPoint and all points of a given list
             double shortest = -1;

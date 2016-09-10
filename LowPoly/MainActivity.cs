@@ -20,9 +20,7 @@ namespace LowPoly
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
 
-		int frameNum = 0;
-
-	    AnimationDrawable generatedAnimation;
+		AnimationDrawable generatedAnimation;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -79,8 +77,7 @@ namespace LowPoly
             imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
             
 		    timeElapsed.Text = temp.Elapsed.ToString();
-			frameNum = 0;
-		    generatedAnimation = null;
+			generatedAnimation = null;
 		}
 
 		public void stepAnimation(object sender, EventArgs e)
