@@ -48,6 +48,26 @@ namespace LowPolyLibrary
             var dotBCBC = dot(BC, BC);
             return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
         }
+
+		internal bool circleContainsPoints(PointF circle, int radius, PointF point1, PointF point2)
+		{
+			//http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
+
+			var abs = (point2.X - point1.X)*(point1.Y - circle.Y) - (point1.X-circle.X)*(point2.Y-point1.Y);
+			var top = Math.Abs(abs);
+			var sqrt = (point2.X - point1.X) * (point2.X - point1.X) + (point2.Y - point1.Y) * (point2.Y - point1.Y);
+			var bottom = Math.Sqrt(sqrt);
+			var distance = top / bottom;
+			return distance <= radius;
+		}
+
+		public bool isInsideCircle(PointF center, int radius)
+		{
+			return  circleContainsPoints(center, radius, A, B) ||
+				    circleContainsPoints(center, radius, B, C) ||
+					circleContainsPoints(center, radius, C, D) ||
+					circleContainsPoints(center, radius, D, A);
+		}
 	}
 }
 

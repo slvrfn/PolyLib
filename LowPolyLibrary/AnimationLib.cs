@@ -4,6 +4,7 @@ using Triad = DelaunayTriangulator.Triad;
 using Double = System.Double;
 using Math = System.Math;
 using PointF = System.Drawing.PointF;
+using System;
 
 namespace LowPolyLibrary
 {
@@ -15,9 +16,28 @@ namespace LowPolyLibrary
         Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
         private List<Triad> triangulatedPoints;
 
-        internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
+		List<cRectangleF[]> viewRectangles;
+
+		PointF lastTouch;
+		int lastRadius;
+
+		internal struct TouchPoints
+		{
+			public List<PointF> inRange;
+			public List<PointF> inRangOfRecs;
+			public List<PointF> outOfRange;
+		}
+
+		TouchPoints touchPointLists;
+
+		public enum Animations
+		{
+			Sweep,Touch
+		}
+
+		internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
         {
-            var overlays = createRectangleOverlays(boundsWidth, boundsHeight, angle);
+            viewRectangles = createRectangleOverlays(boundsWidth, boundsHeight, angle);
             framedPoints = new List<PointF>[numFrames];
             wideFramedPoints = new List<PointF>[numFrames];
 
@@ -39,10 +59,10 @@ namespace LowPolyLibrary
 
                 var missing = true;
 
-                for (int i = 0; i < overlays[1].Length; i++)
+                for (int i = 0; i < viewRectangles[1].Length; i++)
                 {
                     //if the rectangle overlay contains a point
-                    if (overlays[0][i].Contains(newPoint))
+                    if (viewRectangles[0][i].Contains(newPoint))
                     {
                         missing = false;
                         //if the point has not already been added to the overlay's point list
@@ -51,7 +71,7 @@ namespace LowPolyLibrary
                             framedPoints[i].Add(newPoint);
                     }
                     //if overlays[i] does not contain the point, but wideOverlays does, add it. (The point lies outside the visible area and still needs to be maintained).
-                    else if (overlays[1][i].Contains(newPoint))
+                    else if (viewRectangles[1][i].Contains(newPoint))
                     {
                         missing = false;
                         //if the point has not already been added to the overlay's point list
@@ -59,31 +79,144 @@ namespace LowPolyLibrary
                             //add it
                             wideFramedPoints[i].Add(newPoint);
                     }
-
                 }
                 if (missing)
                     ++missingPoints;
             }
         }
 
-        internal List<PointF>[] makeSweepPointsFrame(int frameNum, int direction, List<PointF>[] oldFramelist = null)
+		private int _lowerBound;
+		private int _upperBound;
+
+		internal List<PointF> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
+		{
+			var touch = new List<PointF>();
+
+			currentIndex += displacement;
+
+			var firstFrame = 0;
+			var lastFrame = viewRectangles[0].Length - 1;
+
+			if (currentIndex < firstFrame)
+			{
+				currentIndex++;
+			}
+			if (currentIndex > lastFrame)
+			{
+				currentIndex--;
+			}
+
+			if (displacement == 0)
+			{
+				if (currentIndex != firstFrame &&
+					viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
+																		 lastRadius,
+																		 viewRectangles[0][currentIndex].A,
+																		 viewRectangles[0][currentIndex].D))
+				{
+					touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
+				}
+				if (currentIndex != lastFrame &&
+					viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
+																		 lastRadius,
+																		 viewRectangles[0][currentIndex].B,
+																		 viewRectangles[0][currentIndex].C))
+				{
+					touch.AddRange(getTouchAreaRecPoints(currentIndex, 1));
+				}
+			}
+			else
+			{
+
+				if (displacement < 0)
+				{
+					_lowerBound = currentIndex;
+					if (currentIndex != firstFrame &&
+						viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
+																			 lastRadius,
+																			 viewRectangles[0][currentIndex].A,
+																			 viewRectangles[0][currentIndex].D))
+					{
+						touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
+					}
+				}
+				else if (displacement > 0)
+				{
+					_upperBound = currentIndex;
+					if (currentIndex != lastFrame &&
+							 viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
+																				  lastRadius,
+																				  viewRectangles[0][currentIndex].B,
+																				  viewRectangles[0][currentIndex].C))
+					{
+						touch.AddRange(getTouchAreaRecPoints(currentIndex, 1));
+					}
+				}
+			}
+
+
+
+			touch.AddRange(framedPoints[currentIndex]);
+			return touch;
+		}
+
+		internal void setPointsAroundTouch(PointF touch, int radius)
+		{
+			lastTouch = touch;
+			lastRadius = radius;
+			touchPointLists = new TouchPoints { inRange = new List<PointF>(), inRangOfRecs = new List<PointF>(), outOfRange = new List<PointF>()};
+
+			//index of the smaller rectangle that contains the touch point
+			//var index = Array.FindIndex(viewRectangles[0], rec => rec.isInsideCircle(touch, radius));
+			var index = Array.FindIndex(viewRectangles[0], rec => rec.Contains(touch));
+			//get all points in the same rec as the touch area
+			touchPointLists.inRange = getTouchAreaRecPoints(index);
+
+			//add the points from recs outside of the touch area to a place we can handle them later
+			for (int i = 0; i < framedPoints.Length; i++)
+			{
+				if (i > _upperBound && i < _lowerBound)
+					touchPointLists.outOfRange.AddRange(framedPoints[i]);
+				touchPointLists.outOfRange.AddRange(wideFramedPoints[i]);
+			}
+
+			//actually ween down the points in the touch area to the points inside the "circle" touch area
+			var removeFromTouchPoints = new List<PointF>();
+			foreach (var point in touchPointLists.inRange)
+			{
+
+				if (!pointInsideCircle(point, touch, radius))
+				{
+					//touchPointLists.inRange.Remove(point);
+					removeFromTouchPoints.Add(point);
+					touchPointLists.inRangOfRecs.Add(point);
+				}
+			}
+			foreach (var point in removeFromTouchPoints)
+			{
+				touchPointLists.inRange.Remove(point);
+			}
+
+		}
+
+		internal bool pointInsideCircle(PointF point, PointF center, int radius)
+		{
+			//http://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
+			return (point.X - center.X) * (point.X - center.X) + (point.Y - center.Y) * (point.Y - center.Y) < radius * radius;
+		}
+
+		internal List<PointF>[] makeSweepPointsFrame(int frameNum, int direction)
         {
             var framePoints = new List<PointF>();
             //all the points will move within 15 degrees of the same general direction
             direction = getAngleInRange(direction, 15);
             //workingFrameList is set either to the initial List<PointF>[] of points, or the one passed into this method
             List<PointF>[] workingFrameList = new List<PointF>[framedPoints.Length];
-            if (oldFramelist == null)
-            {
-                for (int i = 0; i < framedPoints.Length; i++)
-                {
-                    workingFrameList[i] = new List<PointF>();
-                    workingFrameList[i].AddRange(framedPoints[i]);
-                }
-
-            }
-            else
-                workingFrameList = oldFramelist;
+            for (int i = 0; i < framedPoints.Length; i++)
+			{
+				workingFrameList[i] = new List<PointF>();
+				workingFrameList[i].AddRange(framedPoints[i]);
+			}
 
             foreach (var point in workingFrameList[frameNum])
             {
@@ -108,6 +241,38 @@ namespace LowPolyLibrary
             return workingFrameList;
         }
 
+		internal TouchPoints makeTouchPointsFrame(int frame, PointF touch, int radius)
+		{
+			var removePoints = new List<PointF>();
+			var newPoints = new List<PointF>();
+			var pointsForMeasure = new List<PointF>();
+			pointsForMeasure.AddRange(touchPointLists.inRange);
+			pointsForMeasure.AddRange(touchPointLists.inRangOfRecs);
+			foreach (var point in touchPointLists.inRange)
+			{
+				var wPoint = new PointF(point.X, point.Y);
+				//created bc cant modify point
+				removePoints.Add(point);
+				var direction = (int)getPolarCoordinates(touch, wPoint);
+
+				var distCanMove = shortestDistanceFromPoints(point, pointsForMeasure, direction, frame);
+				var xComponent = getXComponent(direction, distCanMove);
+				var yComponent = getYComponent(direction, distCanMove);
+
+				wPoint.X += (float)xComponent;
+				wPoint.Y += (float)yComponent;
+				newPoints.Add(wPoint);
+			}
+			//removePoints and newPoints should always be the same length
+			for (int i = 0; i < removePoints.Count - 1; i++)
+			{
+				touchPointLists.inRange.Remove(removePoints[i]);
+				touchPointLists.inRange.Add(newPoints[i]);
+			}
+
+			return touchPointLists;
+		}
+
         private List<DelaunayTriangulator.Vertex> makeTrisFrame(int frameNum, List<DelaunayTriangulator.Vertex> points)
         {
             //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
@@ -121,8 +286,7 @@ namespace LowPolyLibrary
             {
                 //get list of tris at given workingPoint in given frame
                 var tris = new List<Triad>(poTriDic[workingPoint]);
-
-                var distCanMove = shortestDistanceFromTris(workingPoint, tris, direction, points);
+				var distCanMove = frameLocation(frameNum, numFrames, shortestDistanceFromTris(workingPoint, tris, direction, points));
                 var xComponent = getXComponent(direction, distCanMove);
                 var yComponent = getYComponent(direction, distCanMove);
                 foreach (var triangle in tris)
@@ -157,6 +321,14 @@ namespace LowPolyLibrary
             return thisCoord;
         }
 
+		private double getPolarCoordinates(PointF center, PointF point)
+		{
+			var y = Math.Abs(center.Y - point.Y);
+			var x = Math.Abs(center.X - point.X);
+			var radians = Math.Atan(y / x);
+			return radiansToDegrees(radians);
+		}
+
         private double getXComponent(int angle, double length)
         {
             return length * Math.Cos(degreesToRadians(angle));
@@ -190,19 +362,19 @@ namespace LowPolyLibrary
 			////this frame checking handles adding all the points that are close to a working point
 			if (frameNum == 0)
 			{
-				pointList.AddRange(framedPoints[frameNum]);
-			    pointList.AddRange(framedPoints[frameNum + 1]);
+				pointList.AddRange(framePoints[frameNum]);
+				pointList.AddRange(framePoints[frameNum + 1]);
 			}
 			else if (frameNum == numFrames - 1)
 			{
-				pointList.AddRange(framedPoints[frameNum]);
-			    pointList.AddRange(framedPoints[frameNum - 1]);
+				pointList.AddRange(framePoints[frameNum]);
+			    pointList.AddRange(framePoints[frameNum - 1]);
 			}
 			else
 			{
-				pointList.AddRange(framedPoints[frameNum]);
-				pointList.AddRange(framedPoints[frameNum + 1]);
-				pointList.AddRange(framedPoints[frameNum - 1]);
+				pointList.AddRange(framePoints[frameNum]);
+				pointList.AddRange(framePoints[frameNum + 1]);
+				pointList.AddRange(framePoints[frameNum - 1]);
 			}
 
 			var direction = 0;
@@ -248,6 +420,54 @@ namespace LowPolyLibrary
             }
 
         }
+
+		private List<PointF> quadListFromPoints(List<PointF> framePoints, int degree, PointF workingPoint, int frameNum)
+		{
+			
+
+			var direction = 0;
+
+			if (degree > 270)
+				direction = 4;
+			else if (degree > 180)
+				direction = 3;
+			else if (degree > 90)
+				direction = 2;
+			else
+				direction = 1;
+
+			var quad1 = new List<PointF>();
+			var quad2 = new List<PointF>();
+			var quad3 = new List<PointF>();
+			var quad4 = new List<PointF>();
+
+			foreach (var point in framePoints)
+			{
+				//if x,y of new triCenter > x,y of working point, then in the 1st quardant
+				if (point.X > workingPoint.X && point.Y > workingPoint.Y)
+					quad1.Add(point);
+				else if (point.X < workingPoint.X && point.Y > workingPoint.Y)
+					quad2.Add(point);
+				else if (point.X > workingPoint.X && point.Y < workingPoint.Y)
+					quad4.Add(point);
+				else if (point.X < workingPoint.X && point.Y < workingPoint.Y)
+					quad3.Add(point);
+			}
+			switch (direction)
+			{
+				case 1:
+					return quad1;
+				case 2:
+					return quad2;
+				case 3:
+					return quad3;
+				case 4:
+					return quad4;
+				default:
+					return quad1;
+			}
+
+		}
 
         private List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint, List<DelaunayTriangulator.Vertex> points)
         {
@@ -321,6 +541,29 @@ namespace LowPolyLibrary
             }
             return shortest;
         }
+
+		private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> framePoints, int degree, int frameNum)
+		{
+			//this list consists of all the points in the same directional quardant as the working point.
+			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint, frameNum);//just changed to quad points
+
+			//shortest distance between a workingPoint and all points of a given list
+			double shortest = -1;
+			foreach (var point in quadPoints)
+			{
+				//get distances between a workingPoint and the point
+				var vertDistance = dist(workingPoint, point);
+
+				//if this is the first run (shortest == -1) then tempShortest is the vertDistance
+				if (shortest.CompareTo(-1) == 0) //if shortest == -1
+					shortest = vertDistance;
+				//if not the first run, only assign shortest if vertDistance is smaller
+				else
+					if (vertDistance < shortest && vertDistance.CompareTo(0) != 0)//if the vertDistance < current shortest distance and not equal to 0
+					shortest = vertDistance;
+			}
+			return shortest;
+		}
 
         private double shortestDistanceFromTris(PointF workingPoint, List<Triad> tris, int degree, List<DelaunayTriangulator.Vertex> points)
         {
@@ -565,5 +808,11 @@ namespace LowPolyLibrary
             var toRad = Math.PI/180;
             return angle*toRad;
         }
+
+		private double radiansToDegrees(double angle)
+		{
+			var toDeg = 180/Math.PI;
+			return angle*toDeg;
+		}
     }
 }

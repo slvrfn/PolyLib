@@ -36,6 +36,11 @@ namespace LowPolyLibrary
             return createSweepAnimBitmap(0, direction);
 		}
 
+		public void setPointsaroundTouch(PointF touch, int radius)
+		{
+			animator.setPointsAroundTouch(touch, radius);
+		}
+
         private void UpdateVars()
         {
             calcVariance = cell_size * setVariance / 2;
@@ -53,16 +58,36 @@ namespace LowPolyLibrary
             return frameBitmap;
         }
 
-		public AnimationDrawable makeAnimation(int numFrames)
+		public Bitmap createTouchAnimBitmap(int frame, PointF touch, int radius)
+		{
+			var frameList = animator.makeTouchPointsFrame(frame, touch, radius);
+			var frameBitmap = drawPointFrame(frameList);
+			return frameBitmap;
+		}
+
+		public AnimationDrawable makeAnimation(AnimationLib.Animations anim, int numFrames, float x, float y, int radius)
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
             var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
 		    var direction = animator.get360Direction();
-            for (int i = 0; i < numFrames; i++)
-            {
-                var frameBitmap =createSweepAnimBitmap(i, direction);
-                BitmapDrawable frame = new BitmapDrawable(frameBitmap);
+			for (int i = 0; i < numFrames; i++)
+			{
+				Bitmap frameBitmap = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+				switch (anim)
+				{
+					case AnimationLib.Animations.Sweep:
+						frameBitmap = createSweepAnimBitmap(i, direction);
+						break;
+					case AnimationLib.Animations.Touch:
+						var touch = new PointF(x, y);
+						frameBitmap = createTouchAnimBitmap(i, touch, radius);
+						break;
+					default:
+						frameBitmap = createSweepAnimBitmap(i, direction);
+						break;
+				}
+				BitmapDrawable frame = new BitmapDrawable(frameBitmap);
                 animation.AddFrame(frame,duration);
             }
             return animation;
@@ -150,6 +175,60 @@ namespace LowPolyLibrary
             }
             return drawingCanvas;
         }
+
+		private Bitmap drawPointFrame(AnimationLib.TouchPoints frameList)
+		{
+			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+			Canvas canvas = new Canvas(drawingCanvas);
+
+			Paint paint = new Paint();
+			paint.SetStyle(Paint.Style.FillAndStroke);
+			paint.AntiAlias = true;
+
+			//generating a new base triangulation. if an old one exists get rid of it
+			//if (poTriDic != null)
+			//    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
+
+			var convertedPoints = new List<DelaunayTriangulator.Vertex>();
+			//can we just stay in PointF's?
+
+			var measurePoints = new List<PointF>();
+			measurePoints.AddRange(frameList.inRange);
+			measurePoints.AddRange(frameList.inRangOfRecs);
+			measurePoints.AddRange(frameList.outOfRange);
+
+			foreach (var point in measurePoints)
+			{
+				var currentlyExists = convertedPoints.Exists(x =>
+						x.x.CompareTo(point.X) == 0 &&
+						x.y.CompareTo(point.Y) == 0
+					);
+				if (!currentlyExists)
+					convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
+			}
+			var angulator = new Triangulator();
+			var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
+			for (int i = 0; i < newTriangulatedPoints.Count; i++)
+			{
+				var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
+				var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
+				var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
+
+				Path trianglePath = drawTrianglePath(a, b, c);
+
+				var center = centroid(newTriangulatedPoints[i], convertedPoints);
+
+				//animation logic
+				//divyTris(a, overlays, i);
+				//divyTris(b, overlays, i);
+				//divyTris(c,overlays, i);
+
+				paint.Color = getTriangleColor(gradient, center);
+
+				canvas.DrawPath(trianglePath, paint);
+			}
+			return drawingCanvas;
+		}
 
         private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
 	    {

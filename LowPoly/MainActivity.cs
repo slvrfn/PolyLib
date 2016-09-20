@@ -50,8 +50,10 @@ namespace LowPoly
 
 			var metrics = Resources.DisplayMetrics;
 
-			widthTB.Text = metrics.WidthPixels.ToString();
-			heightTB.Text = metrics.HeightPixels.ToString();
+			//widthTB.Text = metrics.WidthPixels.ToString();
+			//heightTB.Text = metrics.HeightPixels.ToString();
+			widthTB.Text = "1080";
+			heightTB.Text = "1920";
 			varTB.Text = _lowPoly.setVariance.ToString ();
 			sizeTB.Text = _lowPoly.cell_size.ToString ();
 		}
@@ -80,38 +82,47 @@ namespace LowPoly
 			generatedAnimation = null;
 		}
 
-		public void stepAnimation(object sender, EventArgs e)
+		public void uuuu(LowPolyLibrary.AnimationLib.Animations anim, System.Drawing.PointF touch)
 		{
 			var temp = new Stopwatch();
 
-   //         temp.Start();
-		 //   var generatedBitmap = _lowPoly.createSweepAnimBitmap(frameNum++);
+			//         temp.Start();
+			//   var generatedBitmap = _lowPoly.createSweepAnimBitmap(frameNum++);
 			//temp.Stop();
 
-            temp.Start();
-		    if (generatedAnimation == null)
-		    {
-                generatedAnimation = _lowPoly.makeAnimation(12);
-                imagePanel.SetImageDrawable(generatedAnimation);
-            }
-		    else
-		    {
-		        generatedAnimation.Stop();
-		    }
-            temp.Stop();
-            //imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));
-            //imagePanel.Background = generatedAnimation;
-            generatedAnimation.Start();
+			temp.Start();
+			if (generatedAnimation == null)
+			{
+				generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
+				imagePanel.SetImageDrawable(generatedAnimation);
+			}
+			else
+			{
+				generatedAnimation.Stop();
+			}
+			temp.Stop();
+			//imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));
+			//imagePanel.Background = generatedAnimation;
+			generatedAnimation.Start();
 
-            timeElapsed.Text = temp.Elapsed.ToString();
+			timeElapsed.Text = temp.Elapsed.ToString();
+		}
+
+		public void stepAnimation(object sender, EventArgs e)
+		{
+			uuuu(LowPolyLibrary.AnimationLib.Animations.Sweep, new System.Drawing.PointF(0, 0));
 		}
 
 		public bool OnTouch(View v, MotionEvent e)
 		{
 			if (e.Action == MotionEventActions.Down)
 			{
-				var touchX = e.GetX();
-				var touchY = e.GetY();
+				var touch = new System.Drawing.PointF();
+				touch.X = e.GetX();
+				touch.Y = e.GetY();
+				_lowPoly.setPointsaroundTouch(touch, 200);
+				generatedAnimation = null;
+				uuuu(LowPolyLibrary.AnimationLib.Animations.Touch, touch);
 				return true;
 			}
 			if (e.Action == MotionEventActions.Up)
