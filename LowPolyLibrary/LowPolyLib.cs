@@ -58,9 +58,9 @@ namespace LowPolyLibrary
             return frameBitmap;
         }
 
-		public Bitmap createTouchAnimBitmap(int frame, PointF touch, int radius)
+		public Bitmap createTouchAnimBitmap(PointF touch, int radius)
 		{
-			var frameList = animator.makeTouchPointsFrame(frame, touch, radius);
+			var frameList = animator.makeTouchPointsFrame(touch, radius);
 			var frameBitmap = drawPointFrame(frameList);
 			return frameBitmap;
 		}
@@ -81,7 +81,7 @@ namespace LowPolyLibrary
 						break;
 					case AnimationLib.Animations.Touch:
 						var touch = new PointF(x, y);
-						frameBitmap = createTouchAnimBitmap(i, touch, radius);
+						frameBitmap = createTouchAnimBitmap(touch, radius);
 						break;
 					default:
 						frameBitmap = createSweepAnimBitmap(i, direction);
@@ -227,6 +227,9 @@ namespace LowPolyLibrary
 
 				canvas.DrawPath(trianglePath, paint);
 			}
+			paint.SetStyle(Paint.Style.Stroke);
+			paint.Color = Android.Graphics.Color.Crimson;
+			canvas.DrawCircle(frameList.touchLocation.X, frameList.touchLocation.Y, frameList.touchRadius, paint);
 			return drawingCanvas;
 		}
 

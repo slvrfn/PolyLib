@@ -18,14 +18,13 @@ namespace LowPolyLibrary
 
 		List<cRectangleF[]> viewRectangles;
 
-		PointF lastTouch;
-		int lastRadius;
-
 		internal struct TouchPoints
 		{
 			public List<PointF> inRange;
 			public List<PointF> inRangOfRecs;
 			public List<PointF> outOfRange;
+			public PointF touchLocation;
+			public int touchRadius;
 		}
 
 		TouchPoints touchPointLists;
@@ -109,16 +108,16 @@ namespace LowPolyLibrary
 			if (displacement == 0)
 			{
 				if (currentIndex != firstFrame &&
-					viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
-																		 lastRadius,
+					viewRectangles[0][currentIndex].circleContainsPoints(touchPointLists.touchLocation,
+																		 touchPointLists.touchRadius,
 																		 viewRectangles[0][currentIndex].A,
 																		 viewRectangles[0][currentIndex].D))
 				{
 					touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
 				}
 				if (currentIndex != lastFrame &&
-					viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
-																		 lastRadius,
+					viewRectangles[0][currentIndex].circleContainsPoints(touchPointLists.touchLocation,
+																		 touchPointLists.touchRadius,
 																		 viewRectangles[0][currentIndex].B,
 																		 viewRectangles[0][currentIndex].C))
 				{
@@ -132,8 +131,8 @@ namespace LowPolyLibrary
 				{
 					_lowerBound = currentIndex;
 					if (currentIndex != firstFrame &&
-						viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
-																			 lastRadius,
+						viewRectangles[0][currentIndex].circleContainsPoints(touchPointLists.touchLocation,
+																			 touchPointLists.touchRadius,
 																			 viewRectangles[0][currentIndex].A,
 																			 viewRectangles[0][currentIndex].D))
 					{
@@ -144,8 +143,8 @@ namespace LowPolyLibrary
 				{
 					_upperBound = currentIndex;
 					if (currentIndex != lastFrame &&
-							 viewRectangles[0][currentIndex].circleContainsPoints(lastTouch,
-																				  lastRadius,
+							 viewRectangles[0][currentIndex].circleContainsPoints(touchPointLists.touchLocation,
+																				  touchPointLists.touchRadius,
 																				  viewRectangles[0][currentIndex].B,
 																				  viewRectangles[0][currentIndex].C))
 					{
@@ -162,10 +161,10 @@ namespace LowPolyLibrary
 
 		internal void setPointsAroundTouch(PointF touch, int radius)
 		{
-			lastTouch = touch;
-			lastRadius = radius;
-			touchPointLists = new TouchPoints { inRange = new List<PointF>(), inRangOfRecs = new List<PointF>(), outOfRange = new List<PointF>()};
-
+			
+			touchPointLists = new TouchPoints { inRange = new List<PointF>(), inRangOfRecs = new List<PointF>(), outOfRange = new List<PointF>(), touchLocation = new PointF(), touchRadius = new int()};
+			touchPointLists.touchLocation = touch;
+			touchPointLists.touchRadius = radius;
 			//index of the smaller rectangle that contains the touch point
 			//var index = Array.FindIndex(viewRectangles[0], rec => rec.isInsideCircle(touch, radius));
 			var index = Array.FindIndex(viewRectangles[0], rec => rec.Contains(touch));
@@ -175,7 +174,7 @@ namespace LowPolyLibrary
 			//add the points from recs outside of the touch area to a place we can handle them later
 			for (int i = 0; i < framedPoints.Length; i++)
 			{
-				if (i > _upperBound && i < _lowerBound)
+				if (!(_lowerBound<i && i<_upperBound))
 					touchPointLists.outOfRange.AddRange(framedPoints[i]);
 				touchPointLists.outOfRange.AddRange(wideFramedPoints[i]);
 			}
@@ -241,23 +240,28 @@ namespace LowPolyLibrary
             return workingFrameList;
         }
 
-		internal TouchPoints makeTouchPointsFrame(int frame, PointF touch, int radius)
+		internal TouchPoints makeTouchPointsFrame(PointF touch, int radius)
 		{
 			var removePoints = new List<PointF>();
 			var newPoints = new List<PointF>();
 			var pointsForMeasure = new List<PointF>();
 			pointsForMeasure.AddRange(touchPointLists.inRange);
 			pointsForMeasure.AddRange(touchPointLists.inRangOfRecs);
+			var rand = new Random();
 			foreach (var point in touchPointLists.inRange)
 			{
 				var wPoint = new PointF(point.X, point.Y);
 				//created bc cant modify point
 				removePoints.Add(point);
-				var direction = (int)getPolarCoordinates(touch, wPoint);
+				//var direction = (int)getPolarCoordinates(touch, wPoint);
 
-				var distCanMove = shortestDistanceFromPoints(point, pointsForMeasure, direction, frame);
-				var xComponent = getXComponent(direction, distCanMove);
-				var yComponent = getYComponent(direction, distCanMove);
+				//var distCanMove = shortestDistanceFromPoints(point, pointsForMeasure, direction);
+				var distCanMove = 20;
+				//var xComponent = getXComponent(direction, distCanMove);
+				//var yComponent = getYComponent(direction, distCanMove);
+
+				var xComponent = rand.Next(-10, 10);
+				var yComponent = rand.Next(-10, 10);
 
 				wPoint.X += (float)xComponent;
 				wPoint.Y += (float)yComponent;
@@ -421,7 +425,7 @@ namespace LowPolyLibrary
 
         }
 
-		private List<PointF> quadListFromPoints(List<PointF> framePoints, int degree, PointF workingPoint, int frameNum)
+		private List<PointF> quadListFromPoints(List<PointF> framePoints, int degree, PointF workingPoint)
 		{
 			
 
@@ -542,10 +546,10 @@ namespace LowPolyLibrary
             return shortest;
         }
 
-		private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> framePoints, int degree, int frameNum)
+		private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> framePoints, int degree)
 		{
 			//this list consists of all the points in the same directional quardant as the working point.
-			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint, frameNum);//just changed to quad points
+			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint);//just changed to quad points
 
 			//shortest distance between a workingPoint and all points of a given list
 			double shortest = -1;
