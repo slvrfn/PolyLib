@@ -14,7 +14,7 @@ namespace LowPolyLibrary
         List<PointF>[] framedPoints = new List<PointF>[numFrames];
         List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
         Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
-        private List<Triad> triangulatedPoints;
+        public List<Triad> triangulatedPoints;
 
 		List<cRectangleF[]> viewRectangles;
 
@@ -31,7 +31,7 @@ namespace LowPolyLibrary
 
 		public enum Animations
 		{
-			Sweep,Touch
+			Sweep,Touch,Grow
 		}
 
 		internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
@@ -239,6 +239,75 @@ namespace LowPolyLibrary
 
             return workingFrameList;
         }
+
+		internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
+		{
+			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
+
+			var rand = new Random();
+			var index = rand.Next(framedPoints.Length);
+			var points = framedPoints[index];
+			var pointIndex = rand.Next(points.Count);
+
+			var point = points[pointIndex];
+			var convertedPoint = new DelaunayTriangulator.Vertex(point.X, point.Y);
+			var animateList = new List<DelaunayTriangulator.Vertex>();
+			var nextTime = new List<DelaunayTriangulator.Vertex>();
+
+			nextTime.Add(convertedPoint);
+			while (nextTime.Count > 0)
+			{
+				var tempEdges =new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+				DelaunayTriangulator.Vertex currentPoint = null;
+				animateList.AddRange(nextTime);
+				nextTime.Clear();
+				foreach (var p in animateList)
+				{
+					currentPoint = p;
+					var drawList = new List<Triad>();
+					try
+					{
+						drawList = poTriDic[new PointF(p.x, p.y)];
+					}
+					catch (Exception)
+					{
+
+					}
+
+
+					foreach (var tri in drawList)
+					{
+						//draw tri
+						var edge1 = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.a]);
+						var edge2 = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.b]);
+						var edge3 = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.c]);
+						//tempEdges.Add(edge1);
+						//tempEdges.Add(edge2);
+						//tempEdges.Add(edge3);
+						if (!animateList.Contains(generatedPoints[tri.a]))
+						{
+							nextTime.Add(generatedPoints[tri.a]);
+							tempEdges.Add(edge1);
+						}
+						if (!animateList.Contains(generatedPoints[tri.b]))
+						{
+							nextTime.Add(generatedPoints[tri.b]);
+							tempEdges.Add(edge2);
+						}
+						if (!animateList.Contains(generatedPoints[tri.c]))
+						{
+							nextTime.Add(generatedPoints[tri.c]);
+							tempEdges.Add(edge3);
+						}
+					}
+
+				}
+				if (onlyGrowth)
+					animateList.Remove(currentPoint);
+				outEdges.Add(tempEdges);
+			}
+			return outEdges;
+		}
 
 		internal TouchPoints makeTouchPointsFrame(PointF touch, int radius)
 		{
@@ -623,7 +692,7 @@ namespace LowPolyLibrary
             return Math.Sqrt(xSquare + ySquare);
         }
 
-        private void divyTris(System.Drawing.PointF point, RectangleF[] overlays, int arrayLoc)
+        internal void divyTris(System.Drawing.PointF point, int arrayLoc)
         {
             //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
             if (poTriDic.ContainsKey(point))
