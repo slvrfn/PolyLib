@@ -393,14 +393,29 @@ namespace LowPolyLibrary
             var thisCoord = ratioToFinalMovement * distanceToCcover;
             return thisCoord;
         }
-
-		private double getPolarCoordinates(PointF center, PointF point)
+		
+		/*private double getPolarCoordinates(PointF center, PointF point)
 		{
 			var y = Math.Abs(center.Y - point.Y);
 			var x = Math.Abs(center.X - point.X);
 			var radians = Math.Atan(y / x);
 			return radiansToDegrees(radians);
-		}
+		}*/
+		
+		//this may be more correct since graphics origin is in the TL corner instead of BL
+		private double GetPolarCoordinates(Point center, Point point)
+    	{
+			var x = point.X - center.X;
+			var y = center.Y - point.Y;
+			var radians = Math.Atan(y / x);
+
+			var degrees = radiansToDegrees(radians);
+
+			if (point.X < center.X)
+				degrees += 180;
+
+			return degrees;
+    	}
 
         private double getXComponent(int angle, double length)
         {
