@@ -405,6 +405,7 @@ namespace LowPolyLibrary
 		//this may be more correct since graphics origin is in the TL corner instead of BL
 		private double GetPolarCoordinates(Point center, Point point)
     	{
+		//http://stackoverflow.com/questions/2676719/calculating-the-angle-between-the-line-defined-by-two-points
 			var x = point.X - center.X;
 			var y = center.Y - point.Y;
 			var radians = Math.Atan(y / x);
@@ -413,6 +414,11 @@ namespace LowPolyLibrary
 
 			if (point.X < center.X)
 				degrees += 180;
+
+			if (degrees < 0)
+			{
+				degrees = 360 + degrees;
+			}
 
 			return degrees;
     	}
