@@ -15,7 +15,7 @@ namespace LowPoly
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
-		Button button, animButton;
+		Button button, animSButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
@@ -35,8 +35,9 @@ namespace LowPoly
 			// and attach an event to it
 			button = FindViewById<Button> (Resource.Id.button1);
 			button.Click += Generate;
-			animButton = FindViewById<Button>(Resource.Id.animButton);
-			animButton.Click += stepAnimation;
+			animSButton = FindViewById<Button>(Resource.Id.animSButton);
+			animSButton.Click += stepAnimation;
+
 
 			imagePanel = FindViewById<ImageView> (Resource.Id.imageView1);
 			imagePanel.SetOnTouchListener(this);
@@ -110,7 +111,7 @@ namespace LowPoly
 
 		public void stepAnimation(object sender, EventArgs e)
 		{
-			uuuu(LowPolyLibrary.AnimationLib.Animations.Sweep, new System.Drawing.PointF(0, 0));
+			uuuu(LowPolyLibrary.AnimationLib.Animations.Grow, new System.Drawing.PointF(0, 0));
 		}
 
 		public bool OnTouch(View v, MotionEvent e)

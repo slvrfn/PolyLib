@@ -5,14 +5,15 @@ using Double = System.Double;
 using Math = System.Math;
 using PointF = System.Drawing.PointF;
 using System;
+using System.Linq;
 
 namespace LowPolyLibrary
 {
     public class AnimationLib
     {
-        private static int numFrames = 12; //static necessary for creation of framedPoints list
-        List<PointF>[] framedPoints = new List<PointF>[numFrames];
-        List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
+        internal static int numFrames = 12; //static necessary for creation of framedPoints list
+        internal List<PointF>[] framedPoints = new List<PointF>[numFrames];
+        internal List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
         Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
         public List<Triad> triangulatedPoints;
 
@@ -245,16 +246,17 @@ namespace LowPolyLibrary
 			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
 
 			var rand = new Random();
-			var index = rand.Next(framedPoints.Length);
-			var points = framedPoints[index];
-			var pointIndex = rand.Next(points.Count);
-
-			var point = points[pointIndex];
-			var convertedPoint = new DelaunayTriangulator.Vertex(point.X, point.Y);
+            //var index = rand.Next(framedPoints.Length);
+            //var points = framedPoints[index];
+            //var pointIndex = rand.Next(points.Count);
+            //var point = points[pointIndex];
+            var index = rand.Next(generatedPoints.Count);
+            var point = generatedPoints[index];
+            //var convertedPoint = new DelaunayTriangulator.Vertex(point.x, point.y);
 			var animateList = new List<DelaunayTriangulator.Vertex>();
 			var nextTime = new List<DelaunayTriangulator.Vertex>();
 
-			nextTime.Add(convertedPoint);
+			nextTime.Add(point);
 			while (nextTime.Count > 0)
 			{
 				var tempEdges =new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
@@ -271,34 +273,75 @@ namespace LowPolyLibrary
 					}
 					catch (Exception)
 					{
-
+                        
 					}
-
-
 					foreach (var tri in drawList)
 					{
-						//draw tri
-						var edge1 = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.a]);
-						var edge2 = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.b]);
-						var edge3 = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.c]);
-						//tempEdges.Add(edge1);
-						//tempEdges.Add(edge2);
-						//tempEdges.Add(edge3);
-						if (!animateList.Contains(generatedPoints[tri.a]))
-						{
-							nextTime.Add(generatedPoints[tri.a]);
-							tempEdges.Add(edge1);
-						}
-						if (!animateList.Contains(generatedPoints[tri.b]))
-						{
-							nextTime.Add(generatedPoints[tri.b]);
-							tempEdges.Add(edge2);
-						}
-						if (!animateList.Contains(generatedPoints[tri.c]))
-						{
-							nextTime.Add(generatedPoints[tri.c]);
-							tempEdges.Add(edge3);
-						}
+                        //draw tri
+                        Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex> edgeA = null;
+                        Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex> edgeB = null;
+                        Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex> edgeC = null;
+                        if (p.Equals(generatedPoints[tri.a]))
+					    {
+                            edgeB = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.b]);
+                            edgeC = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.c]);
+
+                            
+                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeB.Item1) && x.Item2.Equals(edgeB.Item2)) || (x.Item1.Equals(edgeB.Item2) && x.Item2.Equals(edgeB.Item1))))
+                                tempEdges.Add(edgeB);
+                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeC.Item1) && x.Item2.Equals(edgeC.Item2)) || (x.Item1.Equals(edgeC.Item2) && x.Item2.Equals(edgeC.Item1))))
+                                tempEdges.Add(edgeC);
+                        }
+                        else if (p.Equals(generatedPoints[tri.b]))
+                        {
+                            edgeA = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.a]);
+                            edgeC = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.c]);
+
+                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeA.Item1) && x.Item2.Equals(edgeA.Item2)) || (x.Item1.Equals(edgeA.Item2) && x.Item2.Equals(edgeA.Item1))))
+                                tempEdges.Add(edgeA);
+                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeC.Item1) && x.Item2.Equals(edgeC.Item2)) || (x.Item1.Equals(edgeC.Item2) && x.Item2.Equals(edgeC.Item1))))
+                                tempEdges.Add(edgeC);
+                        }
+                        else if (p.Equals(generatedPoints[tri.c]))
+                        {
+                            edgeA = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.a]);
+                            edgeB = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.b]);
+
+                            //if the edge(p1,p2 or edge(p2,p1) does not already exist, add it to the list
+                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeA.Item1) && x.Item2.Equals(edgeA.Item2)) || (x.Item1.Equals(edgeA.Item2) && x.Item2.Equals(edgeA.Item1))))
+                                tempEdges.Add(edgeA);
+                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeB.Item1) && x.Item2.Equals(edgeB.Item2))|| (x.Item1.Equals(edgeB.Item2) && x.Item2.Equals(edgeB.Item1))))
+                                tempEdges.Add(edgeB);
+                        }
+
+					    if (!animateList.Exists(x => x.Equals(generatedPoints[tri.a])))
+					    {
+					        nextTime.Add(generatedPoints[tri.a]);
+							//tempEdges.Add(edgeA);
+					    }
+                        if (!animateList.Exists(x => x.Equals(generatedPoints[tri.b])))
+                        {
+                            nextTime.Add(generatedPoints[tri.b]);
+							//tempEdges.Add(edgeB);
+                        }
+                        if (!animateList.Exists(x => x.Equals(generatedPoints[tri.c])))
+                        {
+                            nextTime.Add(generatedPoints[tri.c]);
+                            //tempEdges.Add(edgeC);
+                        }
+
+      //                  if (!animateList.Contains(generatedPoints[tri.a]))
+						//{
+							
+						//}
+						//if (!animateList.Contains(generatedPoints[tri.b]))
+						//{
+							
+						//}
+						//if (!animateList.Contains(generatedPoints[tri.c]))
+						//{
+							
+						//}
 					}
 
 				}
@@ -517,8 +560,6 @@ namespace LowPolyLibrary
 
 		private List<PointF> quadListFromPoints(List<PointF> framePoints, int degree, PointF workingPoint)
 		{
-			
-
 			var direction = 0;
 
 			if (degree > 270)
@@ -723,6 +764,21 @@ namespace LowPolyLibrary
             {
                 poTriDic[point] = new List<Triad>();
                 poTriDic[point].Add(triangulatedPoints[arrayLoc]);
+            }
+        }
+
+        internal void divyTris(List<DelaunayTriangulator.Vertex> points)
+        {
+            for (int i = 0; i < triangulatedPoints.Count; i++)
+            {
+                var a = new PointF(points[triangulatedPoints[i].a].x, points[triangulatedPoints[i].a].y);
+                var b = new PointF(points[triangulatedPoints[i].b].x, points[triangulatedPoints[i].b].y);
+                var c = new PointF(points[triangulatedPoints[i].c].x, points[triangulatedPoints[i].c].y);
+
+                //animation logic
+                divyTris(a, i);
+                divyTris(b, i);
+                divyTris(c, i);
             }
         }
 

@@ -37,6 +37,18 @@ namespace DelaunayTriangulator
         {
             return string.Format("({0},{1})", x, y);
         }
+
+        public override bool Equals(object obj)
+        {
+            var item = obj as Vertex;
+
+            if (item == null)
+            {
+                return false;
+            }
+
+            return x.Equals(item.x) && y.Equals(item.y);
+        }
     }
 
 }

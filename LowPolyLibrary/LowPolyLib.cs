@@ -35,7 +35,20 @@ namespace LowPolyLibrary
 			_points = GeneratePoints();
             var direction = animator.get360Direction();
             animator.seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight, direction);
-            return createSweepAnimBitmap(0, direction);
+		    var angulator = new Triangulator();
+		    animator.triangulatedPoints = angulator.Triangulation(_points);
+            animator.divyTris(_points);
+            //return createSweepAnimBitmap(0, direction);
+
+            var tmp = new List<PointF>[AnimationLib.numFrames];
+		    for (int i = 0; i < AnimationLib.numFrames; i++)
+		    {
+                tmp[i] = new List<PointF>();
+		        tmp[i].AddRange(animator.framedPoints[i]);
+                tmp[i].AddRange(animator.wideFramedPoints[i]);
+		    }
+
+		    return drawPointFrame(tmp);
 		}
 
 		public void setPointsaroundTouch(PointF touch, int radius)
@@ -71,8 +84,8 @@ namespace LowPolyLibrary
 		{
 			
 			var frameList = animator.makeGrowFrame(_points, false);
-			var frameBitmap = drawPointFrame(frameList);
-			return frameBitmap;
+			var frameBitmaps = drawPointFrame(frameList);
+			return frameBitmaps;
 		}
 
 		public AnimationDrawable makeAnimation(AnimationLib.Animations anim, int numFrames, float x, float y, int radius)
@@ -179,21 +192,16 @@ namespace LowPolyLibrary
                 }
             }
             var angulator = new Triangulator();
-			animator.triangulatedPoints = angulator.Triangulation(convertedPoints);
-            for (int i = 0; i < animator.triangulatedPoints.Count; i++)
+			var triangulatedPoints = angulator.Triangulation(convertedPoints);
+            for (int i = 0; i < triangulatedPoints.Count; i++)
             {
-                var a = new PointF(convertedPoints[animator.triangulatedPoints[i].a].x, convertedPoints[animator.triangulatedPoints[i].a].y);
-                var b = new PointF(convertedPoints[animator.triangulatedPoints[i].b].x, convertedPoints[animator.triangulatedPoints[i].b].y);
-                var c = new PointF(convertedPoints[animator.triangulatedPoints[i].c].x, convertedPoints[animator.triangulatedPoints[i].c].y);
+                var a = new PointF(convertedPoints[triangulatedPoints[i].a].x, convertedPoints[triangulatedPoints[i].a].y);
+                var b = new PointF(convertedPoints[triangulatedPoints[i].b].x, convertedPoints[triangulatedPoints[i].b].y);
+                var c = new PointF(convertedPoints[triangulatedPoints[i].c].x, convertedPoints[triangulatedPoints[i].c].y);
 
                 Path trianglePath = drawTrianglePath(a, b, c);
                 
-                var center = centroid(animator.triangulatedPoints[i], convertedPoints);
-
-                //animation logic
-                animator.divyTris(a, i);
-                animator.divyTris(b, i);
-                animator.divyTris(c, i);
+                var center = centroid(triangulatedPoints[i], convertedPoints);
 
                 paint.Color = getTriangleColor(gradient, center);
 
