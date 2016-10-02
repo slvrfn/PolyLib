@@ -6,6 +6,7 @@ using Math = System.Math;
 using PointF = System.Drawing.PointF;
 using System;
 using System.Linq;
+using DelaunayTriangulator;
 
 namespace LowPolyLibrary
 {
@@ -244,6 +245,103 @@ namespace LowPolyLibrary
 		internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
 		{
 			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
+		    for (int i = 0; i < 60; i++)
+		    {
+		        outEdges.Add(new List<Tuple<Vertex, Vertex>>());
+		    }
+            //for tracking which points have been used
+		    bool[] pointUsed = new bool[generatedPoints.Count];
+		    for (int i = 0; i < pointUsed.Length; i++)
+		    {
+		        pointUsed[i] = false;
+		    }
+
+			var rand = new Random();
+            var index = rand.Next(generatedPoints.Count);
+            var point = generatedPoints[index];
+		    pointUsed[index] = true;
+
+			var animateList = new List<DelaunayTriangulator.Vertex>();
+			var nextTime = new List<DelaunayTriangulator.Vertex>();
+
+			nextTime.Add(point);
+			while (nextTime.Count > 0)
+			{
+				var tempEdges =new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+				DelaunayTriangulator.Vertex currentPoint = null;
+                animateList.Clear();
+				animateList.AddRange(nextTime);
+				nextTime.Clear();
+			    for (int i = 0; i < animateList.Count; i++)
+				{
+                    currentPoint = animateList[i];
+                    var drawList = new List<Triad>();
+                    try
+                    {
+                        drawList = poTriDic[new PointF(animateList[i].x, animateList[i].y)];
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    foreach (var tri in drawList)
+                    {
+                        //if the point is not used
+                        if (!pointUsed[tri.a])
+                        {
+                            //the point is now used
+                            pointUsed[tri.a] = true;
+                            //work on the point next iteration
+                            nextTime.Add(generatedPoints[tri.a]);
+                            //if p is not equal to the tri vertex
+                            if (!animateList[i].Equals(generatedPoints[tri.a]))
+                            {
+                                //create an edge
+                                var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.a]);
+                                //save the edge
+                                tempEdges.Add(edge);
+                            }
+                        }
+                        if (!pointUsed[tri.b])
+                        {
+                            pointUsed[tri.b] = true;
+                            nextTime.Add(generatedPoints[tri.b]);
+                            if (!animateList[i].Equals(generatedPoints[tri.b]))
+                            {
+                                var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.b]);
+                                tempEdges.Add(edge);
+                            }
+                        }
+                        if (!pointUsed[tri.c])
+                        {
+                            pointUsed[tri.c] = true;
+                            nextTime.Add(generatedPoints[tri.c]);
+                            if (!animateList[i].Equals(generatedPoints[tri.c]))
+                            {
+                                var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.c]);
+                                tempEdges.Add(edge);
+                            }
+                        }
+
+                    }
+                    //add the edges from this iteration to the animation frame's edge list
+				    outEdges[i].AddRange(tempEdges);
+                    //if not the first frame, add the edges from the frame before so that we are not only displaying the growth
+                    if(i>0)
+                        outEdges[i].AddRange(outEdges[i-1]);
+				}
+				if (onlyGrowth)
+					animateList.Remove(currentPoint);
+			}
+			return outEdges;
+		}
+
+        /*
+         * Old Grow frame or reference (not working)
+         * 
+         internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
+		{
+			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
 
 			var rand = new Random();
             //var index = rand.Next(framedPoints.Length);
@@ -329,19 +427,6 @@ namespace LowPolyLibrary
                             nextTime.Add(generatedPoints[tri.c]);
                             //tempEdges.Add(edgeC);
                         }
-
-      //                  if (!animateList.Contains(generatedPoints[tri.a]))
-						//{
-							
-						//}
-						//if (!animateList.Contains(generatedPoints[tri.b]))
-						//{
-							
-						//}
-						//if (!animateList.Contains(generatedPoints[tri.c]))
-						//{
-							
-						//}
 					}
 
 				}
@@ -351,8 +436,9 @@ namespace LowPolyLibrary
 			}
 			return outEdges;
 		}
+             */
 
-		internal TouchPoints makeTouchPointsFrame(PointF touch, int radius)
+        internal TouchPoints makeTouchPointsFrame(PointF touch, int radius)
 		{
 			var removePoints = new List<PointF>();
 			var newPoints = new List<PointF>();
