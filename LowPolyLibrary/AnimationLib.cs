@@ -245,7 +245,7 @@ namespace LowPolyLibrary
 		internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
 		{
 			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
-		    for (int i = 0; i < 60; i++)
+		    for (int i = 0; i < 6; i++)
 		    {
 		        outEdges.Add(new List<Tuple<Vertex, Vertex>>());
 		    }
@@ -325,10 +325,11 @@ namespace LowPolyLibrary
 
                     }
                     //add the edges from this iteration to the animation frame's edge list
-				    outEdges[i].AddRange(tempEdges);
+					if(i<6)
+				    	outEdges[i].AddRange(tempEdges);
                     //if not the first frame, add the edges from the frame before so that we are not only displaying the growth
-                    if(i>0)
-                        outEdges[i].AddRange(outEdges[i-1]);
+                    //if(i>0)
+                    //    outEdges[i].AddRange(outEdges[i-1]);
 				}
 				if (onlyGrowth)
 					animateList.Remove(currentPoint);

@@ -94,41 +94,57 @@ namespace LowPolyLibrary
             animation.OneShot = true;
             var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
 		    var direction = animator.get360Direction();
-			for (int i = 0; i < numFrames; i++)
-			{
-				Bitmap frameBitmap = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-				List<Bitmap> frameBitmaps = null;
-				switch (anim)
-				{
-					case AnimationLib.Animations.Sweep:
-						frameBitmap = createSweepAnimBitmap(i, direction);
-						break;
-					case AnimationLib.Animations.Touch:
-						var touch = new PointF(x, y);
-						frameBitmap = createTouchAnimBitmap(touch, radius);
-						break;
-					case AnimationLib.Animations.Grow:
-						frameBitmaps = createGrowAnimBitmap();
-						break;
-					default:
-						frameBitmap = createSweepAnimBitmap(i, direction);
-						break;
-				}
 
-				if (anim == AnimationLib.Animations.Grow)
+			if (anim == AnimationLib.Animations.Grow)
+			{
+				List<Bitmap> frameBitmaps = null;
+				frameBitmaps = createGrowAnimBitmap();
+				foreach (var frame in frameBitmaps)
 				{
-					foreach (var frame in frameBitmaps)
-					{
-						BitmapDrawable conv = new BitmapDrawable(frame);
-						animation.AddFrame(conv, duration);
-					}
+					BitmapDrawable conv = new BitmapDrawable(frame);
+					animation.AddFrame(conv, duration);
 				}
-				else
+			}
+			else
+			{
+				for (int i = 0; i < numFrames; i++)
 				{
+					Bitmap frameBitmap = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+					//List<Bitmap> frameBitmaps = null;
+					switch (anim)
+					{
+						case AnimationLib.Animations.Sweep:
+							frameBitmap = createSweepAnimBitmap(i, direction);
+							break;
+						case AnimationLib.Animations.Touch:
+							var touch = new PointF(x, y);
+							frameBitmap = createTouchAnimBitmap(touch, radius);
+							break;
+						//case AnimationLib.Animations.Grow:
+						//	frameBitmaps = createGrowAnimBitmap();
+						//	break;
+						default:
+							frameBitmap = createSweepAnimBitmap(i, direction);
+							break;
+					}
+
+					//if (anim == AnimationLib.Animations.Grow)
+					//{
+					//	foreach (var frame in frameBitmaps)
+					//	{
+					//		BitmapDrawable conv = new BitmapDrawable(frame);
+					//		animation.AddFrame(conv, duration);
+					//	}
+					//}
+					//else
+					//{
 					BitmapDrawable frame = new BitmapDrawable(frameBitmap);
 					animation.AddFrame(frame, duration);
+					//}
 				}
-            }
+			}
+
+
             return animation;
         }
 
@@ -217,19 +233,30 @@ namespace LowPolyLibrary
 			Paint paint = new Paint();
 			paint.SetStyle(Paint.Style.FillAndStroke);
 			paint.AntiAlias = true;
-			paint.Color = Android.Graphics.Color.Black;
+			paint.Color = Android.Graphics.Color.Crimson;
+			paint.StrokeWidth = 5f;
+
 
 			foreach (var frame in edgeFrameList)
 			{
-				Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+				Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
 				Canvas canvas = new Canvas(drawingCanvas);
-				foreach (var point in frame)
+
+				for (int i = 0; i < frame.Count; i++)
 				{
-					var point1 = new PointF(point.Item1.x, point.Item1.y);
-					var point2 = new PointF(point.Item2.x, point.Item2.y);
+					var point1 = new PointF(frame[i].Item1.x, frame[i].Item1.y);
+					var point2 = new PointF(frame[i].Item2.x, frame[i].Item2.y);
 					Path path = drawPath(point1, point2);
 					canvas.DrawPath(path, paint);
 				}
+
+				//foreach (var point in frame)
+				//{
+				//	var point1 = new PointF(point.Item1.x, point.Item1.y);
+				//	var point2 = new PointF(point.Item2.x, point.Item2.y);
+				//	Path path = drawPath(point1, point2);
+				//	canvas.DrawPath(path, paint);
+				//}
 				outBitmaps.Add(drawingCanvas);
 			}
 
@@ -238,7 +265,7 @@ namespace LowPolyLibrary
 
 		private Bitmap drawPointFrame(AnimationLib.TouchPoints frameList)
 		{
-			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb8888);
 			Canvas canvas = new Canvas(drawingCanvas);
 
 			Paint paint = new Paint();
