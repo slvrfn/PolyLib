@@ -245,7 +245,7 @@ namespace LowPolyLibrary
 		internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
 		{
 			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
-		    for (int i = 0; i < 6; i++)
+		    for (int i = 0; i < 30; i++)
 		    {
 		        outEdges.Add(new List<Tuple<Vertex, Vertex>>());
 		    }
@@ -291,11 +291,12 @@ namespace LowPolyLibrary
                         {
                             //the point is now used
                             pointUsed[tri.a] = true;
-                            //work on the point next iteration
-                            nextTime.Add(generatedPoints[tri.a]);
+                            
                             //if p is not equal to the tri vertex
                             if (!animateList[i].Equals(generatedPoints[tri.a]))
                             {
+								//work on the point next iteration
+								nextTime.Add(generatedPoints[tri.a]);
                                 //create an edge
                                 var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.a]);
                                 //save the edge
@@ -305,9 +306,10 @@ namespace LowPolyLibrary
                         if (!pointUsed[tri.b])
                         {
                             pointUsed[tri.b] = true;
-                            nextTime.Add(generatedPoints[tri.b]);
+                            
                             if (!animateList[i].Equals(generatedPoints[tri.b]))
                             {
+								nextTime.Add(generatedPoints[tri.b]);
                                 var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.b]);
                                 tempEdges.Add(edge);
                             }
@@ -315,9 +317,10 @@ namespace LowPolyLibrary
                         if (!pointUsed[tri.c])
                         {
                             pointUsed[tri.c] = true;
-                            nextTime.Add(generatedPoints[tri.c]);
+                            
                             if (!animateList[i].Equals(generatedPoints[tri.c]))
                             {
+								nextTime.Add(generatedPoints[tri.c]);
                                 var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.c]);
                                 tempEdges.Add(edge);
                             }
@@ -325,7 +328,7 @@ namespace LowPolyLibrary
 
                     }
                     //add the edges from this iteration to the animation frame's edge list
-					if(i<6)
+					if(i<30)
 				    	outEdges[i].AddRange(tempEdges);
                     //if not the first frame, add the edges from the frame before so that we are not only displaying the growth
                     //if(i>0)
