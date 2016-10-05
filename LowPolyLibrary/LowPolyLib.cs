@@ -83,7 +83,7 @@ namespace LowPolyLibrary
 		public List<Bitmap> createGrowAnimBitmap()
 		{
 			
-			var frameList = animator.makeGrowFrame(_points, false);
+			var frameList = animator.makeGrowFrame(_points);
 			var frameBitmaps = drawPointFrame(frameList);
 			return frameBitmaps;
 		}
@@ -237,15 +237,16 @@ namespace LowPolyLibrary
 			paint.StrokeWidth = 5f;
 
 
-			foreach (var frame in edgeFrameList)
+			//foreach (var frame in edgeFrameList)
+			for (int j = 0; j < edgeFrameList.Count; j++)
 			{
 				Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
 				Canvas canvas = new Canvas(drawingCanvas);
 
-				for (int i = 0; i < frame.Count; i++)
+				for (int i = 0; i < edgeFrameList[j].Count; i++)
 				{
-					var point1 = new PointF(frame[i].Item1.x, frame[i].Item1.y);
-					var point2 = new PointF(frame[i].Item2.x, frame[i].Item2.y);
+					var point1 = new PointF(edgeFrameList[j][i].Item1.x, edgeFrameList[j][i].Item1.y);
+					var point2 = new PointF(edgeFrameList[j][i].Item2.x, edgeFrameList[j][i].Item2.y);
 					Path path = drawPath(point1, point2);
 					canvas.DrawPath(path, paint);
 				}

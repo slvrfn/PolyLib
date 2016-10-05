@@ -242,205 +242,211 @@ namespace LowPolyLibrary
             return workingFrameList;
         }
 
-		internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
+		//internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
+		//{
+		//	var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
+		//    for (int i = 0; i < 30; i++)
+		//    {
+		//        outEdges.Add(new List<Tuple<Vertex, Vertex>>());
+		//    }
+  //          //for tracking which points have been used
+		//    bool[] pointUsed = new bool[generatedPoints.Count];
+		//    for (int i = 0; i < pointUsed.Length; i++)
+		//    {
+		//        pointUsed[i] = false;
+		//    }
+
+		//	var rand = new Random();
+  //          var index = rand.Next(generatedPoints.Count);
+  //          var point = generatedPoints[index];
+		//    pointUsed[index] = true;
+
+		//	var animateList = new List<DelaunayTriangulator.Vertex>();
+		//	var nextTime = new List<DelaunayTriangulator.Vertex>();
+
+		//	nextTime.Add(point);
+		//	while (nextTime.Count > 0)
+		//	{
+		//		var tempEdges =new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+		//		DelaunayTriangulator.Vertex currentPoint = null;
+  //              animateList.Clear();
+		//		animateList.AddRange(nextTime);
+		//		nextTime.Clear();
+		//	    for (int i = 0; i < animateList.Count; i++)
+		//		{
+  //                  currentPoint = animateList[i];
+  //                  var drawList = new List<Triad>();
+  //                  try
+  //                  {
+  //                      drawList = poTriDic[new PointF(animateList[i].x, animateList[i].y)];
+  //                  }
+  //                  catch (Exception)
+  //                  {
+
+  //                  }
+  //                  foreach (var tri in drawList)
+  //                  {
+  //                      //if the point is not used
+  //                      if (!pointUsed[tri.a])
+  //                      {
+  //                          //the point is now used
+  //                          pointUsed[tri.a] = true;
+                            
+  //                          //if p is not equal to the tri vertex
+  //                          if (!animateList[i].Equals(generatedPoints[tri.a]))
+  //                          {
+		//						//work on the point next iteration
+		//						nextTime.Add(generatedPoints[tri.a]);
+  //                              //create an edge
+  //                              var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.a]);
+  //                              //save the edge
+  //                              tempEdges.Add(edge);
+  //                          }
+  //                      }
+  //                      if (!pointUsed[tri.b])
+  //                      {
+  //                          pointUsed[tri.b] = true;
+                            
+  //                          if (!animateList[i].Equals(generatedPoints[tri.b]))
+  //                          {
+		//						nextTime.Add(generatedPoints[tri.b]);
+  //                              var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.b]);
+  //                              tempEdges.Add(edge);
+  //                          }
+  //                      }
+  //                      if (!pointUsed[tri.c])
+  //                      {
+  //                          pointUsed[tri.c] = true;
+                            
+  //                          if (!animateList[i].Equals(generatedPoints[tri.c]))
+  //                          {
+		//						nextTime.Add(generatedPoints[tri.c]);
+  //                              var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.c]);
+  //                              tempEdges.Add(edge);
+  //                          }
+  //                      }
+
+  //                  }
+  //                  //add the edges from this iteration to the animation frame's edge list
+		//			if(i<30)
+		//		    	outEdges[i].AddRange(tempEdges);
+  //                  //if not the first frame, add the edges from the frame before so that we are not only displaying the growth
+  //                  //if(i>0)
+  //                  //    outEdges[i].AddRange(outEdges[i-1]);
+		//		}
+		//		if (onlyGrowth)
+		//			animateList.Remove(currentPoint);
+		//	}
+		//	return outEdges;
+		//}
+
+        internal List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints)
 		{
 			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
-		    for (int i = 0; i < 30; i++)
-		    {
-		        outEdges.Add(new List<Tuple<Vertex, Vertex>>());
-		    }
-            //for tracking which points have been used
-		    bool[] pointUsed = new bool[generatedPoints.Count];
-		    for (int i = 0; i < pointUsed.Length; i++)
-		    {
-		        pointUsed[i] = false;
-		    }
-
-			var rand = new Random();
-            var index = rand.Next(generatedPoints.Count);
-            var point = generatedPoints[index];
-		    pointUsed[index] = true;
-
-			var animateList = new List<DelaunayTriangulator.Vertex>();
-			var nextTime = new List<DelaunayTriangulator.Vertex>();
-
-			nextTime.Add(point);
-			while (nextTime.Count > 0)
+			var edgeHolder = new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+			//for (int i = 0; i < 30; i++)
+			//{
+			//	outEdges.Add(new List<Tuple<Vertex, Vertex>>());
+			//}
+			//for tracking which points have been used
+			bool[] pointUsed = new bool[generatedPoints.Count];
+			for (int i = 0; i < pointUsed.Length; i++)
 			{
-				var tempEdges =new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
-				DelaunayTriangulator.Vertex currentPoint = null;
-                animateList.Clear();
-				animateList.AddRange(nextTime);
-				nextTime.Clear();
-			    for (int i = 0; i < animateList.Count; i++)
-				{
-                    currentPoint = animateList[i];
-                    var drawList = new List<Triad>();
-                    try
-                    {
-                        drawList = poTriDic[new PointF(animateList[i].x, animateList[i].y)];
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                    foreach (var tri in drawList)
-                    {
-                        //if the point is not used
-                        if (!pointUsed[tri.a])
-                        {
-                            //the point is now used
-                            pointUsed[tri.a] = true;
-                            
-                            //if p is not equal to the tri vertex
-                            if (!animateList[i].Equals(generatedPoints[tri.a]))
-                            {
-								//work on the point next iteration
-								nextTime.Add(generatedPoints[tri.a]);
-                                //create an edge
-                                var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.a]);
-                                //save the edge
-                                tempEdges.Add(edge);
-                            }
-                        }
-                        if (!pointUsed[tri.b])
-                        {
-                            pointUsed[tri.b] = true;
-                            
-                            if (!animateList[i].Equals(generatedPoints[tri.b]))
-                            {
-								nextTime.Add(generatedPoints[tri.b]);
-                                var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.b]);
-                                tempEdges.Add(edge);
-                            }
-                        }
-                        if (!pointUsed[tri.c])
-                        {
-                            pointUsed[tri.c] = true;
-                            
-                            if (!animateList[i].Equals(generatedPoints[tri.c]))
-                            {
-								nextTime.Add(generatedPoints[tri.c]);
-                                var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(animateList[i], generatedPoints[tri.c]);
-                                tempEdges.Add(edge);
-                            }
-                        }
-
-                    }
-                    //add the edges from this iteration to the animation frame's edge list
-					if(i<30)
-				    	outEdges[i].AddRange(tempEdges);
-                    //if not the first frame, add the edges from the frame before so that we are not only displaying the growth
-                    //if(i>0)
-                    //    outEdges[i].AddRange(outEdges[i-1]);
-				}
-				if (onlyGrowth)
-					animateList.Remove(currentPoint);
+				pointUsed[i] = false;
 			}
-			return outEdges;
-		}
-
-        /*
-         * Old Grow frame or reference (not working)
-         * 
-         internal List<List<Tuple<DelaunayTriangulator.Vertex,DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints, bool onlyGrowth)
-		{
-			var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
 
 			var rand = new Random();
-            //var index = rand.Next(framedPoints.Length);
-            //var points = framedPoints[index];
-            //var pointIndex = rand.Next(points.Count);
-            //var point = points[pointIndex];
-            var index = rand.Next(generatedPoints.Count);
-            var point = generatedPoints[index];
-            //var convertedPoint = new DelaunayTriangulator.Vertex(point.x, point.y);
-			var animateList = new List<DelaunayTriangulator.Vertex>();
-			var nextTime = new List<DelaunayTriangulator.Vertex>();
+			var index = rand.Next(generatedPoints.Count);
+			var point = generatedPoints[index];
+			pointUsed[index] = true;
 
-			nextTime.Add(point);
-			while (nextTime.Count > 0)
+			var animateList = new Queue<DelaunayTriangulator.Vertex>();
+
+			animateList.Enqueue(point);
+			var odd = 0;
+			var firstTime = true;
+			while (animateList.Count > 0)
 			{
-				var tempEdges =new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
-				DelaunayTriangulator.Vertex currentPoint = null;
-				animateList.AddRange(nextTime);
-				nextTime.Clear();
-				foreach (var p in animateList)
+				var tempEdges = new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+
+				var currentPoint = animateList.Dequeue();
+				var drawList = new List<Triad>();
+				try
 				{
-					currentPoint = p;
-					var drawList = new List<Triad>();
-					try
+					drawList = poTriDic[new PointF(currentPoint.x, currentPoint.y)];
+				}
+				catch (Exception)
+				{
+
+				}
+				foreach (var tri in drawList)
+				{
+					//if the point is not used
+					if (!pointUsed[tri.a])
 					{
-						drawList = poTriDic[new PointF(p.x, p.y)];
+						//the point is now used
+						pointUsed[tri.a] = true;
+
+						//if p is not equal to the tri vertex
+						if (!currentPoint.Equals(generatedPoints[tri.a]))
+						{
+							//work on the point next iteration
+							animateList.Enqueue(generatedPoints[tri.a]);
+							//create an edge
+							var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(currentPoint, generatedPoints[tri.a]);
+							//save the edge
+							tempEdges.Add(edge);
+						}
 					}
-					catch (Exception)
+					if (!pointUsed[tri.b])
 					{
-                        
+						pointUsed[tri.b] = true;
+
+						if (!currentPoint.Equals(generatedPoints[tri.b]))
+						{
+							animateList.Enqueue(generatedPoints[tri.b]);
+							var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(currentPoint, generatedPoints[tri.b]);
+							tempEdges.Add(edge);
+						}
 					}
-					foreach (var tri in drawList)
+					if (!pointUsed[tri.c])
 					{
-                        //draw tri
-                        Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex> edgeA = null;
-                        Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex> edgeB = null;
-                        Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex> edgeC = null;
-                        if (p.Equals(generatedPoints[tri.a]))
-					    {
-                            edgeB = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.b]);
-                            edgeC = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.c]);
+						pointUsed[tri.c] = true;
 
-                            
-                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeB.Item1) && x.Item2.Equals(edgeB.Item2)) || (x.Item1.Equals(edgeB.Item2) && x.Item2.Equals(edgeB.Item1))))
-                                tempEdges.Add(edgeB);
-                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeC.Item1) && x.Item2.Equals(edgeC.Item2)) || (x.Item1.Equals(edgeC.Item2) && x.Item2.Equals(edgeC.Item1))))
-                                tempEdges.Add(edgeC);
-                        }
-                        else if (p.Equals(generatedPoints[tri.b]))
-                        {
-                            edgeA = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.a]);
-                            edgeC = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.c]);
-
-                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeA.Item1) && x.Item2.Equals(edgeA.Item2)) || (x.Item1.Equals(edgeA.Item2) && x.Item2.Equals(edgeA.Item1))))
-                                tempEdges.Add(edgeA);
-                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeC.Item1) && x.Item2.Equals(edgeC.Item2)) || (x.Item1.Equals(edgeC.Item2) && x.Item2.Equals(edgeC.Item1))))
-                                tempEdges.Add(edgeC);
-                        }
-                        else if (p.Equals(generatedPoints[tri.c]))
-                        {
-                            edgeA = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.a]);
-                            edgeB = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(p, generatedPoints[tri.b]);
-
-                            //if the edge(p1,p2 or edge(p2,p1) does not already exist, add it to the list
-                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeA.Item1) && x.Item2.Equals(edgeA.Item2)) || (x.Item1.Equals(edgeA.Item2) && x.Item2.Equals(edgeA.Item1))))
-                                tempEdges.Add(edgeA);
-                            if (!tempEdges.Exists(x => (x.Item1.Equals(edgeB.Item1) && x.Item2.Equals(edgeB.Item2))|| (x.Item1.Equals(edgeB.Item2) && x.Item2.Equals(edgeB.Item1))))
-                                tempEdges.Add(edgeB);
-                        }
-
-					    if (!animateList.Exists(x => x.Equals(generatedPoints[tri.a])))
-					    {
-					        nextTime.Add(generatedPoints[tri.a]);
-							//tempEdges.Add(edgeA);
-					    }
-                        if (!animateList.Exists(x => x.Equals(generatedPoints[tri.b])))
-                        {
-                            nextTime.Add(generatedPoints[tri.b]);
-							//tempEdges.Add(edgeB);
-                        }
-                        if (!animateList.Exists(x => x.Equals(generatedPoints[tri.c])))
-                        {
-                            nextTime.Add(generatedPoints[tri.c]);
-                            //tempEdges.Add(edgeC);
-                        }
+						if (!currentPoint.Equals(generatedPoints[tri.c]))
+						{
+							animateList.Enqueue(generatedPoints[tri.c]);
+							var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(currentPoint, generatedPoints[tri.c]);
+							tempEdges.Add(edge);
+						}
 					}
 
 				}
-				if (onlyGrowth)
-					animateList.Remove(currentPoint);
-				outEdges.Add(tempEdges);
+				//add the edges from this iteration to the animation frame's edge list
+				//tolist to ensure list copy
+				edgeHolder.AddRange(tempEdges.ToList());
+				odd++;
+				if (odd > 5)
+				{
+					outEdges.Add(edgeHolder.ToList());
+					edgeHolder.Clear();
+					odd = 0;
+				}
+
+				//if not the first frame, add the edges from the frame before so that we are not only displaying the growth
+				//if(i>0)
+				//    outEdges[i].AddRange(outEdges[i-1]);
 			}
+			//this makes it not just show the growth
+			for (int i = 0; i < outEdges.Count; i++)
+			{
+				if (i > 0)
+					outEdges[i].AddRange(outEdges[i - 1]);
+			}
+
 			return outEdges;
 		}
-             */
+             
 
         internal TouchPoints makeTouchPointsFrame(PointF touch, int radius)
 		{
