@@ -49,6 +49,14 @@ namespace DelaunayTriangulator
 
             return x.Equals(item.x) && y.Equals(item.y);
         }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (x.GetHashCode()*397) ^ y.GetHashCode();
+            }
+        }
     }
 
 }
