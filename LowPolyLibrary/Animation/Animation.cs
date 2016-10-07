@@ -6,11 +6,10 @@ using Math = System.Math;
 using PointF = System.Drawing.PointF;
 using System;
 using System.Linq;
-using DelaunayTriangulator;
 
 namespace LowPolyLibrary
 {
-    public class AnimationLib
+    public class Animation
     {
         internal static int numFrames = 12; //static necessary for creation of framedPoints list
         internal List<PointF>[] framedPoints = new List<PointF>[numFrames];

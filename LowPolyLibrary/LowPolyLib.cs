@@ -17,7 +17,7 @@ namespace LowPolyLibrary
 	public class LowPolyLib
 	{
         //private List<DelaunayTriangulator.Vertex> _points;
-        AnimationLib animator = new AnimationLib();
+        Animation animator = new Animation();
 	    
         public int boundsWidth;
 		public int boundsHeight;
@@ -40,8 +40,8 @@ namespace LowPolyLibrary
             animator.divyTris(_points);
             //return createSweepAnimBitmap(0, direction);
 
-            var tmp = new List<PointF>[AnimationLib.numFrames];
-		    for (int i = 0; i < AnimationLib.numFrames; i++)
+            var tmp = new List<PointF>[Animation.numFrames];
+		    for (int i = 0; i < Animation.numFrames; i++)
 		    {
                 tmp[i] = new List<PointF>();
 		        tmp[i].AddRange(animator.framedPoints[i]);
@@ -88,14 +88,14 @@ namespace LowPolyLibrary
 			return frameBitmaps;
 		}
 
-		public AnimationDrawable makeAnimation(AnimationLib.Animations anim, int numFrames, float x, float y, int radius)
+		public AnimationDrawable makeAnimation(Animation.Animations anim, int numFrames, float x, float y, int radius)
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
             var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
 		    var direction = animator.get360Direction();
 
-			if (anim == AnimationLib.Animations.Grow)
+			if (anim == Animation.Animations.Grow)
 			{
 				List<Bitmap> frameBitmaps = null;
 				frameBitmaps = createGrowAnimBitmap();
@@ -113,14 +113,14 @@ namespace LowPolyLibrary
 					//List<Bitmap> frameBitmaps = null;
 					switch (anim)
 					{
-						case AnimationLib.Animations.Sweep:
+						case Animation.Animations.Sweep:
 							frameBitmap = createSweepAnimBitmap(i, direction);
 							break;
-						case AnimationLib.Animations.Touch:
+						case Animation.Animations.Touch:
 							var touch = new PointF(x, y);
 							frameBitmap = createTouchAnimBitmap(touch, radius);
 							break;
-						//case AnimationLib.Animations.Grow:
+						//case Animation.Animations.Grow:
 						//	frameBitmaps = createGrowAnimBitmap();
 						//	break;
 						default:
@@ -128,7 +128,7 @@ namespace LowPolyLibrary
 							break;
 					}
 
-					//if (anim == AnimationLib.Animations.Grow)
+					//if (anim == Animation.Animations.Grow)
 					//{
 					//	foreach (var frame in frameBitmaps)
 					//	{
@@ -264,7 +264,7 @@ namespace LowPolyLibrary
 			return outBitmaps;
 		}
 
-		private Bitmap drawPointFrame(AnimationLib.TouchPoints frameList)
+		private Bitmap drawPointFrame(Animation.TouchPoints frameList)
 		{
 			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb8888);
 			Canvas canvas = new Canvas(drawingCanvas);

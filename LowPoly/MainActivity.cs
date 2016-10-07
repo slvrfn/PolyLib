@@ -83,7 +83,7 @@ namespace LowPoly
 			generatedAnimation = null;
 		}
 
-		public void uuuu(LowPolyLibrary.AnimationLib.Animations anim, System.Drawing.PointF touch)
+		public void uuuu(LowPolyLibrary.Animation.Animations anim, System.Drawing.PointF touch)
 		{
 			var temp = new Stopwatch();
 
@@ -111,7 +111,7 @@ namespace LowPoly
 
 		public void stepAnimation(object sender, EventArgs e)
 		{
-			uuuu(LowPolyLibrary.AnimationLib.Animations.Grow, new System.Drawing.PointF(0, 0));
+			uuuu(LowPolyLibrary.Animation.Animations.Grow, new System.Drawing.PointF(0, 0));
 		}
 
 		public bool OnTouch(View v, MotionEvent e)
@@ -123,7 +123,7 @@ namespace LowPoly
 				touch.Y = e.GetY();
 				_lowPoly.setPointsaroundTouch(touch, 200);
 				generatedAnimation = null;
-				uuuu(LowPolyLibrary.AnimationLib.Animations.Touch, touch);
+				uuuu(LowPolyLibrary.Animation.Animations.Touch, touch);
 				return true;
 			}
 			if (e.Action == MotionEventActions.Up)
