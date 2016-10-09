@@ -18,7 +18,7 @@ namespace LowPoly
 		Button button, animSButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
-		LowPolyLibrary.LowPolyLib _lowPoly = new LowPolyLibrary.LowPolyLib ();
+		LowPolyLibrary.Triangulation _lowPoly = new LowPolyLibrary.Triangulation ();
 
 		AnimationDrawable generatedAnimation;
 

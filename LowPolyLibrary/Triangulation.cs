@@ -14,7 +14,7 @@ using System;
 
 namespace LowPolyLibrary
 {
-	public class LowPolyLib
+	public class Triangulation
 	{
         //private List<DelaunayTriangulator.Vertex> _points;
         Animation animator = new Animation();
@@ -50,12 +50,7 @@ namespace LowPolyLibrary
 
 		    return drawPointFrame(tmp);
 		}
-
-		public void setPointsaroundTouch(PointF touch, int radius)
-		{
-			animator.setPointsAroundTouch(touch, radius);
-		}
-
+        
         private void UpdateVars()
         {
             calcVariance = cell_size * setVariance / 2;
@@ -65,29 +60,7 @@ namespace LowPolyLibrary
             bleed_y = ((cells_y * cell_size) - boundsHeight) / 2;
             gradient = getGradient();
         }
-
-        public Bitmap createSweepAnimBitmap(int frame, int direction)
-        {
-            var frameList = animator.makeSweepPointsFrame(frame, direction);
-            var frameBitmap = drawPointFrame(frameList);
-            return frameBitmap;
-        }
-
-		public Bitmap createTouchAnimBitmap(PointF touch, int radius)
-		{
-			var frameList = animator.makeTouchPointsFrame(touch, radius);
-			var frameBitmap = drawPointFrame(frameList);
-			return frameBitmap;
-		}
-
-		public List<Bitmap> createGrowAnimBitmap()
-		{
-			
-			var frameList = animator.makeGrowFrame(_points);
-			var frameBitmaps = drawPointFrame(frameList);
-			return frameBitmaps;
-		}
-
+        
 		public AnimationDrawable makeAnimation(Animation.Animations anim, int numFrames, float x, float y, int radius)
         {
             AnimationDrawable animation = new AnimationDrawable();
@@ -179,148 +152,7 @@ namespace LowPolyLibrary
             }
             return drawingCanvas;
         }
-
-        private Bitmap drawPointFrame(List<PointF>[] frameList)
-        {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-            Canvas canvas = new Canvas(drawingCanvas);
-
-            Paint paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
-
-            //generating a new base triangulation. if an old one exists get rid of it
-            //if (poTriDic != null)
-            //    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
-
-            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
-            //can we just stay in PointF's?
-            foreach (var frame in frameList)
-            {
-                foreach (var point in frame)
-                {
-                    var currentlyExists = convertedPoints.Exists(x => 
-                        x.x.CompareTo(point.X) == 0 &&
-                        x.y.CompareTo(point.Y) == 0
-                    );
-                    if(!currentlyExists)
-                        convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
-                }
-            }
-            var angulator = new Triangulator();
-			var triangulatedPoints = angulator.Triangulation(convertedPoints);
-            for (int i = 0; i < triangulatedPoints.Count; i++)
-            {
-                var a = new PointF(convertedPoints[triangulatedPoints[i].a].x, convertedPoints[triangulatedPoints[i].a].y);
-                var b = new PointF(convertedPoints[triangulatedPoints[i].b].x, convertedPoints[triangulatedPoints[i].b].y);
-                var c = new PointF(convertedPoints[triangulatedPoints[i].c].x, convertedPoints[triangulatedPoints[i].c].y);
-
-                Path trianglePath = drawTrianglePath(a, b, c);
-                
-                var center = centroid(triangulatedPoints[i], convertedPoints);
-
-                paint.Color = getTriangleColor(gradient, center);
-
-                canvas.DrawPath(trianglePath, paint);
-            }
-            return drawingCanvas;
-        }
-
-		private List<Bitmap> drawPointFrame(List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>> edgeFrameList)
-		{
-			var outBitmaps =new List<Bitmap>();
-
-			Paint paint = new Paint();
-			paint.SetStyle(Paint.Style.FillAndStroke);
-			paint.AntiAlias = true;
-			paint.Color = Android.Graphics.Color.Crimson;
-			paint.StrokeWidth = 5f;
-
-
-			//foreach (var frame in edgeFrameList)
-			for (int j = 0; j < edgeFrameList.Count; j++)
-			{
-				Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
-				Canvas canvas = new Canvas(drawingCanvas);
-
-				for (int i = 0; i < edgeFrameList[j].Count; i++)
-				{
-					var point1 = new PointF(edgeFrameList[j][i].Item1.x, edgeFrameList[j][i].Item1.y);
-					var point2 = new PointF(edgeFrameList[j][i].Item2.x, edgeFrameList[j][i].Item2.y);
-					Path path = drawPath(point1, point2);
-					canvas.DrawPath(path, paint);
-				}
-
-				//foreach (var point in frame)
-				//{
-				//	var point1 = new PointF(point.Item1.x, point.Item1.y);
-				//	var point2 = new PointF(point.Item2.x, point.Item2.y);
-				//	Path path = drawPath(point1, point2);
-				//	canvas.DrawPath(path, paint);
-				//}
-				outBitmaps.Add(drawingCanvas);
-			}
-
-			return outBitmaps;
-		}
-
-		private Bitmap drawPointFrame(Animation.TouchPoints frameList)
-		{
-			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb8888);
-			Canvas canvas = new Canvas(drawingCanvas);
-
-			Paint paint = new Paint();
-			paint.SetStyle(Paint.Style.FillAndStroke);
-			paint.AntiAlias = true;
-
-			//generating a new base triangulation. if an old one exists get rid of it
-			//if (poTriDic != null)
-			//    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
-
-			var convertedPoints = new List<DelaunayTriangulator.Vertex>();
-			//can we just stay in PointF's?
-
-			var measurePoints = new List<PointF>();
-			measurePoints.AddRange(frameList.inRange);
-			measurePoints.AddRange(frameList.inRangOfRecs);
-			measurePoints.AddRange(frameList.outOfRange);
-
-			foreach (var point in measurePoints)
-			{
-				var currentlyExists = convertedPoints.Exists(x =>
-						x.x.CompareTo(point.X) == 0 &&
-						x.y.CompareTo(point.Y) == 0
-					);
-				if (!currentlyExists)
-					convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
-			}
-			var angulator = new Triangulator();
-			var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
-			for (int i = 0; i < newTriangulatedPoints.Count; i++)
-			{
-				var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
-				var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
-				var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
-
-				Path trianglePath = drawTrianglePath(a, b, c);
-
-				var center = centroid(newTriangulatedPoints[i], convertedPoints);
-
-				//animation logic
-				//divyTris(a, overlays, i);
-				//divyTris(b, overlays, i);
-				//divyTris(c,overlays, i);
-
-				paint.Color = getTriangleColor(gradient, center);
-
-				canvas.DrawPath(trianglePath, paint);
-			}
-			paint.SetStyle(Paint.Style.Stroke);
-			paint.Color = Android.Graphics.Color.Crimson;
-			canvas.DrawCircle(frameList.touchLocation.X, frameList.touchLocation.Y, frameList.touchRadius, paint);
-			return drawingCanvas;
-		}
-
+        
         private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
 	    {
             Path path = new Path();
@@ -471,14 +303,7 @@ namespace LowPolyLibrary
 		{
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}
-
-		internal System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
-		{
-			var x = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
-			var y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);
-
-			return new System.Drawing.Point(x,y);
-		}
+        
 	}
 }
 
