@@ -13,7 +13,7 @@ namespace LowPolyLibrary
         public List<Bitmap> createGrowAnimBitmap()
         {
 
-            var frameList = animator.makeGrowFrame(_points);
+            var frameList = makeGrowFrame(_points);
             var frameBitmaps = drawPointFrame(frameList);
             return frameBitmaps;
         }

@@ -11,6 +11,8 @@ using Enum = System.Enum;
 using Math = System.Math;
 using PointF = System.Drawing.PointF;
 using System;
+using Android.Test.Suitebuilder;
+using Javax.Security.Auth;
 
 namespace LowPolyLibrary
 {
@@ -26,14 +28,14 @@ namespace LowPolyLibrary
 		private double calcVariance, cells_x, cells_y;
 		private double bleed_x, bleed_y;
 		//private static int numFrames = 12; //static necessary for creation of framedPoints list
-        Bitmap gradient;
-		List<DelaunayTriangulator.Vertex> _points;
+        internal Bitmap gradient;
+		internal List<DelaunayTriangulator.Vertex> _points;
 
 		public Bitmap GenerateNew()
 		{
 			UpdateVars();
 			_points = GeneratePoints();
-            var direction = animator.get360Direction();
+            var direction = Geometry.get360Direction();
             animator.seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight, direction);
 		    var angulator = new Triangulator();
 		    animator.triangulatedPoints = angulator.Triangulation(_points);
@@ -50,7 +52,53 @@ namespace LowPolyLibrary
 
 		    return drawPointFrame(tmp);
 		}
-        
+
+        internal Bitmap drawPointFrame(List<PointF>[] frameList)
+        {
+            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+            Canvas canvas = new Canvas(drawingCanvas);
+
+            Paint paint = new Paint();
+            paint.SetStyle(Paint.Style.FillAndStroke);
+            paint.AntiAlias = true;
+
+            //generating a new base triangulation. if an old one exists get rid of it
+            //if (poTriDic != null)
+            //    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
+
+            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
+            //can we just stay in PointF's?
+            foreach (var frame in frameList)
+            {
+                foreach (var point in frame)
+                {
+                    var currentlyExists = convertedPoints.Exists(x =>
+                        x.x.CompareTo(point.X) == 0 &&
+                        x.y.CompareTo(point.Y) == 0
+                    );
+                    if (!currentlyExists)
+                        convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
+                }
+            }
+            var angulator = new Triangulator();
+            var triangulatedPoints = angulator.Triangulation(convertedPoints);
+            for (int i = 0; i < triangulatedPoints.Count; i++)
+            {
+                var a = new PointF(convertedPoints[triangulatedPoints[i].a].x, convertedPoints[triangulatedPoints[i].a].y);
+                var b = new PointF(convertedPoints[triangulatedPoints[i].b].x, convertedPoints[triangulatedPoints[i].b].y);
+                var c = new PointF(convertedPoints[triangulatedPoints[i].c].x, convertedPoints[triangulatedPoints[i].c].y);
+
+                Path trianglePath = drawTrianglePath(a, b, c);
+
+                var center = Geometry.centroid(triangulatedPoints[i], convertedPoints);
+
+                paint.Color = getTriangleColor(gradient, center);
+
+                canvas.DrawPath(trianglePath, paint);
+            }
+            return drawingCanvas;
+        }
+
         private void UpdateVars()
         {
             calcVariance = cell_size * setVariance / 2;
@@ -61,65 +109,65 @@ namespace LowPolyLibrary
             gradient = getGradient();
         }
         
-		public AnimationDrawable makeAnimation(Animation.Animations anim, int numFrames, float x, float y, int radius)
-        {
-            AnimationDrawable animation = new AnimationDrawable();
-            animation.OneShot = true;
-            var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
-		    var direction = animator.get360Direction();
+		//public AnimationDrawable makeAnimation(Animation.Animations anim, int numFrames, float x, float y, int radius)
+  //      {
+  //          AnimationDrawable animation = new AnimationDrawable();
+  //          animation.OneShot = true;
+  //          var duration = 42*2;//roughly how many milliseconds each frame will be for 24fps
+		//    var direction = Geometry.get360Direction();
 
-			if (anim == Animation.Animations.Grow)
-			{
-				List<Bitmap> frameBitmaps = null;
-				frameBitmaps = createGrowAnimBitmap();
-				foreach (var frame in frameBitmaps)
-				{
-					BitmapDrawable conv = new BitmapDrawable(frame);
-					animation.AddFrame(conv, duration);
-				}
-			}
-			else
-			{
-				for (int i = 0; i < numFrames; i++)
-				{
-					Bitmap frameBitmap = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-					//List<Bitmap> frameBitmaps = null;
-					switch (anim)
-					{
-						case Animation.Animations.Sweep:
-							frameBitmap = createSweepAnimBitmap(i, direction);
-							break;
-						case Animation.Animations.Touch:
-							var touch = new PointF(x, y);
-							frameBitmap = createTouchAnimBitmap(touch, radius);
-							break;
-						//case Animation.Animations.Grow:
-						//	frameBitmaps = createGrowAnimBitmap();
-						//	break;
-						default:
-							frameBitmap = createSweepAnimBitmap(i, direction);
-							break;
-					}
+		//	if (anim == Animation.Animations.Grow)
+		//	{
+		//		List<Bitmap> frameBitmaps = null;
+		//		frameBitmaps = createGrowAnimBitmap();
+		//		foreach (var frame in frameBitmaps)
+		//		{
+		//			BitmapDrawable conv = new BitmapDrawable(frame);
+		//			animation.AddFrame(conv, duration);
+		//		}
+		//	}
+		//	else
+		//	{
+		//		for (int i = 0; i < numFrames; i++)
+		//		{
+		//			Bitmap frameBitmap = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+		//			//List<Bitmap> frameBitmaps = null;
+		//			switch (anim)
+		//			{
+		//				case Animation.Animations.Sweep:
+		//					frameBitmap = createSweepAnimBitmap(i, direction);
+		//					break;
+		//				case Animation.Animations.Touch:
+		//					var touch = new PointF(x, y);
+		//					frameBitmap = createTouchAnimBitmap(touch, radius);
+		//					break;
+		//				//case Animation.Animations.Grow:
+		//				//	frameBitmaps = createGrowAnimBitmap();
+		//				//	break;
+		//				default:
+		//					frameBitmap = createSweepAnimBitmap(i, direction);
+		//					break;
+		//			}
 
-					//if (anim == Animation.Animations.Grow)
-					//{
-					//	foreach (var frame in frameBitmaps)
-					//	{
-					//		BitmapDrawable conv = new BitmapDrawable(frame);
-					//		animation.AddFrame(conv, duration);
-					//	}
-					//}
-					//else
-					//{
-					BitmapDrawable frame = new BitmapDrawable(frameBitmap);
-					animation.AddFrame(frame, duration);
-					//}
-				}
-			}
+		//			//if (anim == Animation.Animations.Grow)
+		//			//{
+		//			//	foreach (var frame in frameBitmaps)
+		//			//	{
+		//			//		BitmapDrawable conv = new BitmapDrawable(frame);
+		//			//		animation.AddFrame(conv, duration);
+		//			//	}
+		//			//}
+		//			//else
+		//			//{
+		//			BitmapDrawable frame = new BitmapDrawable(frameBitmap);
+		//			animation.AddFrame(frame, duration);
+		//			//}
+		//		}
+		//	}
 
 
-            return animation;
-        }
+  //          return animation;
+  //      }
 
         private Bitmap drawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
         {
@@ -143,7 +191,7 @@ namespace LowPolyLibrary
 
                     Path trianglePath = drawTrianglePath(a, b, c);
 
-                    var center = centroid(tri, points);
+                    var center = Geometry.centroid(tri, points);
 
                     paint.Color = getTriangleColor(gradient, center);
 
@@ -153,7 +201,7 @@ namespace LowPolyLibrary
             return drawingCanvas;
         }
         
-        private Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
+        internal Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
 	    {
             Path path = new Path();
             path.SetFillType(Path.FillType.EvenOdd);
@@ -163,7 +211,7 @@ namespace LowPolyLibrary
             path.Close();
             return path;
         }
-		private Path drawPath(System.Drawing.PointF a, System.Drawing.PointF b)
+		internal Path drawPath(System.Drawing.PointF a, System.Drawing.PointF b)
 		{
 			Path path = new Path();
 			path.SetFillType(Path.FillType.EvenOdd);
@@ -172,7 +220,7 @@ namespace LowPolyLibrary
 			return path;
 		}
 
-		private Android.Graphics.Color getTriangleColor(Bitmap gradient, System.Drawing.Point center)
+		internal Android.Graphics.Color getTriangleColor(Bitmap gradient, System.Drawing.Point center)
 		{
 		    center = keepInPicBounds(center);
 
@@ -303,6 +351,12 @@ namespace LowPolyLibrary
 		{
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}
+
+	    public void test()
+	    {
+	        var t = new Touch();
+	        var tt = t.createTouchAnimBitmap(new PointF(), 5);
+	    }
         
 	}
 }

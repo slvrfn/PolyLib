@@ -8,7 +8,7 @@ namespace LowPolyLibrary
 {
     class Geometry
     {
-        internal bool pointInsideCircle(PointF point, PointF center, int radius)
+        internal static bool pointInsideCircle(PointF point, PointF center, int radius)
         {
             //http://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
             return (point.X - center.X) * (point.X - center.X) + (point.Y - center.Y) * (point.Y - center.Y) < radius * radius;
@@ -23,7 +23,7 @@ namespace LowPolyLibrary
 		}*/
 
         //this may be more correct since graphics origin is in the TL corner instead of BL
-        private double GetPolarCoordinates(Point center, Point point)
+        internal static double GetPolarCoordinates(Point center, Point point)
         {
             //http://stackoverflow.com/questions/2676719/calculating-the-angle-between-the-line-defined-by-two-points
             var x = point.X - center.X;
@@ -43,19 +43,19 @@ namespace LowPolyLibrary
             return degrees;
         }
 
-        private double degreesToRadians(int angle)
+        internal static double degreesToRadians(int angle)
         {
             var toRad = Math.PI / 180;
             return angle * toRad;
         }
 
-        private double radiansToDegrees(double angle)
+        internal static double radiansToDegrees(double angle)
         {
             var toDeg = 180 / Math.PI;
             return angle * toDeg;
         }
 
-        private PointF getIntersection(float slope, PointF linePoint, PointF perpendicularLinePoint)
+        internal static PointF getIntersection(float slope, PointF linePoint, PointF perpendicularLinePoint)
         {
             var linePoint2 = new PointF();
             var point2Offset = (float)(2 * dist(linePoint, perpendicularLinePoint));
@@ -79,7 +79,7 @@ namespace LowPolyLibrary
             return new PointF(x4, y4);
         }
 
-        private PointF walkAngle(int angle, float distance, PointF startingPoint)
+        internal static PointF walkAngle(int angle, float distance, PointF startingPoint)
         {
             var endPoint = new PointF(startingPoint.X, startingPoint.Y);
             var y = distance * ((float)Math.Sin(degreesToRadians(angle)));
@@ -89,21 +89,21 @@ namespace LowPolyLibrary
             return endPoint;
         }
 
-        private double dist(PointF workingPoint, DelaunayTriangulator.Vertex vertex)
+        internal static double dist(PointF workingPoint, DelaunayTriangulator.Vertex vertex)
         {
             var xSquare = (workingPoint.X - vertex.x) * (workingPoint.X - vertex.x);
             var ySquare = (workingPoint.Y - vertex.y) * (workingPoint.Y - vertex.y);
             return Math.Sqrt(xSquare + ySquare);
         }
 
-        internal double dist(PointF workingPoint, PointF vertex)
+        internal static double dist(PointF workingPoint, PointF vertex)
         {
             var xSquare = (workingPoint.X - vertex.X) * (workingPoint.X - vertex.X);
             var ySquare = (workingPoint.Y - vertex.Y) * (workingPoint.Y - vertex.Y);
             return Math.Sqrt(xSquare + ySquare);
         }
 
-        internal int getAngleInRange(int angle, int range)
+        internal static int getAngleInRange(int angle, int range)
         {
             var rand = new System.Random();
             var range_lower = angle - range;
@@ -113,24 +113,24 @@ namespace LowPolyLibrary
             return rand.Next(range_lower, range_upper);
         }
 
-        internal int get360Direction()
+        internal static int get360Direction()
         {
             var rand = new System.Random();
             //return a int from 0 to 359 that represents the direction a point will move
             return rand.Next(360);
         }
 
-        private double getXComponent(int angle, double length)
+        internal static double getXComponent(int angle, double length)
         {
             return length * Math.Cos(degreesToRadians(angle));
         }
 
-        private double getYComponent(int angle, double length)
+        internal static double getYComponent(int angle, double length)
         {
             return length * Math.Sin(degreesToRadians(angle));
         }
 
-        internal System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
+        internal static System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
         {
             var x = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
             var y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);

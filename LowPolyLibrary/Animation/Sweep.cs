@@ -35,8 +35,8 @@ namespace LowPolyLibrary
                 var wPoint = new PointF(point.X, point.Y);
 
                 var distCanMove = shortestDistanceFromPoints(wPoint, workingFrameList, direction, frameNum);
-                var xComponent = getXComponent(direction, distCanMove);
-                var yComponent = getYComponent(direction, distCanMove);
+                var xComponent = Geometry.getXComponent(direction, distCanMove);
+                var yComponent = Geometry.getYComponent(direction, distCanMove);
 
                 wPoint.X += (float)xComponent;
                 wPoint.Y += (float)yComponent;
@@ -50,52 +50,6 @@ namespace LowPolyLibrary
             }
 
             return workingFrameList;
-        }
-
-        private Bitmap drawPointFrame(List<PointF>[] frameList)
-        {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-            Canvas canvas = new Canvas(drawingCanvas);
-
-            Paint paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
-
-            //generating a new base triangulation. if an old one exists get rid of it
-            //if (poTriDic != null)
-            //    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
-
-            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
-            //can we just stay in PointF's?
-            foreach (var frame in frameList)
-            {
-                foreach (var point in frame)
-                {
-                    var currentlyExists = convertedPoints.Exists(x =>
-                        x.x.CompareTo(point.X) == 0 &&
-                        x.y.CompareTo(point.Y) == 0
-                    );
-                    if (!currentlyExists)
-                        convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
-                }
-            }
-            var angulator = new Triangulator();
-            var triangulatedPoints = angulator.Triangulation(convertedPoints);
-            for (int i = 0; i < triangulatedPoints.Count; i++)
-            {
-                var a = new PointF(convertedPoints[triangulatedPoints[i].a].x, convertedPoints[triangulatedPoints[i].a].y);
-                var b = new PointF(convertedPoints[triangulatedPoints[i].b].x, convertedPoints[triangulatedPoints[i].b].y);
-                var c = new PointF(convertedPoints[triangulatedPoints[i].c].x, convertedPoints[triangulatedPoints[i].c].y);
-
-                Path trianglePath = drawTrianglePath(a, b, c);
-
-                var center = centroid(triangulatedPoints[i], convertedPoints);
-
-                paint.Color = getTriangleColor(gradient, center);
-
-                canvas.DrawPath(trianglePath, paint);
-            }
-            return drawingCanvas;
         }
     }
 }

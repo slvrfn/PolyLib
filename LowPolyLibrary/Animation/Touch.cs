@@ -9,6 +9,10 @@ namespace LowPolyLibrary
 {
     class Touch : Animation
     {
+        internal Touch()
+        {
+            
+        }
 
 
         private int _lowerBound;
@@ -23,7 +27,7 @@ namespace LowPolyLibrary
             public int touchRadius;
         }
 
-        internal TouchPoints touchPointLists620126409;
+        
 
         public Bitmap createTouchAnimBitmap(PointF touch, int radius)
         {
@@ -134,7 +138,7 @@ namespace LowPolyLibrary
             foreach (var point in touchPointLists.inRange)
             {
 
-                if (!pointInsideCircle(point, touch, radius))
+                if (!Geometry.pointInsideCircle(point, touch, radius))
                 {
                     //touchPointLists.inRange.Remove(point);
                     removeFromTouchPoints.Add(point);
@@ -225,7 +229,7 @@ namespace LowPolyLibrary
 
                 Path trianglePath = drawTrianglePath(a, b, c);
 
-                var center = centroid(newTriangulatedPoints[i], convertedPoints);
+                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
                 //animation logic
                 //divyTris(a, overlays, i);

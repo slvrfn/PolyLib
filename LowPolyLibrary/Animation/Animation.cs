@@ -76,22 +76,22 @@ namespace LowPolyLibrary
             }
         }
         
-        private List<DelaunayTriangulator.Vertex> makeTrisFrame(int frameNum, List<DelaunayTriangulator.Vertex> points)
+        internal List<DelaunayTriangulator.Vertex> makeTrisFrame(int frameNum, List<DelaunayTriangulator.Vertex> points)
         {
             //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
             var tempPoList = new List<DelaunayTriangulator.Vertex>(points);
             //get array of points contained in a specified frame
             var pointList = framedPoints[frameNum];
 
-            var direction = get360Direction();
+            var direction = Geometry.get360Direction();
 
             foreach (var workingPoint in pointList)
             {
                 //get list of tris at given workingPoint in given frame
                 var tris = new List<Triad>(poTriDic[workingPoint]);
 				var distCanMove = frameLocation(frameNum, numFrames, shortestDistanceFromTris(workingPoint, tris, direction, points));
-                var xComponent = getXComponent(direction, distCanMove);
-                var yComponent = getYComponent(direction, distCanMove);
+                var xComponent = Geometry.getXComponent(direction, distCanMove);
+                var yComponent = Geometry.getYComponent(direction, distCanMove);
                 foreach (var triangle in tris)
                 {
                     //animate each triangle
@@ -116,7 +116,7 @@ namespace LowPolyLibrary
             return points;
         }
 
-        private double frameLocation(int frame, int totalFrames, Double distanceToCcover)
+        internal double frameLocation(int frame, int totalFrames, Double distanceToCcover)
         {
             //method to be used when a final destination is known, and you want to get a proportional distance to have moved up to that point at this point in time
             var ratioToFinalMovement = frame / (Double)totalFrames;
@@ -124,7 +124,7 @@ namespace LowPolyLibrary
             return thisCoord;
         }
         
-        private List<PointF> quadListFromPoints(List<PointF>[] framePoints, int degree, PointF workingPoint, int frameNum)
+        internal List<PointF> quadListFromPoints(List<PointF>[] framePoints, int degree, PointF workingPoint, int frameNum)
         {
 			var pointList = new List<PointF>();
 			////this frame checking handles adding all the points that are close to a working point
@@ -189,7 +189,7 @@ namespace LowPolyLibrary
 
         }
 
-		private List<PointF> quadListFromPoints(List<PointF> framePoints, int degree, PointF workingPoint)
+		internal List<PointF> quadListFromPoints(List<PointF> framePoints, int degree, PointF workingPoint)
 		{
 			var direction = 0;
 
@@ -235,7 +235,7 @@ namespace LowPolyLibrary
 
 		}
 
-        private List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint, List<DelaunayTriangulator.Vertex> points)
+        internal List<Triad> quadListFromTris(List<Triad> tris, int degree, PointF workingPoint, List<DelaunayTriangulator.Vertex> points)
         {
             var direction = 0;
 
@@ -253,12 +253,10 @@ namespace LowPolyLibrary
             var quad3 = new List<Triad>();
             var quad4 = new List<Triad>();
 
-            var polyLib = new Triangulation();
-
             foreach (var tri in tris)
             {
                 //var angle = getAngle(workingPoint, centroid(tri));
-                var triCenter = polyLib.centroid(tri, points);
+                var triCenter = Geometry.centroid(tri, points);
                 //if x,y of new triCenter > x,y of working point, then in the 1st quardant
                 if (triCenter.X > workingPoint.X && triCenter.Y > workingPoint.Y)
                     quad1.Add(tri);
@@ -285,7 +283,7 @@ namespace LowPolyLibrary
 
         }
 
-        private double shortestDistanceFromPoints(PointF workingPoint, List<PointF>[] framePoints, int degree, int frameNum)
+        internal double shortestDistanceFromPoints(PointF workingPoint, List<PointF>[] framePoints, int degree, int frameNum)
         {
 			//this list consists of all the points in the same directional quardant as the working point.
 			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint, frameNum);//just changed to quad points
@@ -295,7 +293,7 @@ namespace LowPolyLibrary
             foreach (var point in quadPoints)
             {
                 //get distances between a workingPoint and the point
-                var vertDistance = dist(workingPoint, point);
+                var vertDistance = Geometry.dist(workingPoint, point);
 
                 //if this is the first run (shortest == -1) then tempShortest is the vertDistance
                 if (shortest.CompareTo(-1) == 0) //if shortest == -1
@@ -308,7 +306,7 @@ namespace LowPolyLibrary
             return shortest;
         }
 
-		private double shortestDistanceFromPoints(PointF workingPoint, List<PointF> framePoints, int degree)
+		internal double shortestDistanceFromPoints(PointF workingPoint, List<PointF> framePoints, int degree)
 		{
 			//this list consists of all the points in the same directional quardant as the working point.
 			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint);//just changed to quad points
@@ -318,7 +316,7 @@ namespace LowPolyLibrary
 			foreach (var point in quadPoints)
 			{
 				//get distances between a workingPoint and the point
-				var vertDistance = dist(workingPoint, point);
+				var vertDistance = Geometry.dist(workingPoint, point);
 
 				//if this is the first run (shortest == -1) then tempShortest is the vertDistance
 				if (shortest.CompareTo(-1) == 0) //if shortest == -1
@@ -331,7 +329,7 @@ namespace LowPolyLibrary
 			return shortest;
 		}
 
-        private double shortestDistanceFromTris(PointF workingPoint, List<Triad> tris, int degree, List<DelaunayTriangulator.Vertex> points)
+        internal double shortestDistanceFromTris(PointF workingPoint, List<Triad> tris, int degree, List<DelaunayTriangulator.Vertex> points)
         {
             var quadTris = quadListFromTris(tris, degree, workingPoint, points);
 
@@ -340,9 +338,9 @@ namespace LowPolyLibrary
             foreach (var tri in quadTris)
             {
                 //get distances between a workingPoint and each vertex of a tri
-                var vert1Distance = dist(workingPoint, points[tri.a]);
-                var vert2Distance = dist(workingPoint, points[tri.a]);
-                var vert3Distance = dist(workingPoint, points[tri.a]);
+                var vert1Distance = Geometry.dist(workingPoint, points[tri.a]);
+                var vert2Distance = Geometry.dist(workingPoint, points[tri.a]);
+                var vert3Distance = Geometry.dist(workingPoint, points[tri.a]);
 
                 double tempShortest;
                 //only one vertex distance can be 0. So if vert1 is 0, assign vert 2 for initial distance comparrison
@@ -399,13 +397,13 @@ namespace LowPolyLibrary
             }
         }
 
-        private List<cRectangleF[]> createRectangleOverlays(int boundsWidth, int boundsHeight, int angle)
+        internal List<cRectangleF[]> createRectangleOverlays(int boundsWidth, int boundsHeight, int angle)
         {
             //array size numFrames of rectangles. each array entry serves as a rotated cRectangleF
             cRectangleF[] frames = new cRectangleF[numFrames];
 
             //slope of the given angle
-			var slope = (float)Math.Tan(degreesToRadians(angle));
+			var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
             var recipSlope = -1/slope;
 
 			PointF ADIntersection;
@@ -453,15 +451,15 @@ namespace LowPolyLibrary
                 cornerD = drawingAreaA;
             }
 
-            ADIntersection = getIntersection(slope, cornerA, cornerD);
-            DCIntersection = getIntersection(recipSlope, cornerD, cornerC);
+            ADIntersection = Geometry.getIntersection(slope, cornerA, cornerD);
+            DCIntersection = Geometry.getIntersection(recipSlope, cornerD, cornerC);
             //ABIntersection used to calculate framewidth
-            var ABIntersection = getIntersection(slope, cornerA, cornerB);
-            var frameWidth = (float)dist(ADIntersection, ABIntersection)/numFrames;
+            var ABIntersection = Geometry.getIntersection(slope, cornerA, cornerB);
+            var frameWidth = (float)Geometry.dist(ADIntersection, ABIntersection)/numFrames;
             var wideOverlays = createWideRectangleOverlays(frameWidth, ADIntersection, DCIntersection, angle,boundsWidth, boundsHeight);
 
-            var walkedB = walkAngle(angle, frameWidth, ADIntersection);
-            var walkedC = walkAngle(angle, frameWidth, DCIntersection);
+            var walkedB = Geometry.walkAngle(angle, frameWidth, ADIntersection);
+            var walkedC = Geometry.walkAngle(angle, frameWidth, DCIntersection);
             frames[0] = new cRectangleF
             {
                 A = new PointF(ADIntersection.X, ADIntersection.Y),
@@ -476,8 +474,8 @@ namespace LowPolyLibrary
                 var overlay = new cRectangleF();
                 overlay.A = frames[i - 1].B;
                 overlay.D = frames[i - 1].C;
-                overlay.B = walkAngle(angle, frameWidth, overlay.A);
-                overlay.C = walkAngle(angle, frameWidth, overlay.D);
+                overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
+                overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
                 frames[i] = overlay;
             }
             var returnList = new List<cRectangleF[]>();
@@ -486,7 +484,7 @@ namespace LowPolyLibrary
             return returnList;
         }
 
-        private cRectangleF[] createWideRectangleOverlays(float frameWidth, PointF A, PointF D, int angle, int boundsWidth, int boundsHeight)
+        internal cRectangleF[] createWideRectangleOverlays(float frameWidth, PointF A, PointF D, int angle, int boundsWidth, int boundsHeight)
         {
             //first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
             //all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
@@ -503,12 +501,12 @@ namespace LowPolyLibrary
             var tempHeight = boundsHeight / 2;
 
             frames[0] = new cRectangleF();
-            frames[0].A = walkAngle(angle +90, tempHeight, overlayA);
-            frames[0].B = walkAngle(angle, frameWidth, frames[0].A);
-            frames[0].A = walkAngle(angle + 180, tempWidth, frames[0].A);
-            frames[0].D = walkAngle(angle + 270, tempHeight, overlayD);
-            frames[0].C = walkAngle(angle, frameWidth, frames[0].D);
-            frames[0].D = walkAngle(angle + 180, tempWidth, frames[0].D);
+            frames[0].A = Geometry.walkAngle(angle +90, tempHeight, overlayA);
+            frames[0].B = Geometry.walkAngle(angle, frameWidth, frames[0].A);
+            frames[0].A = Geometry.walkAngle(angle + 180, tempWidth, frames[0].A);
+            frames[0].D = Geometry.walkAngle(angle + 270, tempHeight, overlayD);
+            frames[0].C = Geometry.walkAngle(angle, frameWidth, frames[0].D);
+            frames[0].D = Geometry.walkAngle(angle + 180, tempWidth, frames[0].D);
 
 
             //this logic is for grabbing all points (even those outside the visible drawing area)
@@ -520,15 +518,15 @@ namespace LowPolyLibrary
                 {
                     overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
                     overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
-                    overlay.B = walkAngle(angle, frameWidth + tempWidth, overlay.A);
-                    overlay.C = walkAngle(angle, frameWidth + tempWidth, overlay.D);
+                    overlay.B = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.A);
+                    overlay.C = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.D);
                 }
                 else
                 {
                     overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
                     overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
-                    overlay.B = walkAngle(angle, frameWidth, overlay.A);
-                    overlay.C = walkAngle(angle, frameWidth, overlay.D);
+                    overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
+                    overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
                 }
                 frames[i] = overlay;
             }

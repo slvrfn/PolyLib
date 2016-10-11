@@ -57,6 +57,8 @@ namespace LowPoly
 			heightTB.Text = "1920";
 			varTB.Text = _lowPoly.setVariance.ToString ();
 			sizeTB.Text = _lowPoly.cell_size.ToString ();
+
+            //_lowPoly.test();
 		}
 
 		private void updatePolyLib()
@@ -94,8 +96,9 @@ namespace LowPoly
 			temp.Start();
 			if (generatedAnimation == null)
 			{
-				generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
-				imagePanel.SetImageDrawable(generatedAnimation);
+                //COMMENTED TEMPORARILY 10/10
+                //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
+                imagePanel.SetImageDrawable(generatedAnimation);
 			}
 			else
 			{
@@ -121,7 +124,8 @@ namespace LowPoly
 				var touch = new System.Drawing.PointF();
 				touch.X = e.GetX();
 				touch.Y = e.GetY();
-				_lowPoly.setPointsaroundTouch(touch, 200);
+                //COMMENTED TEMPORARILY 10/10
+				//_lowPoly.setPointsaroundTouch(touch, 200);
 				generatedAnimation = null;
 				uuuu(LowPolyLibrary.Animation.Animations.Touch, touch);
 				return true;
