@@ -9,6 +9,8 @@ using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views.Animations;
 using Android.Views;
+using LowPolyLibrary;
+using Animation = LowPolyLibrary.Animation;
 
 namespace LowPoly
 {
@@ -18,15 +20,13 @@ namespace LowPoly
 		Button button, animSButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
-		LowPolyLibrary.Triangulation _lowPoly = new LowPolyLibrary.Triangulation ();
+	    private LowPolyLibrary.Triangulation _lowPoly;
 
 		AnimationDrawable generatedAnimation;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
-//			MotionEvent t;
-
-			base.OnCreate (savedInstanceState);
+            base.OnCreate (savedInstanceState);
 
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
@@ -49,34 +49,38 @@ namespace LowPoly
 			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
             timeElapsed = FindViewById<TextView>(Resource.Id.timeElapsed);
 
-			var metrics = Resources.DisplayMetrics;
+           
+
+            var metrics = Resources.DisplayMetrics;
 
 			//widthTB.Text = metrics.WidthPixels.ToString();
 			//heightTB.Text = metrics.HeightPixels.ToString();
 			widthTB.Text = "1080";
 			heightTB.Text = "1920";
-			varTB.Text = _lowPoly.setVariance.ToString ();
-			sizeTB.Text = _lowPoly.cell_size.ToString ();
+		    varTB.Text = ".75";
+		    sizeTB.Text = "150";
 
-            //_lowPoly.test();
+		    //_lowPoly.test();
 		}
 
-		private void updatePolyLib()
+		private void UpdatePolyLib()
 		{
-			_lowPoly.boundsWidth = Int32.Parse(widthTB.Text);
-			_lowPoly.boundsHeight = Int32.Parse(heightTB.Text);
+            var boundsWidth = Int32.Parse(widthTB.Text);
+			var boundsHeight = Int32.Parse(heightTB.Text);
 
-			_lowPoly.setVariance = double.Parse(varTB.Text);
-			_lowPoly.cell_size = double.Parse(sizeTB.Text);
-		}
+			var variance = double.Parse(varTB.Text);
+			var cellSize = double.Parse(sizeTB.Text);
+
+            _lowPoly = new LowPolyLibrary.Triangulation(boundsWidth,boundsHeight,variance, cellSize);
+        }
 
 		public void Generate (object sender, EventArgs e){
             var temp = new Stopwatch();
 
-			updatePolyLib();
-
+			UpdatePolyLib();
+            
             temp.Start();
-            var generatedBitmap = _lowPoly.GenerateNew();
+		    var generatedBitmap = _lowPoly.GeneratedBitmap;
             temp.Stop();
 
             imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
@@ -89,14 +93,26 @@ namespace LowPoly
 		{
 			var temp = new Stopwatch();
 
-			//         temp.Start();
-			//   var generatedBitmap = _lowPoly.createSweepAnimBitmap(frameNum++);
-			//temp.Stop();
-
 			temp.Start();
 			if (generatedAnimation == null)
 			{
-                //COMMENTED TEMPORARILY 10/10
+			    switch (anim)
+			    {
+                    case Animation.Animations.Grow:
+                        //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
+                        var g = new Grow(_lowPoly);
+			            generatedAnimation = g.Animation;
+                        break;
+                    case Animation.Animations.Sweep:
+                        var s = new Sweep(_lowPoly);
+			            generatedAnimation = s.Animation;
+			            break;
+                    case Animation.Animations.Touch:
+                        var t = new Touch(_lowPoly,touch.X, touch.Y, 50);
+			            generatedAnimation = t.Animation;
+			            break;
+			    }
+
                 //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
                 imagePanel.SetImageDrawable(generatedAnimation);
 			}
@@ -105,8 +121,6 @@ namespace LowPoly
 				generatedAnimation.Stop();
 			}
 			temp.Stop();
-			//imagePanel.SetImageDrawable(new BitmapDrawable(generatedBitmap));
-			//imagePanel.Background = generatedAnimation;
 			generatedAnimation.Start();
 
 			timeElapsed.Text = temp.Elapsed.ToString();

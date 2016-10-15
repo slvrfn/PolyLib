@@ -6,40 +6,119 @@ using Math = System.Math;
 using PointF = System.Drawing.PointF;
 using System;
 using System.Linq;
+using Android.Graphics;
 
 namespace LowPolyLibrary
 {
-    public class Animation : Triangulation
+    public class Animation
     {
-        internal static int numFrames = 12; //static necessary for creation of framedPoints list
-        internal List<PointF>[] framedPoints = new List<PointF>[numFrames];
-        internal List<PointF>[] wideFramedPoints = new List<PointF>[numFrames];
+        internal int numFrames = 12; //static necessary for creation of FramedPoints list
+        internal List<PointF>[] FramedPoints;
+        internal List<PointF>[] WideFramedPoints;
         internal Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
+        private double bleed_x, bleed_y;
+
         public List<Triad> triangulatedPoints;
+        internal Bitmap gradient;
+        internal List<DelaunayTriangulator.Vertex> _points;
 
-		internal List<cRectangleF[]> viewRectangles;
-        internal Touch.TouchPoints touchPointLists;
+        internal List<cRectangleF[]> viewRectangles;
 
+        public int boundsWidth;
+        public int boundsHeight;
 
         public enum Animations
 		{
 			Sweep,Touch,Grow
 		}
 
-		internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
+        public Animation(Triangulation triangulation)
+        {
+            bleed_x = triangulation.bleed_x;
+            bleed_y = triangulation.bleed_y;
+            _points = triangulation._points;
+            gradient = triangulation.gradient;
+            triangulatedPoints = triangulation.TriangulatedPoints;
+            boundsHeight = triangulation.BoundsHeight;
+            boundsWidth = triangulation.BoundsWidth;
+
+            FramedPoints = new List<PointF>[numFrames];
+            WideFramedPoints = new List<PointF>[numFrames];
+
+            var direction = Geometry.get360Direction();
+            seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight, direction);
+            divyTris(_points);
+        }
+
+        internal Path drawPath(System.Drawing.PointF a, System.Drawing.PointF b)
+        {
+            Path path = new Path();
+            path.SetFillType(Path.FillType.EvenOdd);
+            path.MoveTo(b.X, b.Y);
+            path.LineTo(a.X, a.Y);
+            return path;
+        }
+
+        internal Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
+        {
+            Path path = new Path();
+            path.SetFillType(Path.FillType.EvenOdd);
+            path.MoveTo(b.X, b.Y);
+            path.LineTo(c.X, c.Y);
+            path.LineTo(a.X, a.Y);
+            path.Close();
+            return path;
+        }
+
+        internal Android.Graphics.Color getTriangleColor(Bitmap gradient, System.Drawing.Point center)
+        {
+            center = keepInPicBounds(center);
+
+            System.Drawing.Color colorFromRGB;
+            try
+            {
+                colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetPixel(center.X, center.Y));
+            }
+            catch
+            {
+                colorFromRGB = System.Drawing.Color.Cyan;
+            }
+
+            Android.Graphics.Color triColor = Android.Graphics.Color.Rgb(colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
+            return triColor;
+        }
+
+        private System.Drawing.Point keepInPicBounds(System.Drawing.Point center)
+        {
+            if (center.X < 0)
+                center.X += (int)bleed_x;
+            else if (center.X > boundsWidth)
+                center.X -= (int)bleed_x;
+            else if (center.X == boundsWidth)
+                center.X -= (int)bleed_x - 1;
+            if (center.Y < 0)
+                center.Y += (int)bleed_y;
+            else if (center.Y > boundsHeight)
+                center.Y -= (int)bleed_y + 1;
+            else if (center.Y == boundsHeight)
+                center.Y -= (int)bleed_y - 1;
+            return center;
+        }
+
+        internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
         {
             viewRectangles = createRectangleOverlays(boundsWidth, boundsHeight, angle);
-            framedPoints = new List<PointF>[numFrames];
-            wideFramedPoints = new List<PointF>[numFrames];
+            FramedPoints = new List<PointF>[numFrames];
+            WideFramedPoints = new List<PointF>[numFrames];
 
             //if this number is above zero it means a point is not being captured in a rectangle
             //should break(debug) if greater than 0
             var missingPoints = 0;
 
-            for (int i = 0; i < framedPoints.Length; i++)
+            for (int i = 0; i < FramedPoints.Length; i++)
             {
-                framedPoints[i] = new List<PointF>();
-                wideFramedPoints[i] = new List<PointF>();
+                FramedPoints[i] = new List<PointF>();
+                WideFramedPoints[i] = new List<PointF>();
             }
 
             foreach (var point in points)
@@ -57,18 +136,18 @@ namespace LowPolyLibrary
                     {
                         missing = false;
                         //if the point has not already been added to the overlay's point list
-                        if (!framedPoints[i].Contains(newPoint))
+                        if (!FramedPoints[i].Contains(newPoint))
                             //add it
-                            framedPoints[i].Add(newPoint);
+                            FramedPoints[i].Add(newPoint);
                     }
                     //if overlays[i] does not contain the point, but wideOverlays does, add it. (The point lies outside the visible area and still needs to be maintained).
                     else if (viewRectangles[1][i].Contains(newPoint))
                     {
                         missing = false;
                         //if the point has not already been added to the overlay's point list
-                        if (!wideFramedPoints[i].Contains(newPoint))
+                        if (!WideFramedPoints[i].Contains(newPoint))
                             //add it
-                            wideFramedPoints[i].Add(newPoint);
+                            WideFramedPoints[i].Add(newPoint);
                     }
                 }
                 if (missing)
@@ -81,7 +160,7 @@ namespace LowPolyLibrary
             //temporary copy of the frame's points. This copy will serve as a 'frame' in the animationFrames array
             var tempPoList = new List<DelaunayTriangulator.Vertex>(points);
             //get array of points contained in a specified frame
-            var pointList = framedPoints[frameNum];
+            var pointList = FramedPoints[frameNum];
 
             var direction = Geometry.get360Direction();
 
@@ -369,7 +448,7 @@ namespace LowPolyLibrary
             return shortest;
         }
 
-        internal void divyTris(System.Drawing.PointF point, int arrayLoc)
+        private void divyTris(System.Drawing.PointF point, int arrayLoc)
         {
             //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
             if (poTriDic.ContainsKey(point))

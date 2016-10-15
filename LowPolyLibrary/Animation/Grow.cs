@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using DelaunayTriangulator;
 using PointF = System.Drawing.PointF;
 
@@ -10,9 +11,15 @@ namespace LowPolyLibrary
 {
     class Grow : Animation
     {
+        internal Grow(Triangulation triangulation): base(triangulation) {}
+
+        public AnimationDrawable Animation
+        {
+            get { return makeAnimation(); }
+        }
+
         public List<Bitmap> createGrowAnimBitmap()
         {
-
             var frameList = makeGrowFrame(_points);
             var frameBitmaps = drawPointFrame(frameList);
             return frameBitmaps;
@@ -28,11 +35,22 @@ namespace LowPolyLibrary
             paint.Color = Android.Graphics.Color.Crimson;
             paint.StrokeWidth = 5f;
 
-
             //foreach (var frame in edgeFrameList)
             for (int j = 0; j < edgeFrameList.Count; j++)
             {
-                Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
+                Bitmap drawingCanvas;
+                //TODO this trycatch is temp to avoid out of memory on grow animation
+                try
+                {
+                    drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
+                }
+                catch (Exception)
+                {
+
+                    continue;
+                }
+                //Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
+
                 Canvas canvas = new Canvas(drawingCanvas);
 
                 for (int i = 0; i < edgeFrameList[j].Count; i++)
@@ -54,6 +72,21 @@ namespace LowPolyLibrary
             }
 
             return outBitmaps;
+        }
+
+        public AnimationDrawable makeAnimation()
+        {
+            AnimationDrawable animation = new AnimationDrawable();
+            animation.OneShot = true;
+            var duration = 42 * 2;//roughly how many milliseconds each frame will be for 24fps
+
+            List<Bitmap> frameBitmaps = createGrowAnimBitmap();
+            foreach (var frame in frameBitmaps)
+            {
+                BitmapDrawable conv = new BitmapDrawable(frame);
+                animation.AddFrame(conv, duration);
+            }
+            return animation;
         }
 
         internal List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints)
@@ -80,7 +113,6 @@ namespace LowPolyLibrary
 
             animateList.Enqueue(point);
             var odd = 0;
-            var firstTime = true;
             while (animateList.Count > 0)
             {
                 var tempEdges = new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
