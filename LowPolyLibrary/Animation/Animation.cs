@@ -362,24 +362,39 @@ namespace LowPolyLibrary
 
         }
 
-        internal double shortestDistanceFromPoints(PointF workingPoint, List<PointF>[] framePoints, int degree, int frameNum)
+        internal double shortestDistanceFromPoints(PointF workingPoint)
         {
-			//this list consists of all the points in the same directional quardant as the working point.
-			var quadPoints = quadListFromPoints(framePoints, degree, workingPoint, frameNum);//just changed to quad points
+			//this list consists of all the triangles containing the point.
+            var tris = poTriDic[workingPoint];
 
-            //shortest distance between a workingPoint and all points of a given list
+            //shortest distance between a workingPoint and all vertices of the given triangle list
             double shortest = -1;
-            foreach (var point in quadPoints)
+            foreach (var tri in tris)
             {
-                //get distances between a workingPoint and the point
-                var vertDistance = Geometry.dist(workingPoint, point);
+                //get distances between a workingPoint and the close triangle vertices
+                double vertDistance = double.MinValue;
+                
+                var vertDistance1 = Geometry.dist(workingPoint, _points[tri.a]);
+                var vertDistance2 = Geometry.dist(workingPoint, _points[tri.b]);
+                var vertDistance3 = Geometry.dist(workingPoint, _points[tri.c]);
+
+                if (vertDistance1.Equals(0))
+                    vertDistance = Math.Min(vertDistance2, vertDistance3);
+                else if (vertDistance2.Equals(0))
+                {
+                    vertDistance = Math.Min(vertDistance1, vertDistance3);
+                }
+                else if (vertDistance3.Equals(0))
+                {
+                    vertDistance = Math.Min(vertDistance1, vertDistance2);
+                }
 
                 //if this is the first run (shortest == -1) then tempShortest is the vertDistance
                 if (shortest.CompareTo(-1) == 0) //if shortest == -1
                     shortest = vertDistance;
                 //if not the first run, only assign shortest if vertDistance is smaller
                 else
-                    if (vertDistance < shortest && vertDistance.CompareTo(0) != 0)//if the vertDistance < current shortest distance and not equal to 0
+                    if (vertDistance < shortest)//if the vertDistance < current shortest distance and not equal to 0
                     shortest = vertDistance;
             }
             return shortest;

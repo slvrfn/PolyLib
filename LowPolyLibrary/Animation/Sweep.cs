@@ -61,7 +61,7 @@ namespace LowPolyLibrary
                 //created bc cant modify point
                 var wPoint = new PointF(point.X, point.Y);
 
-                var distCanMove = shortestDistanceFromPoints(wPoint, workingFrameList, direction, frameNum);
+                var distCanMove = shortestDistanceFromPoints(wPoint);
                 var xComponent = Geometry.getXComponent(direction, distCanMove);
                 var yComponent = Geometry.getYComponent(direction, distCanMove);
 
