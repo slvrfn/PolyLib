@@ -30,12 +30,9 @@ namespace LowPolyLibrary
             setPointsAroundTouch();
         }
 
-        public AnimationDrawable Animation
-        {
-            get { return MakeAnimation(); }
-        }
+        public AnimationDrawable Animation => MakeAnimation();
 
-        public AnimationDrawable MakeAnimation()
+        private AnimationDrawable MakeAnimation()
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
@@ -52,7 +49,7 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        public Bitmap createTouchAnimBitmap()
+        private Bitmap createTouchAnimBitmap()
         {
             makeTouchPointsFrame();
             var frameBitmap = drawPointFrame();
@@ -79,6 +76,8 @@ namespace LowPolyLibrary
 
             if (displacement == 0)
             {
+                _lowerBound = currentIndex;
+                _upperBound = currentIndex;
                 if (currentIndex != firstFrame &&
                     viewRectangles[0][currentIndex].circleContainsPoints(TouchLocation,
                                                                          TouchRadius,
