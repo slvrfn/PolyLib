@@ -13,16 +13,16 @@ namespace LowPolyLibrary
     {
         internal Grow(Triangulation triangulation): base(triangulation) {}
 
-        public AnimationDrawable Animation => makeAnimation();
+        public AnimationDrawable Animation => MakeAnimation();
 
-        private List<Bitmap> createGrowAnimBitmap()
+        private List<Bitmap> CreateGrowAnimBitmap()
         {
-            var frameList = makeGrowFrame();
-            var frameBitmaps = drawPointFrame(frameList);
+            var frameList = MakeGrowFrame();
+            var frameBitmaps = DrawPointFrame(frameList);
             return frameBitmaps;
         }
 
-        private List<Bitmap> drawPointFrame(List<List<DelaunayTriangulator.Vertex>> edgeFrameList)
+        private List<Bitmap> DrawPointFrame(List<List<DelaunayTriangulator.Vertex>> edgeFrameList)
         {
             var outBitmaps = new List<Bitmap>();
 
@@ -77,13 +77,13 @@ namespace LowPolyLibrary
             return outBitmaps;
         }
 
-        private AnimationDrawable makeAnimation()
+        private AnimationDrawable MakeAnimation()
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
             var duration = 42 * 2;//roughly how many milliseconds each frame will be for 24fps
 
-            List<Bitmap> frameBitmaps = createGrowAnimBitmap();
+            List<Bitmap> frameBitmaps = CreateGrowAnimBitmap();
             foreach (var frame in frameBitmaps)
             {
                 BitmapDrawable conv = new BitmapDrawable(frame);
@@ -92,7 +92,7 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        private List<List<Vertex>> makeGrowFrame()
+        private List<List<Vertex>> MakeGrowFrame()
         {
             var outEdges = new List<List<Vertex>>();
             var pointHolder = new List<Vertex>();

@@ -32,7 +32,7 @@ namespace LowPolyLibrary
 			Sweep,Touch,Grow
 		}
 
-        public Animation(Triangulation triangulation)
+        protected Animation(Triangulation triangulation)
         {
             bleed_x = triangulation.bleed_x;
             bleed_y = triangulation.bleed_y;
