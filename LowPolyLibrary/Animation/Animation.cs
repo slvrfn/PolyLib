@@ -19,8 +19,8 @@ namespace LowPolyLibrary
         private double bleed_x, bleed_y;
 
         public List<Triad> triangulatedPoints;
-        internal Bitmap gradient;
-        internal List<DelaunayTriangulator.Vertex> _points;
+        internal Bitmap Gradient;
+        internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
         internal List<cRectangleF[]> viewRectangles;
 
@@ -36,8 +36,8 @@ namespace LowPolyLibrary
         {
             bleed_x = triangulation.bleed_x;
             bleed_y = triangulation.bleed_y;
-            _points = triangulation._points;
-            gradient = triangulation.gradient;
+            InternalPoints = triangulation.InternalPoints;
+            Gradient = triangulation.Gradient;
             triangulatedPoints = triangulation.TriangulatedPoints;
             boundsHeight = triangulation.BoundsHeight;
             boundsWidth = triangulation.BoundsWidth;
@@ -46,8 +46,8 @@ namespace LowPolyLibrary
             WideFramedPoints = new List<PointF>[numFrames];
 
             var direction = Geometry.get360Direction();
-            seperatePointsIntoRectangleFrames(_points, boundsWidth, boundsHeight, direction);
-            divyTris(_points);
+            seperatePointsIntoRectangleFrames(InternalPoints, boundsWidth, boundsHeight, direction);
+            divyTris(InternalPoints);
         }
 
         internal Path drawPath(System.Drawing.PointF a, System.Drawing.PointF b)
@@ -374,9 +374,9 @@ namespace LowPolyLibrary
                 //get distances between a workingPoint and the close triangle vertices
                 double vertDistance = double.MinValue;
                 
-                var vertDistance1 = Geometry.dist(workingPoint, _points[tri.a]);
-                var vertDistance2 = Geometry.dist(workingPoint, _points[tri.b]);
-                var vertDistance3 = Geometry.dist(workingPoint, _points[tri.c]);
+                var vertDistance1 = Geometry.dist(workingPoint, InternalPoints[tri.a]);
+                var vertDistance2 = Geometry.dist(workingPoint, InternalPoints[tri.b]);
+                var vertDistance3 = Geometry.dist(workingPoint, InternalPoints[tri.c]);
 
                 if (vertDistance1.Equals(0))
                     vertDistance = Math.Min(vertDistance2, vertDistance3);

@@ -114,7 +114,7 @@ namespace LowPolyLibrary
 
                 var center = Geometry.centroid(triangulatedPoints[i], convertedPoints);
 
-                paint.Color = getTriangleColor(gradient, center);
+                paint.Color = getTriangleColor(Gradient, center);
 
                 canvas.DrawPath(trianglePath, paint);
             }

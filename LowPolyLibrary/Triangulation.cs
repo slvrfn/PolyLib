@@ -25,8 +25,8 @@ namespace LowPolyLibrary
 		public double Variance = .75;
 		private double calcVariance, cells_x, cells_y;
 		internal double bleed_x, bleed_y;
-        internal Bitmap gradient;
-		internal List<DelaunayTriangulator.Vertex> _points;
+        internal Bitmap Gradient;
+		internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
         public List<Triad> TriangulatedPoints;
 
@@ -38,9 +38,9 @@ namespace LowPolyLibrary
             CellSize = cellSize;
 
             UpdateVars();
-			_points = GeneratePoints();
+			InternalPoints = GeneratePoints();
 		    var angulator = new Triangulator();
-		    TriangulatedPoints = angulator.Triangulation(_points);
+		    TriangulatedPoints = angulator.Triangulation(InternalPoints);
 		}
 
 	    public Bitmap GeneratedBitmap
@@ -59,15 +59,15 @@ namespace LowPolyLibrary
             
             for (int i = 0; i < TriangulatedPoints.Count; i++)
             {
-                var a = new PointF(_points[TriangulatedPoints[i].a].x, _points[TriangulatedPoints[i].a].y);
-                var b = new PointF(_points[TriangulatedPoints[i].b].x, _points[TriangulatedPoints[i].b].y);
-                var c = new PointF(_points[TriangulatedPoints[i].c].x, _points[TriangulatedPoints[i].c].y);
+                var a = new PointF(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
+                var b = new PointF(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
+                var c = new PointF(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
 
                 Path trianglePath = drawTrianglePath(a, b, c);
 
-                var center = Geometry.centroid(TriangulatedPoints[i], _points);
+                var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
 
-                paint.Color = GetTriangleColor(gradient, center);
+                paint.Color = GetTriangleColor(Gradient, center);
 
                 canvas.DrawPath(trianglePath, paint);
             }
@@ -81,7 +81,7 @@ namespace LowPolyLibrary
             cells_y = Math.Floor((BoundsHeight + 4 * CellSize) / CellSize);
             bleed_x = ((cells_x * CellSize) - BoundsWidth) / 2;
             bleed_y = ((cells_y * CellSize) - BoundsHeight) / 2;
-            gradient = GetGradient();
+            Gradient = GetGradient();
         }
 
         private Bitmap DrawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
@@ -108,7 +108,7 @@ namespace LowPolyLibrary
 
                     var center = Geometry.centroid(tri, points);
 
-                    paint.Color = GetTriangleColor(gradient, center);
+                    paint.Color = GetTriangleColor(Gradient, center);
 
                     canvas.DrawPath(trianglePath, paint);
                 }
