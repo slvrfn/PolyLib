@@ -92,10 +92,10 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        private List<List<DelaunayTriangulator.Vertex>> makeGrowFrame()
+        private List<List<Vertex>> makeGrowFrame()
         {
-            var outEdges = new List<List<DelaunayTriangulator.Vertex>>();
-            var pointHolder = new List<DelaunayTriangulator.Vertex>();
+            var outEdges = new List<List<Vertex>>();
+            var pointHolder = new List<Vertex>();
 
             bool[] pointUsed = new bool[InternalPoints.Count];
             for (int i = 0; i < pointUsed.Length; i++)
@@ -119,12 +119,11 @@ namespace LowPolyLibrary
             //save the first point
             pointHolder.Add(point);
 
-            var animateList = new Queue<DelaunayTriangulator.Vertex>();
+            var animateList = new Queue<Vertex>();
             animateList.Enqueue(point);
-            var buffer = 0;
             while (animateList.Count > 0)
             {
-                var tempEdges = new List<DelaunayTriangulator.Vertex>();
+                var tempEdges = new List<Vertex>();
 
                 var currentPoint = animateList.Dequeue();
                 var drawList = new List<Triad>();
@@ -178,13 +177,18 @@ namespace LowPolyLibrary
                 //add the points from this iteration to the animation frame's list
                 //tolist to ensure list copy
                 pointHolder.AddRange(tempEdges.ToList());
-                buffer++;
-                if (buffer > 5)
+                //if pointholder has more points than the average number of points per number of frames
+                if (pointHolder.Count>InternalPoints.Count/numFrames)
                 {
                     outEdges.Add(pointHolder.ToList());
                     pointHolder.Clear();
-                    buffer = 0;
                 }
+            }
+            //if there are any points left over that weren't added (x<InternalPoints.Count/numFrames)
+            if (pointHolder.Count > 0)
+            {
+                outEdges.Add(pointHolder.ToList());
+                pointHolder.Clear();
             }
 
             return outEdges;
