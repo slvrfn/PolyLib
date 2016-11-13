@@ -108,7 +108,7 @@ namespace LowPoly
 			            generatedAnimation = s.Animation;
 			            break;
                     case Animation.Animations.Touch:
-                        var t = new Touch(_lowPoly,touch.X, touch.Y, 50);
+                        var t = new Touch(_lowPoly,touch.X, touch.Y, 200);
 			            generatedAnimation = t.Animation;
 			            break;
 			    }

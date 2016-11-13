@@ -13,19 +13,16 @@ namespace LowPolyLibrary
     {
         internal Grow(Triangulation triangulation): base(triangulation) {}
 
-        public AnimationDrawable Animation
-        {
-            get { return makeAnimation(); }
-        }
+        public AnimationDrawable Animation => makeAnimation();
 
-        public List<Bitmap> createGrowAnimBitmap()
+        private List<Bitmap> createGrowAnimBitmap()
         {
-            var frameList = makeGrowFrame(_points);
+            var frameList = makeGrowFrame();
             var frameBitmaps = drawPointFrame(frameList);
             return frameBitmaps;
         }
 
-        private List<Bitmap> drawPointFrame(List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>> edgeFrameList)
+        private List<Bitmap> drawPointFrame(List<List<DelaunayTriangulator.Vertex>> edgeFrameList)
         {
             var outBitmaps = new List<Bitmap>();
 
@@ -36,9 +33,10 @@ namespace LowPolyLibrary
             paint.StrokeWidth = 5f;
 
             //foreach (var frame in edgeFrameList)
-            for (int j = 0; j < edgeFrameList.Count; j++)
+            for (int i = 0; i < edgeFrameList.Count; i++)
             {
                 Bitmap drawingCanvas;
+#warning Trycatch for bitmap memory error
                 //TODO this trycatch is temp to avoid out of memory on grow animation
                 try
                 {
@@ -53,28 +51,31 @@ namespace LowPolyLibrary
 
                 Canvas canvas = new Canvas(drawingCanvas);
 
-                for (int i = 0; i < edgeFrameList[j].Count; i++)
+                foreach (var tri in triangulatedPoints)
                 {
-                    var point1 = new PointF(edgeFrameList[j][i].Item1.x, edgeFrameList[j][i].Item1.y);
-                    var point2 = new PointF(edgeFrameList[j][i].Item2.x, edgeFrameList[j][i].Item2.y);
-                    Path path = drawPath(point1, point2);
-                    canvas.DrawPath(path, paint);
+                    if (edgeFrameList[i].Contains(_points[tri.a]) && edgeFrameList[i].Contains(_points[tri.b]) && edgeFrameList[i].Contains(_points[tri.c]))
+                    {
+                        var a = new PointF(_points[tri.a].x, _points[tri.a].y);
+                        var b = new PointF(_points[tri.b].x, _points[tri.b].y);
+                        var c = new PointF(_points[tri.c].x, _points[tri.c].y);
+
+                        Path trianglePath = drawTrianglePath(a, b, c);
+
+                        var center = Geometry.centroid(tri, _points);
+
+                        paint.Color = getTriangleColor(gradient, center);
+
+                        canvas.DrawPath(trianglePath, paint);
+                    }
                 }
 
-                //foreach (var point in frame)
-                //{
-                //	var point1 = new PointF(point.Item1.x, point.Item1.y);
-                //	var point2 = new PointF(point.Item2.x, point.Item2.y);
-                //	Path path = drawPath(point1, point2);
-                //	canvas.DrawPath(path, paint);
-                //}
                 outBitmaps.Add(drawingCanvas);
             }
 
             return outBitmaps;
         }
 
-        public AnimationDrawable makeAnimation()
+        private AnimationDrawable makeAnimation()
         {
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
@@ -89,33 +90,33 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        internal List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>> makeGrowFrame(List<DelaunayTriangulator.Vertex> generatedPoints)
+        private List<List<DelaunayTriangulator.Vertex>> makeGrowFrame()
         {
-            var outEdges = new List<List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>>();
-            var edgeHolder = new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+            var outEdges = new List<List<DelaunayTriangulator.Vertex>>();
+            var edgeHolder = new List<DelaunayTriangulator.Vertex>();
             //for (int i = 0; i < 30; i++)
             //{
             //	outEdges.Add(new List<Tuple<Vertex, Vertex>>());
             //}
             //for tracking which points have been used
-            bool[] pointUsed = new bool[generatedPoints.Count];
+            bool[] pointUsed = new bool[_points.Count];
             for (int i = 0; i < pointUsed.Length; i++)
             {
                 pointUsed[i] = false;
             }
 
             var rand = new Random();
-            var index = rand.Next(generatedPoints.Count);
-            var point = generatedPoints[index];
+            var index = rand.Next(_points.Count);
+            var point = _points[index];
             pointUsed[index] = true;
 
             var animateList = new Queue<DelaunayTriangulator.Vertex>();
-
+            edgeHolder.Add(point);
             animateList.Enqueue(point);
             var odd = 0;
             while (animateList.Count > 0)
             {
-                var tempEdges = new List<Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>>();
+                var tempEdges = new List<DelaunayTriangulator.Vertex>();
 
                 var currentPoint = animateList.Dequeue();
                 var drawList = new List<Triad>();
@@ -136,36 +137,32 @@ namespace LowPolyLibrary
                         pointUsed[tri.a] = true;
 
                         //if p is not equal to the tri vertex
-                        if (!currentPoint.Equals(generatedPoints[tri.a]))
+                        if (!currentPoint.Equals(_points[tri.a]))
                         {
                             //work on the point next iteration
-                            animateList.Enqueue(generatedPoints[tri.a]);
-                            //create an edge
-                            var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(currentPoint, generatedPoints[tri.a]);
-                            //save the edge
-                            tempEdges.Add(edge);
+                            animateList.Enqueue(_points[tri.a]);
+                            //save the point
+                            tempEdges.Add(_points[tri.a]);
                         }
                     }
                     if (!pointUsed[tri.b])
                     {
                         pointUsed[tri.b] = true;
 
-                        if (!currentPoint.Equals(generatedPoints[tri.b]))
+                        if (!currentPoint.Equals(_points[tri.b]))
                         {
-                            animateList.Enqueue(generatedPoints[tri.b]);
-                            var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(currentPoint, generatedPoints[tri.b]);
-                            tempEdges.Add(edge);
+                            animateList.Enqueue(_points[tri.b]);
+                            tempEdges.Add(_points[tri.b]);
                         }
                     }
                     if (!pointUsed[tri.c])
                     {
                         pointUsed[tri.c] = true;
 
-                        if (!currentPoint.Equals(generatedPoints[tri.c]))
+                        if (!currentPoint.Equals(_points[tri.c]))
                         {
-                            animateList.Enqueue(generatedPoints[tri.c]);
-                            var edge = new Tuple<DelaunayTriangulator.Vertex, DelaunayTriangulator.Vertex>(currentPoint, generatedPoints[tri.c]);
-                            tempEdges.Add(edge);
+                            animateList.Enqueue(_points[tri.c]);
+                            tempEdges.Add(_points[tri.c]);
                         }
                     }
 
