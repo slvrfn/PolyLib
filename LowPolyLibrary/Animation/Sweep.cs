@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using DelaunayTriangulator;
@@ -17,7 +18,7 @@ namespace LowPolyLibrary
             get { return MakeAnimation(); }
         }
 
-        public Bitmap CreateSweepAnimBitmap(int frame, int direction)
+		public Bitmap CreateBitmap(int frame, int direction)
         {
             var frameList = makeSweepPointsFrame(frame, direction);
             var frameBitmap = drawPointFrame(frameList);
@@ -33,7 +34,7 @@ namespace LowPolyLibrary
 
             for (int i = 0; i < numFrames; i++)
             {
-                Bitmap frameBitmap = CreateSweepAnimBitmap(i, direction);
+                Bitmap frameBitmap = CreateBitmap(i, direction);
                 
                 BitmapDrawable frame = new BitmapDrawable(frameBitmap);
 
@@ -43,20 +44,13 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        internal List<PointF>[] makeSweepPointsFrame(int frameNum, int direction)
+        internal List<Tuple<PointF,PointF>> makeSweepPointsFrame(int frameNum, int direction)
         {
-            var framePoints = new List<PointF>();
-            //all the points will move within 15 degrees of the same general direction
+            var framePoints = new List<Tuple<PointF, PointF>>();
+            //all the points will move within 15 degrees of the same direction
             direction = Geometry.getAngleInRange(direction, 15);
-            //workingFrameList is set either to the initial List<PointF>[] of points, or the one passed into this method
-            List<PointF>[] workingFrameList = new List<PointF>[FramedPoints.Length];
-            for (int i = 0; i < FramedPoints.Length; i++)
-            {
-                workingFrameList[i] = new List<PointF>();
-                workingFrameList[i].AddRange(FramedPoints[i]);
-            }
 
-            foreach (var point in workingFrameList[frameNum])
+            foreach (var point in FramedPoints[frameNum])
             {
                 //created bc cant modify point
                 var wPoint = new PointF(point.X, point.Y);
@@ -67,19 +61,14 @@ namespace LowPolyLibrary
 
                 wPoint.X += (float)xComponent;
                 wPoint.Y += (float)yComponent;
-                framePoints.Add(wPoint);
-            }
-            workingFrameList[frameNum] = framePoints;
-
-            for (int i = 0; i < numFrames; i++)
-            {
-                workingFrameList[i].AddRange(WideFramedPoints[i]);
+				var tup = new Tuple<PointF, PointF>(point,wPoint);
+                framePoints.Add(tup);
             }
 
-            return workingFrameList;
+			return framePoints;
         }
         
-        internal Bitmap drawPointFrame(List<PointF>[] frameList)
+		internal Bitmap drawPointFrame(List<Tuple<PointF, PointF>> pointChanges)
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
             Canvas canvas = new Canvas(drawingCanvas);
@@ -88,31 +77,27 @@ namespace LowPolyLibrary
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
-            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
+			//ensure copy of internal points because it will be modified
+			var convertedPoints = InternalPoints.ToList();
             //can we just stay in PointF's?
-            foreach (var frame in frameList)
+            foreach (var point in pointChanges)
             {
-                foreach (var point in frame)
-                {
-                    var currentlyExists = convertedPoints.Exists(x =>
-                        x.x.CompareTo(point.X) == 0 &&
-                        x.y.CompareTo(point.Y) == 0
-                    );
-                    if (!currentlyExists)
-                        convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
-                }
+				var oldPoint = new Vertex(point.Item1.X, point.Item1.Y);
+				var newPoint = new Vertex(point.Item2.X, point.Item2.Y);
+				convertedPoints.Remove(oldPoint);
+				convertedPoints.Add(newPoint);
             }
             var angulator = new Triangulator();
-            var triangulatedPoints = angulator.Triangulation(convertedPoints);
-            for (int i = 0; i < triangulatedPoints.Count; i++)
+			var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
+            for (int i = 0; i < newTriangulatedPoints.Count; i++)
             {
-                var a = new PointF(convertedPoints[triangulatedPoints[i].a].x, convertedPoints[triangulatedPoints[i].a].y);
-                var b = new PointF(convertedPoints[triangulatedPoints[i].b].x, convertedPoints[triangulatedPoints[i].b].y);
-                var c = new PointF(convertedPoints[triangulatedPoints[i].c].x, convertedPoints[triangulatedPoints[i].c].y);
+                var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
+                var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
+                var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
                 Path trianglePath = drawTrianglePath(a, b, c);
 
-                var center = Geometry.centroid(triangulatedPoints[i], convertedPoints);
+                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
                 paint.Color = getTriangleColor(Gradient, center);
 
