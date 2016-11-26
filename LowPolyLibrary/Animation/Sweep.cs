@@ -44,31 +44,25 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        internal List<Tuple<PointF,PointF>> makeSweepPointsFrame(int frameNum, int direction)
+        internal List<AnimatedPoint> makeSweepPointsFrame(int frameNum, int direction)
         {
-            var framePoints = new List<Tuple<PointF, PointF>>();
+			var animatedPoints = new List<AnimatedPoint>();
             //all the points will move within 15 degrees of the same direction
             direction = Geometry.getAngleInRange(direction, 15);
 
             foreach (var point in FramedPoints[frameNum])
             {
-                //created bc cant modify point
-                var wPoint = new PointF(point.X, point.Y);
-
-                var distCanMove = shortestDistanceFromPoints(wPoint);
+                var distCanMove = shortestDistanceFromPoints(point);
                 var xComponent = Geometry.getXComponent(direction, distCanMove);
                 var yComponent = Geometry.getYComponent(direction, distCanMove);
-
-                wPoint.X += (float)xComponent;
-                wPoint.Y += (float)yComponent;
-				var tup = new Tuple<PointF, PointF>(point,wPoint);
-                framePoints.Add(tup);
+				var p = new AnimatedPoint(point, (float)xComponent, (float)yComponent);
+                animatedPoints.Add(p);
             }
 
-			return framePoints;
+			return animatedPoints;
         }
         
-		internal Bitmap drawPointFrame(List<Tuple<PointF, PointF>> pointChanges)
+		internal Bitmap drawPointFrame(List<AnimatedPoint> pointChanges)
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
             Canvas canvas = new Canvas(drawingCanvas);
@@ -80,10 +74,10 @@ namespace LowPolyLibrary
 			//ensure copy of internal points because it will be modified
 			var convertedPoints = InternalPoints.ToList();
             //can we just stay in PointF's?
-            foreach (var point in pointChanges)
+			foreach (var animatedPoint in pointChanges)
             {
-				var oldPoint = new Vertex(point.Item1.X, point.Item1.Y);
-				var newPoint = new Vertex(point.Item2.X, point.Item2.Y);
+				var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
+				var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
 				convertedPoints.Remove(oldPoint);
 				convertedPoints.Add(newPoint);
             }

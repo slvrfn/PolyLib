@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Triangulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Vertex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)cRectangleF.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimatedPoint.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulator\" />
