@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using DelaunayTriangulator;
@@ -40,7 +41,7 @@ namespace LowPolyLibrary
 
             for (int i = 0; i < numFrames; i++)
             {
-                Bitmap frameBitmap = createTouchAnimBitmap();
+                Bitmap frameBitmap = CreateBitmap();
 
                 BitmapDrawable frame = new BitmapDrawable(frameBitmap);
                 animation.AddFrame(frame, duration);
@@ -49,10 +50,10 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        private Bitmap createTouchAnimBitmap()
-        {
-            makeTouchPointsFrame();
-            var frameBitmap = drawPointFrame();
+		private Bitmap CreateBitmap()
+		{
+            var points = makeTouchPointsFrame();
+            var frameBitmap = drawPointFrame(points);
             return frameBitmap;
         }
 
@@ -164,19 +165,15 @@ namespace LowPolyLibrary
             }
         }
 
-        internal void makeTouchPointsFrame()
+        internal List<AnimatedPoint> makeTouchPointsFrame()
         {
-            var removePoints = new List<PointF>();
-            var newPoints = new List<PointF>();
+			var animatedPoints = new List<AnimatedPoint>();
             //var pointsForMeasure = new List<PointF>();
             //pointsForMeasure.AddRange(InRange);
             //pointsForMeasure.AddRange(InRangOfRecs);
             var rand = new Random();
             foreach (var point in InRange)
             {
-                var wPoint = new PointF(point.X, point.Y);
-                //created bc cant modify point
-                removePoints.Add(point);
                 //var direction = (int)getPolarCoordinates(touch, wPoint);
 
                 //var distCanMove = shortestDistanceFromPoints(point, pointsForMeasure, direction);
@@ -187,19 +184,13 @@ namespace LowPolyLibrary
                 var xComponent = rand.Next(-10, 10);
                 var yComponent = rand.Next(-10, 10);
 
-                wPoint.X += (float)xComponent;
-                wPoint.Y += (float)yComponent;
-                newPoints.Add(wPoint);
+				var animPoint = new AnimatedPoint(point, xComponent, yComponent);
+				animatedPoints.Add(animPoint);
             }
-            //removePoints and newPoints should always be the same length
-            for (int i = 0; i < removePoints.Count - 1; i++)
-            {
-                InRange.Remove(removePoints[i]);
-                InRange.Add(newPoints[i]);
-            }
+			return animatedPoints;
         }
 
-        private Bitmap drawPointFrame()
+        private Bitmap drawPointFrame(List<AnimatedPoint> pointChanges)
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb8888);
             Canvas canvas = new Canvas(drawingCanvas);
@@ -208,27 +199,17 @@ namespace LowPolyLibrary
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
-            //generating a new base triangulation. if an old one exists get rid of it
-            //if (poTriDic != null)
-            //    poTriDic = new Dictionary<System.Drawing.PointF, List<Triad>>();
+			//ensure copy of internal points because it will be modified
+			var convertedPoints = InternalPoints.ToList();
+			//can we just stay in PointF's?
+			foreach (var animatedPoint in pointChanges)
+			{
+				var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
+				var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
+				convertedPoints.Remove(oldPoint);
+				convertedPoints.Add(newPoint);
+			}
 
-            var convertedPoints = new List<DelaunayTriangulator.Vertex>();
-            //can we just stay in PointF's?
-
-            var measurePoints = new List<PointF>();
-            measurePoints.AddRange(InRange);
-            measurePoints.AddRange(InRangOfRecs);
-            measurePoints.AddRange(OutOfRange);
-
-            foreach (var point in measurePoints)
-            {
-                var currentlyExists = convertedPoints.Exists(x =>
-                        x.x.CompareTo(point.X) == 0 &&
-                        x.y.CompareTo(point.Y) == 0
-                    );
-                if (!currentlyExists)
-                    convertedPoints.Add(new DelaunayTriangulator.Vertex(point.X, point.Y));
-            }
             var angulator = new Triangulator();
             var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
             for (int i = 0; i < newTriangulatedPoints.Count; i++)
