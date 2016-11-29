@@ -22,7 +22,7 @@ namespace LowPolyLibrary
             return frameBitmaps;
         }
 
-        private List<Bitmap> DrawPointFrame(List<List<DelaunayTriangulator.Vertex>> edgeFrameList)
+        private List<Bitmap> DrawPointFrame(List<List<AnimatedPoint>> edgeFrameList)
         {
             var outBitmaps = new List<Bitmap>();
 
@@ -51,7 +51,8 @@ namespace LowPolyLibrary
 
                 for (int j = 0; j <= i; j++)
                 {
-                    thisFrame.AddRange(edgeFrameList[j]);
+					var tempList = edgeFrameList[j].ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y);});
+					thisFrame.AddRange(tempList);
                 }
 
                 foreach (var tri in triangulatedPoints)
@@ -92,10 +93,10 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        private List<List<Vertex>> MakeGrowFrame()
+        private List<List<AnimatedPoint>> MakeGrowFrame()
         {
-            var outEdges = new List<List<Vertex>>();
-            var pointHolder = new List<Vertex>();
+            var outEdges = new List<List<AnimatedPoint>>();
+            var pointHolder = new List<AnimatedPoint>();
 
             bool[] pointUsed = new bool[InternalPoints.Count];
             for (int i = 0; i < pointUsed.Length; i++)
@@ -117,13 +118,13 @@ namespace LowPolyLibrary
             //set the first point as used
             pointUsed[indexT] = true;
             //save the first point
-            pointHolder.Add(point);
+			pointHolder.Add(new AnimatedPoint(point));
 
             var animateList = new Queue<Vertex>();
             animateList.Enqueue(point);
             while (animateList.Count > 0)
             {
-                var tempEdges = new List<Vertex>();
+                var tempEdges = new List<AnimatedPoint>();
 
                 var currentPoint = animateList.Dequeue();
                 var drawList = new List<Triad>();
@@ -149,7 +150,7 @@ namespace LowPolyLibrary
                             //work on the point next iteration
                             animateList.Enqueue(InternalPoints[tri.a]);
                             //save the point
-                            tempEdges.Add(InternalPoints[tri.a]);
+							tempEdges.Add(new AnimatedPoint(InternalPoints[tri.a]));
                         }
                     }
                     if (!pointUsed[tri.b])
@@ -159,7 +160,7 @@ namespace LowPolyLibrary
                         if (!currentPoint.Equals(InternalPoints[tri.b]))
                         {
                             animateList.Enqueue(InternalPoints[tri.b]);
-                            tempEdges.Add(InternalPoints[tri.b]);
+							tempEdges.Add(new AnimatedPoint(InternalPoints[tri.b]));
                         }
                     }
                     if (!pointUsed[tri.c])
@@ -169,7 +170,7 @@ namespace LowPolyLibrary
                         if (!currentPoint.Equals(InternalPoints[tri.c]))
                         {
                             animateList.Enqueue(InternalPoints[tri.c]);
-                            tempEdges.Add(InternalPoints[tri.c]);
+							tempEdges.Add(new AnimatedPoint(InternalPoints[tri.c]));
                         }
                     }
 

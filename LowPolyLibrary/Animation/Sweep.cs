@@ -11,16 +11,19 @@ namespace LowPolyLibrary
 {
     public class Sweep : Animation
     {
+		private int Direction = -1;
+
         internal Sweep(Triangulation triangulation): base(triangulation) {}
 
         public AnimationDrawable Animation
         {
-            get { return MakeAnimation(); }
+            get {  Direction = Geometry.get360Direction();
+				return MakeAnimation(); }
         }
 
-		public Bitmap CreateBitmap(int frame, int direction)
+		public Bitmap CreateBitmap()
         {
-            var frameList = makeSweepPointsFrame(frame, direction);
+            var frameList = makeSweepPointsFrame();
             var frameBitmap = drawPointFrame(frameList);
             return frameBitmap;
         }
@@ -30,11 +33,12 @@ namespace LowPolyLibrary
             AnimationDrawable animation = new AnimationDrawable();
             animation.OneShot = true;
             var duration = 42 * 2;//roughly how many milliseconds each frame will be for 24fps
-            var direction = Geometry.get360Direction();
+            
 
             for (int i = 0; i < numFrames; i++)
             {
-                Bitmap frameBitmap = CreateBitmap(i, direction);
+				CurrentFrame = i;
+                Bitmap frameBitmap = CreateBitmap();
                 
                 BitmapDrawable frame = new BitmapDrawable(frameBitmap);
 
@@ -44,17 +48,17 @@ namespace LowPolyLibrary
             return animation;
         }
 
-        internal List<AnimatedPoint> makeSweepPointsFrame(int frameNum, int direction)
+		internal List<AnimatedPoint> makeSweepPointsFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();
             //all the points will move within 15 degrees of the same direction
-            direction = Geometry.getAngleInRange(direction, 15);
+            var localDirection = Geometry.getAngleInRange(Direction, 15);
 
-            foreach (var point in FramedPoints[frameNum])
+            foreach (var point in FramedPoints[CurrentFrame])
             {
                 var distCanMove = shortestDistanceFromPoints(point);
-                var xComponent = Geometry.getXComponent(direction, distCanMove);
-                var yComponent = Geometry.getYComponent(direction, distCanMove);
+                var xComponent = Geometry.getXComponent(localDirection, distCanMove);
+                var yComponent = Geometry.getYComponent(localDirection, distCanMove);
 				var p = new AnimatedPoint(point, (float)xComponent, (float)yComponent);
                 animatedPoints.Add(p);
             }

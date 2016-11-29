@@ -21,5 +21,19 @@ namespace LowPolyLibrary
 			XDisplacement = xDisplacement;
 			YDisplacement = yDisplacement;
 		}
+
+		public AnimatedPoint(PointF point)
+		{
+			Point = point;
+			XDisplacement = 0.0f;
+			YDisplacement = 0.0f;
+		}
+
+		public AnimatedPoint(DelaunayTriangulator.Vertex vertex)
+		{
+			Point = new PointF(vertex.x, vertex.y);
+			XDisplacement = 0.0f;
+			YDisplacement = 0.0f;
+		}
 	}
 }

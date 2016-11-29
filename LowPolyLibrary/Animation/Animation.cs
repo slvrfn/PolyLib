@@ -13,6 +13,7 @@ namespace LowPolyLibrary
     public class Animation
     {
         internal int numFrames = 12; //static necessary for creation of FramedPoints list
+		internal int CurrentFrame = 0;
         internal List<PointF>[] FramedPoints;
         internal List<PointF>[] WideFramedPoints;
         internal Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
