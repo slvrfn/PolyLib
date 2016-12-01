@@ -9,7 +9,7 @@ using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary
 {
-    class Touch : Animation
+    class Touch : AnimationBase
     {
         private int _lowerBound;
         private int _upperBound;
@@ -29,32 +29,6 @@ namespace LowPolyLibrary
             TouchRadius = radius;
 
             setPointsAroundTouch();
-        }
-
-        public AnimationDrawable Animation => MakeAnimation();
-
-        private AnimationDrawable MakeAnimation()
-        {
-            AnimationDrawable animation = new AnimationDrawable();
-            animation.OneShot = true;
-            var duration = 42 * 2;//roughly how many milliseconds each frame will be for 24fps
-
-            for (int i = 0; i < numFrames; i++)
-            {
-                Bitmap frameBitmap = CreateBitmap();
-
-                BitmapDrawable frame = new BitmapDrawable(frameBitmap);
-                animation.AddFrame(frame, duration);
-            }
-
-            return animation;
-        }
-
-		private Bitmap CreateBitmap()
-		{
-            var points = makeTouchPointsFrame();
-            var frameBitmap = drawPointFrame(points);
-            return frameBitmap;
         }
 
         internal List<PointF> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
@@ -165,7 +139,16 @@ namespace LowPolyLibrary
             }
         }
 
-        internal List<AnimatedPoint> makeTouchPointsFrame()
+		//helper for "push away from touch"
+		internal double frameLocation(int frame, int totalFrames, Double distanceToCcover)
+		{
+			//method to be used when a final destination is known, and you want to get a proportional distance to have moved up to that point at this point in time
+			var ratioToFinalMovement = frame / (Double)totalFrames;
+			var thisCoord = ratioToFinalMovement * distanceToCcover;
+			return thisCoord;
+		}
+
+        internal override List<AnimatedPoint> RenderFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();
             //var pointsForMeasure = new List<PointF>();
@@ -190,7 +173,8 @@ namespace LowPolyLibrary
 			return animatedPoints;
         }
 
-        private Bitmap drawPointFrame(List<AnimatedPoint> pointChanges)
+		//only overriding to force display of red ring of current touch area
+        internal override Bitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb8888);
             Canvas canvas = new Canvas(drawingCanvas);
@@ -230,6 +214,7 @@ namespace LowPolyLibrary
             paint.Color = Android.Graphics.Color.Crimson;
             canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
             return drawingCanvas;
-        }
+                 }
+
     }
 }

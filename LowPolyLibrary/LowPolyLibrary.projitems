@@ -9,7 +9,7 @@
     <Import_RootNamespace>LowPolyLibrary</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Animation\Animation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Grow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Sweep.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Touch.cs" />

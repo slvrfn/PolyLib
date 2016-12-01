@@ -55,6 +55,143 @@ namespace LowPolyLibrary
             return angle * toDeg;
         }
 
+		internal static List<cRectangleF[]> createRectangleOverlays(int angle, int numFrames, int boundsWidth, int boundsHeight)
+		{
+			//array size numFrames of rectangles. each array entry serves as a rotated cRectangleF
+			cRectangleF[] frames = new cRectangleF[numFrames];
+
+			//slope of the given angle
+			var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
+			var recipSlope = -1 / slope;
+
+			PointF ADIntersection;
+			PointF DCIntersection;
+			var drawingAreaA = new PointF(0, boundsHeight);
+			var drawingAreaB = new PointF(boundsWidth, boundsHeight);
+			var drawingAreaC = new PointF(boundsWidth, 0);
+			var drawingAreaD = new PointF(0, 0);
+
+			PointF cornerA;
+			PointF cornerB;
+			PointF cornerC;
+			PointF cornerD;
+
+			if (angle < 90)
+			{
+				//quad1
+				cornerA = drawingAreaA;
+				cornerB = drawingAreaB;
+				cornerC = drawingAreaC;
+				cornerD = drawingAreaD;
+			}
+			else if (angle < 180)
+			{
+				//quad2
+				cornerA = drawingAreaD;
+				cornerB = drawingAreaA;
+				cornerC = drawingAreaB;
+				cornerD = drawingAreaC;
+			}
+			else if (angle < 270)
+			{
+				//quad3
+				cornerA = drawingAreaC;
+				cornerB = drawingAreaD;
+				cornerC = drawingAreaA;
+				cornerD = drawingAreaB;
+			}
+			else
+			{
+				//quad4
+				cornerA = drawingAreaB;
+				cornerB = drawingAreaC;
+				cornerC = drawingAreaD;
+				cornerD = drawingAreaA;
+			}
+
+			ADIntersection = Geometry.getIntersection(slope, cornerA, cornerD);
+			DCIntersection = Geometry.getIntersection(recipSlope, cornerD, cornerC);
+			//ABIntersection used to calculate framewidth
+			var ABIntersection = Geometry.getIntersection(slope, cornerA, cornerB);
+			var frameWidth = (float)Geometry.dist(ADIntersection, ABIntersection) / numFrames;
+			var wideOverlays = createWideRectangleOverlays(frameWidth, ADIntersection, DCIntersection, angle, numFrames, boundsWidth, boundsHeight);
+
+			var walkedB = Geometry.walkAngle(angle, frameWidth, ADIntersection);
+			var walkedC = Geometry.walkAngle(angle, frameWidth, DCIntersection);
+			frames[0] = new cRectangleF
+			{
+				A = new PointF(ADIntersection.X, ADIntersection.Y),
+				B = new PointF(walkedB.X, walkedB.Y),
+				C = new PointF(walkedC.X, walkedC.Y),
+				D = new PointF(DCIntersection.X, DCIntersection.Y)
+			};
+
+			//starts from second array entry because first entry is assigned above
+			for (int i = 1; i < numFrames; i++)
+			{
+				var overlay = new cRectangleF();
+				overlay.A = frames[i - 1].B;
+				overlay.D = frames[i - 1].C;
+				overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
+				overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
+				frames[i] = overlay;
+			}
+			var returnList = new List<cRectangleF[]>();
+			returnList.Add(frames);
+			returnList.Add(wideOverlays);
+			return returnList;
+		}
+
+		internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, PointF A, PointF D, int angle, int numFrames, int boundsWidth, int boundsHeight)
+		{
+			//first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
+			//all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
+
+			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
+			cRectangleF[] frames = new cRectangleF[numFrames];
+
+
+			//represents the corner A of the regular overlays
+			var overlayA = new PointF(A.X, A.Y);
+			var overlayD = new PointF(D.X, D.Y);
+
+			var tempWidth = boundsWidth / 2;
+			var tempHeight = boundsHeight / 2;
+
+			frames[0] = new cRectangleF();
+			frames[0].A = Geometry.walkAngle(angle + 90, tempHeight, overlayA);
+			frames[0].B = Geometry.walkAngle(angle, frameWidth, frames[0].A);
+			frames[0].A = Geometry.walkAngle(angle + 180, tempWidth, frames[0].A);
+			frames[0].D = Geometry.walkAngle(angle + 270, tempHeight, overlayD);
+			frames[0].C = Geometry.walkAngle(angle, frameWidth, frames[0].D);
+			frames[0].D = Geometry.walkAngle(angle + 180, tempWidth, frames[0].D);
+
+
+			//this logic is for grabbing all points (even those outside the visible drawing area)
+			//starts at 1 cause first array spot handled above
+			for (int i = 1; i < numFrames; i++)
+			{
+				cRectangleF overlay = new cRectangleF();
+				if (i == numFrames - 1)
+				{
+					overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
+					overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
+					overlay.B = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.A);
+					overlay.C = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.D);
+				}
+				else
+				{
+					overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
+					overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
+					overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
+					overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
+				}
+				frames[i] = overlay;
+			}
+
+			return frames;
+		}
+
         internal static PointF getIntersection(float slope, PointF linePoint, PointF perpendicularLinePoint)
         {
             var linePoint2 = new PointF();

@@ -9,133 +9,95 @@ using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary
 {
-    class Grow : Animation
+    class Grow : AnimationBase
     {
-        internal Grow(Triangulation triangulation): base(triangulation) {}
+		bool[] pointUsed;
+		Queue<Vertex> animateList;
+		List<AnimatedPoint> TotalAnimatedPoints;
 
-        public AnimationDrawable Animation => MakeAnimation();
+        internal Grow(Triangulation triangulation): base(triangulation) 
+		{
+			TotalAnimatedPoints = new List<AnimatedPoint>();
+			pointUsed = new bool[InternalPoints.Count];
+			for (int i = 0; i < pointUsed.Length; i++)
+			{
+				pointUsed[i] = false;
+			}
 
-        private List<Bitmap> CreateGrowAnimBitmap()
+			var rand = new Random();
+			//visible rec so that the start of the anim is from a point visible on screen
+			var visibleRecIndex = rand.Next(FramedPoints.Length);
+			//index of a randoom point on the random visible rec
+			var index = rand.Next(FramedPoints[visibleRecIndex].Count);
+			//pointF version of the point
+			var pointT = FramedPoints[visibleRecIndex][index];
+			//vertex version of the point
+			var point = new Vertex(pointT.X, pointT.Y);
+			//index of the chosen point in the overall points list
+			var indexT = InternalPoints.IndexOf(point);
+			//set the first point as used
+			pointUsed[indexT] = true;
+
+			animateList = new Queue<Vertex>();
+			animateList.Enqueue(point);
+		}
+
+        internal override Bitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {
-            var frameList = MakeGrowFrame();
-            var frameBitmaps = DrawPointFrame(frameList);
-            return frameBitmaps;
-        }
-
-        private List<Bitmap> DrawPointFrame(List<List<AnimatedPoint>> edgeFrameList)
-        {
-            var outBitmaps = new List<Bitmap>();
-
-            Paint paint = new Paint();
+			Paint paint = new Paint();
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
-            //foreach (var frame in edgeFrameList)
-            for (int i = 0; i < edgeFrameList.Count; i++)
-            {
-                Bitmap drawingCanvas;
+			Bitmap drawingCanvas = null;
 #warning Trycatch for bitmap memory error
-                //TODO this trycatch is temp to avoid out of memory on grow animation
-                try
-                {
-                    drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
-                }
-                catch (Exception e)
-                {
+			//TODO this trycatch is temp to avoid out of memory on grow animation
+			try
+			{
+				drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
+			}
+			catch (Exception e)
+			{
+				
+			}
+			Canvas canvas = new Canvas(drawingCanvas);
 
-                    continue;
-                }
-                Canvas canvas = new Canvas(drawingCanvas);
+			var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
 
-                var thisFrame = new List<Vertex>();
+			foreach (var tri in triangulatedPoints)
+			{
+				if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
+				{
+					var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
+					var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
+					var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
 
-                for (int j = 0; j <= i; j++)
-                {
-					var tempList = edgeFrameList[j].ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y);});
-					thisFrame.AddRange(tempList);
-                }
+					Path trianglePath = drawTrianglePath(a, b, c);
 
-                foreach (var tri in triangulatedPoints)
-                {
-                    if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
-                    {
-                        var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
-                        var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
-                        var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
+					var center = Geometry.centroid(tri, InternalPoints);
 
-                        Path trianglePath = drawTrianglePath(a, b, c);
+					paint.Color = getTriangleColor(Gradient, center);
 
-                        var center = Geometry.centroid(tri, InternalPoints);
+					canvas.DrawPath(trianglePath, paint);
+				}
+			}
+			return drawingCanvas;
+		}
 
-                        paint.Color = getTriangleColor(Gradient, center);
-
-                        canvas.DrawPath(trianglePath, paint);
-                    }
-                }
-                outBitmaps.Add(drawingCanvas);
-            }
-
-            return outBitmaps;
-        }
-
-        private AnimationDrawable MakeAnimation()
+        internal override List<AnimatedPoint> RenderFrame()
         {
-            AnimationDrawable animation = new AnimationDrawable();
-            animation.OneShot = true;
-            var duration = 42 * 2;//roughly how many milliseconds each frame will be for 24fps
+			var outPoints = new List<AnimatedPoint>();
 
-            List<Bitmap> frameBitmaps = CreateGrowAnimBitmap();
-            foreach (var frame in frameBitmaps)
-            {
-                BitmapDrawable conv = new BitmapDrawable(frame);
-                animation.AddFrame(conv, duration);
-            }
-            return animation;
-        }
-
-        private List<List<AnimatedPoint>> MakeGrowFrame()
-        {
-            var outEdges = new List<List<AnimatedPoint>>();
-            var pointHolder = new List<AnimatedPoint>();
-
-            bool[] pointUsed = new bool[InternalPoints.Count];
-            for (int i = 0; i < pointUsed.Length; i++)
-            {
-                pointUsed[i] = false;
-            }
-
-            var rand = new Random();
-            //visible rec so that the start of the anim is from a point visible on screen
-            var visibleRecIndex = rand.Next(FramedPoints.Length);
-            //index of a randoom point on the random visible rec
-            var index = rand.Next(FramedPoints[visibleRecIndex].Count);
-            //pointF version of the point
-            var pointT = FramedPoints[visibleRecIndex][index];
-            //vertex version of the point
-            var point = new Vertex(pointT.X,pointT.Y);
-            //index of the chosen point in the overall points list
-            var indexT = InternalPoints.IndexOf(point);
-            //set the first point as used
-            pointUsed[indexT] = true;
-            //save the first point
-			pointHolder.Add(new AnimatedPoint(point));
-
-            var animateList = new Queue<Vertex>();
-            animateList.Enqueue(point);
-            while (animateList.Count > 0)
-            {
+			for (int i = 0; i < InternalPoints.Count / numFrames; i++)
+			{
                 var tempEdges = new List<AnimatedPoint>();
 
                 var currentPoint = animateList.Dequeue();
-                var drawList = new List<Triad>();
-                try
-                {
-                    drawList = poTriDic[new PointF(currentPoint.x, currentPoint.y)];
-                }
-                catch (Exception)
-                {
 
-                }
+				//save the first point
+				outPoints.Add(new AnimatedPoint(currentPoint));
+
+                var drawList = new List<Triad>();
+                drawList = poTriDic[new PointF(currentPoint.x, currentPoint.y)];
                 foreach (var tri in drawList)
                 {
                     //if the point is not used
@@ -177,22 +139,10 @@ namespace LowPolyLibrary
                 }
                 //add the points from this iteration to the animation frame's list
                 //tolist to ensure list copy
-                pointHolder.AddRange(tempEdges.ToList());
-                //if pointholder has more points than the average number of points per number of frames
-                if (pointHolder.Count>InternalPoints.Count/numFrames)
-                {
-                    outEdges.Add(pointHolder.ToList());
-                    pointHolder.Clear();
-                }
+                outPoints.AddRange(tempEdges.ToList());
             }
-            //if there are any points left over that weren't added (x<InternalPoints.Count/numFrames)
-            if (pointHolder.Count > 0)
-            {
-                outEdges.Add(pointHolder.ToList());
-                pointHolder.Clear();
-            }
-
-            return outEdges;
+			TotalAnimatedPoints.AddRange(outPoints);
+			return TotalAnimatedPoints;
         }
     }
 }
