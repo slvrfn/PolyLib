@@ -19,7 +19,7 @@ namespace LowPolyLibrary
         internal List<PointF>[] FramedPoints;
         internal List<PointF>[] WideFramedPoints;
         internal Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
-        private double bleed_x, bleed_y;
+        internal double bleed_x, bleed_y;
 
         public List<Triad> triangulatedPoints;
         internal Bitmap Gradient;
@@ -91,11 +91,12 @@ namespace LowPolyLibrary
 				var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
 				var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
-				Path trianglePath = drawTrianglePath(a, b, c);
+				Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
 
 				var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
-				paint.Color = getTriangleColor(Gradient, center);
+				var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+				paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
 				canvas.DrawPath(trianglePath, paint);
 			}
@@ -120,53 +121,7 @@ namespace LowPolyLibrary
 			}
 
 			return animation;
-   		}
-
-        internal Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
-        {
-            Path path = new Path();
-            path.SetFillType(Path.FillType.EvenOdd);
-            path.MoveTo(b.X, b.Y);
-            path.LineTo(c.X, c.Y);
-            path.LineTo(a.X, a.Y);
-            path.Close();
-            return path;
-        }
-
-        internal Android.Graphics.Color getTriangleColor(Bitmap gradient, System.Drawing.Point center)
-        {
-            center = keepInPicBounds(center);
-
-            System.Drawing.Color colorFromRGB;
-            try
-            {
-                colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetPixel(center.X, center.Y));
-            }
-            catch
-            {
-                colorFromRGB = System.Drawing.Color.Cyan;
-            }
-
-            Android.Graphics.Color triColor = Android.Graphics.Color.Rgb(colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
-            return triColor;
-        }
-
-        private System.Drawing.Point keepInPicBounds(System.Drawing.Point center)
-        {
-            if (center.X < 0)
-                center.X += (int)bleed_x;
-            else if (center.X > boundsWidth)
-                center.X -= (int)bleed_x;
-            else if (center.X == boundsWidth)
-                center.X -= (int)bleed_x - 1;
-            if (center.Y < 0)
-                center.Y += (int)bleed_y;
-            else if (center.Y > boundsHeight)
-                center.Y -= (int)bleed_y + 1;
-            else if (center.Y == boundsHeight)
-                center.Y -= (int)bleed_y - 1;
-            return center;
-        }
+		}
 
         internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int angle)
         {

@@ -63,11 +63,12 @@ namespace LowPolyLibrary
                 var b = new PointF(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
                 var c = new PointF(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
 
-                Path trianglePath = drawTrianglePath(a, b, c);
+                Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
 
                 var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
 
-                paint.Color = GetTriangleColor(Gradient, center);
+				var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+                paint.Color =Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
                 canvas.DrawPath(trianglePath, paint);
             }
@@ -104,63 +105,18 @@ namespace LowPolyLibrary
                     var b = new PointF(points[tri.b].x, points[tri.b].y);
                     var c = new PointF(points[tri.c].x, points[tri.c].y);
 
-                    Path trianglePath = drawTrianglePath(a, b, c);
+                    Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
 
                     var center = Geometry.centroid(tri, points);
 
-                    paint.Color = GetTriangleColor(Gradient, center);
+					var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+                    paint.Color =Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
                     canvas.DrawPath(trianglePath, paint);
                 }
             }
             return drawingCanvas;
-        }
-        
-        internal Path drawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
-	    {
-            Path path = new Path();
-            path.SetFillType(Path.FillType.EvenOdd);
-            path.MoveTo(b.X, b.Y);
-            path.LineTo(c.X, c.Y);
-            path.LineTo(a.X, a.Y);
-            path.Close();
-            return path;
-        }
-
-		internal Android.Graphics.Color GetTriangleColor(Bitmap gradient, System.Drawing.Point center)
-		{
-		    center = KeepInPicBounds(center);
-
-			System.Drawing.Color colorFromRGB;
-			try
-			{
-				colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetPixel(center.X, center.Y));
-			}
-			catch
-			{
-				colorFromRGB = System.Drawing.Color.Cyan;
-			}
-
-			Android.Graphics.Color triColor = Android.Graphics.Color.Rgb (colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
-			return triColor;
 		}
-
-	    private System.Drawing.Point KeepInPicBounds(System.Drawing.Point center)
-	    {
-            if (center.X < 0)
-                center.X += (int)bleed_x;
-            else if (center.X > BoundsWidth)
-                center.X -= (int)bleed_x;
-            else if (center.X == BoundsWidth)
-                center.X -= (int)bleed_x - 1;
-            if (center.Y < 0)
-                center.Y += (int)bleed_y;
-            else if (center.Y > BoundsHeight)
-                center.Y -= (int)bleed_y + 1;
-            else if (center.Y == BoundsHeight)
-                center.Y -= (int)bleed_y - 1;
-	        return center;
-	    }
 
 		private int[] getGradientColors()
 		{

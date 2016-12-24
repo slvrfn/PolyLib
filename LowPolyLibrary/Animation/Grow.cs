@@ -71,11 +71,12 @@ namespace LowPolyLibrary
 					var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
 					var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
 
-					Path trianglePath = drawTrianglePath(a, b, c);
+					Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
 
 					var center = Geometry.centroid(tri, InternalPoints);
 
-					paint.Color = getTriangleColor(Gradient, center);
+					var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+					paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
 					canvas.DrawPath(trianglePath, paint);
 				}

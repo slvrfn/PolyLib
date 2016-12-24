@@ -257,6 +257,17 @@ namespace LowPolyLibrary
             return rand.Next(360);
         }
 
+		internal static Android.Graphics.Path DrawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
+		{
+			var path = new Android.Graphics.Path();
+			path.SetFillType(Android.Graphics.Path.FillType.EvenOdd);
+			path.MoveTo(b.X, b.Y);
+			path.LineTo(c.X, c.Y);
+			path.LineTo(a.X, a.Y);
+			path.Close();
+			return path;
+		}
+
         internal static double getXComponent(int angle, double length)
         {
             return length * Math.Cos(degreesToRadians(angle));
@@ -274,5 +285,40 @@ namespace LowPolyLibrary
 
             return new System.Drawing.Point(x, y);
         }
+
+		internal static System.Drawing.Point KeepInPicBounds(System.Drawing.Point center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
+		{
+			if (center.X < 0)
+				center.X += (int)bleed_x;
+			else if (center.X > BoundsWidth)
+				center.X -= (int)bleed_x;
+			else if (center.X == BoundsWidth)
+				center.X -= (int)bleed_x - 1;
+			if (center.Y < 0)
+				center.Y += (int)bleed_y;
+			else if (center.Y > BoundsHeight)
+				center.Y -= (int)bleed_y + 1;
+			else if (center.Y == BoundsHeight)
+				center.Y -= (int)bleed_y - 1;
+			return center;
+		}
+
+		internal static Android.Graphics.Color GetTriangleColor(Android.Graphics.Bitmap gradient, System.Drawing.Point center)
+		{
+			//center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+
+			System.Drawing.Color colorFromRGB;
+			try
+			{
+				colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetPixel(center.X, center.Y));
+			}
+			catch
+			{
+				colorFromRGB = System.Drawing.Color.Cyan;
+			}
+
+			Android.Graphics.Color triColor = Android.Graphics.Color.Rgb(colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
+			return triColor;
+		}
     }
 }
