@@ -254,7 +254,7 @@ namespace LowPolyLibrary
 			return points;
 		}
 
-		private static double _map(double num, int[] in_range, double[] out_range)
+		private double _map(double num, int[] in_range, double[] out_range)
 		{
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}

@@ -51,7 +51,7 @@ namespace LowPolyLibrary
             WideFramedPoints = new List<PointF>[numFrames];
 
             var direction = Geometry.get360Direction();
-            seperatePointsIntoRectangleFrames(InternalPoints, boundsWidth, boundsHeight, direction);
+            seperatePointsIntoRectangleFrames(InternalPoints, direction);
             divyTris(InternalPoints);
         }
 
@@ -168,7 +168,7 @@ namespace LowPolyLibrary
             return center;
         }
 
-        internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int boundsWidth, int boundsHeight, int angle)
+        internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int angle)
         {
             viewRectangles = Geometry.createRectangleOverlays(angle,numFrames, boundsWidth, boundsHeight);
             FramedPoints = new List<PointF>[numFrames];

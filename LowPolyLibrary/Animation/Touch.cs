@@ -176,45 +176,21 @@ namespace LowPolyLibrary
 		//only overriding to force display of red ring of current touch area
         internal override Bitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
         {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb8888);
-            Canvas canvas = new Canvas(drawingCanvas);
+			//base DrawPointFrame will render the animation correctly, get the bitmap
+			var renderedBitmap = base.DrawPointFrame(pointChanges);
 
-            Paint paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
+			//Create a canvas to draw touch location on the bitmap
+            Canvas canvas = new Canvas(renderedBitmap);
+
+			Paint paint = new Paint();
             paint.AntiAlias = true;
-
-			//ensure copy of internal points because it will be modified
-			var convertedPoints = InternalPoints.ToList();
-			//can we just stay in PointF's?
-			foreach (var animatedPoint in pointChanges)
-			{
-				var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
-				var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
-				convertedPoints.Remove(oldPoint);
-				convertedPoints.Add(newPoint);
-			}
-
-            var angulator = new Triangulator();
-            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
-            for (int i = 0; i < newTriangulatedPoints.Count; i++)
-            {
-                var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
-                var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
-                var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
-
-                Path trianglePath = drawTrianglePath(a, b, c);
-
-                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
-
-                paint.Color = getTriangleColor(Gradient, center);
-
-                canvas.DrawPath(trianglePath, paint);
-            }
-            paint.SetStyle(Paint.Style.Stroke);
+			paint.SetStyle(Paint.Style.Stroke);
             paint.Color = Android.Graphics.Color.Crimson;
+
             canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
-            return drawingCanvas;
-                 }
+
+            return renderedBitmap;
+        }
 
     }
 }

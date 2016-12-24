@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Widget;
 using Android.OS;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using Android.Graphics.Drawables;
 using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary;
-using Animation = LowPolyLibrary.Animation;
+using AnimationBase = LowPolyLibrary.AnimationBase;
 
 namespace LowPoly
 {
@@ -89,7 +89,7 @@ namespace LowPoly
 			generatedAnimation = null;
 		}
 
-		public void uuuu(LowPolyLibrary.Animation.Animations anim, System.Drawing.PointF touch)
+		public void uuuu(LowPolyLibrary.AnimationBase.Animations anim, System.Drawing.PointF touch)
 		{
 			var temp = new Stopwatch();
 
@@ -98,16 +98,16 @@ namespace LowPoly
 			{
 			    switch (anim)
 			    {
-                    case Animation.Animations.Grow:
+                    case AnimationBase.Animations.Grow:
                         //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
                         var g = new Grow(_lowPoly);
 			            generatedAnimation = g.Animation;
                         break;
-                    case Animation.Animations.Sweep:
+                    case AnimationBase.Animations.Sweep:
                         var s = new Sweep(_lowPoly);
 			            generatedAnimation = s.Animation;
 			            break;
-                    case Animation.Animations.Touch:
+                    case AnimationBase.Animations.Touch:
                         var t = new Touch(_lowPoly,touch.X, touch.Y, 200);
 			            generatedAnimation = t.Animation;
 			            break;
@@ -128,7 +128,7 @@ namespace LowPoly
 
 		public void stepAnimation(object sender, EventArgs e)
 		{
-			uuuu(LowPolyLibrary.Animation.Animations.Grow, new System.Drawing.PointF(0, 0));
+			uuuu(LowPolyLibrary.AnimationBase.Animations.Sweep, new System.Drawing.PointF(0, 0));
 		}
 
 		public bool OnTouch(View v, MotionEvent e)
@@ -141,7 +141,7 @@ namespace LowPoly
                 //COMMENTED TEMPORARILY 10/10
 				//_lowPoly.setPointsaroundTouch(touch, 200);
 				generatedAnimation = null;
-				uuuu(LowPolyLibrary.Animation.Animations.Touch, touch);
+				uuuu(LowPolyLibrary.AnimationBase.Animations.Touch, touch);
 				return true;
 			}
 			if (e.Action == MotionEventActions.Up)
