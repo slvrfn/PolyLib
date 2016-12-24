@@ -21,7 +21,7 @@ namespace LowPolyLibrary
         internal Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
         internal double bleed_x, bleed_y;
 
-        public List<Triad> triangulatedPoints;
+        internal List<Triad> triangulatedPoints;
         internal Bitmap Gradient;
         internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
