@@ -45,10 +45,10 @@ namespace LowPolyLibrary
 
 	    public Bitmap GeneratedBitmap
 	    {
-            get { return DrawPointFrame(); }
+            get { return DrawFrame(); }
 	    }
 
-        private Bitmap DrawPointFrame()
+		private Bitmap DrawFrame()
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
             Canvas canvas = new Canvas(drawingCanvas);
@@ -83,39 +83,6 @@ namespace LowPolyLibrary
             bleed_x = ((cells_x * CellSize) - BoundsWidth) / 2;
             bleed_y = ((cells_y * CellSize) - BoundsHeight) / 2;
             Gradient = GetGradient();
-        }
-
-        private Bitmap DrawTriFrame(Dictionary<PointF, List<Triad>> frameDic, List<DelaunayTriangulator.Vertex> points)
-        {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
-            Canvas canvas = new Canvas(drawingCanvas);
-
-            Paint paint = new Paint();
-            paint.StrokeWidth = .5f;
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
-
-            foreach (KeyValuePair<PointF, List<Triad>> entry in frameDic)
-            {
-                // do something with entry.Value or entry.Key
-                var frameTriList = entry.Value;
-                foreach (var tri in frameTriList)
-                {
-                    var a = new PointF(points[tri.a].x, points[tri.a].y);
-                    var b = new PointF(points[tri.b].x, points[tri.b].y);
-                    var c = new PointF(points[tri.c].x, points[tri.c].y);
-
-                    Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
-
-                    var center = Geometry.centroid(tri, points);
-
-					var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-                    paint.Color =Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-
-                    canvas.DrawPath(trianglePath, paint);
-                }
-            }
-            return drawingCanvas;
 		}
 
 		private int[] getGradientColors()
