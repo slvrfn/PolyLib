@@ -1,0 +1,3 @@
+[submodule "Submodules/DataflowAnimationLibrary"]
+	path = Submodules/DataflowAnimationLibrary
+	url = https://cameronwhite08@bitbucket.org/cameronwhite08/dataflowanimationlibrary.git
