@@ -23,8 +23,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Vertex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)cRectangleF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimatedPoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\AnimationRendering.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\CurrentAnimationsBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\CustomAnimation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\FrameQueueBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\RandomAnimationBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\Timer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulator\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Threading\" />
   </ItemGroup>
 </Project>
