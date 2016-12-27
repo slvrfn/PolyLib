@@ -26,6 +26,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulator\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Threading\" />
   </ItemGroup>
 </Project>

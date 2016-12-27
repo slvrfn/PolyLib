@@ -7,10 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPoly", "LowPoly\LowPoly.
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LowPolyLibrary", "LowPolyLibrary\LowPolyLibrary.shproj", "{C3859E54-205E-482C-A711-AD923E4279A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataflowAnimationLibrary", "Submodules\DataflowAnimationLibrary\DataflowAnimationLibrary\DataflowAnimationLibrary.csproj", "{2B0F3A99-0DCC-4C93-9514-3E2D6C850925}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{D88CB0A6-BE25-4D5C-96F0-4BA6E58D020D}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		LowPolyLibrary\LowPolyLibrary.projitems*{c3859e54-205e-482c-a711-ad923e4279a0}*SharedItemsImports = 13
@@ -26,16 +22,8 @@ Global
 		{8603726E-C512-46C0-A623-1D68777AA852}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{8603726E-C512-46C0-A623-1D68777AA852}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8603726E-C512-46C0-A623-1D68777AA852}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2B0F3A99-0DCC-4C93-9514-3E2D6C850925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2B0F3A99-0DCC-4C93-9514-3E2D6C850925}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2B0F3A99-0DCC-4C93-9514-3E2D6C850925}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2B0F3A99-0DCC-4C93-9514-3E2D6C850925}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{C3859E54-205E-482C-A711-AD923E4279A0} = {D88CB0A6-BE25-4D5C-96F0-4BA6E58D020D}
-		{2B0F3A99-0DCC-4C93-9514-3E2D6C850925} = {D88CB0A6-BE25-4D5C-96F0-4BA6E58D020D}
 	EndGlobalSection
 EndGlobal
