@@ -12,59 +12,29 @@ namespace LowPolyLibrary.Threading
 	public class AnimationRendering
 	{
 		private readonly CurrentAnimationsBlock _animations;
-		private readonly TransformBlock<CustomAnimtion[], int> _renderFrame;
+		private readonly TransformBlock<CustomAnimtion[], CustomAnimtion> _renderFrame;
+		private readonly TransformBlock<CustomAnimtion, int> _drawFrame;
 		private readonly FrameQueueBlock<int> _frameQueue;
 		private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<int> _writeImage;
 
-		private Stopwatch watch;
-
-		public AnimationRendering()
+		public AnimationRendering(Action<int> writeAction, Func<CustomAnimtion[], CustomAnimtion> renderFunction, Func<CustomAnimtion, int> drawFunction)
 		{
 			_animations = new CurrentAnimationsBlock();
-
+			_randomAnim = new RandomAnimationBlock(_animations, 5000);
 			_frameQueue = new FrameQueueBlock<int>();
 
-			_randomAnim = new RandomAnimationBlock(_animations, 5000);
-
-			_renderFrame = new TransformBlock<CustomAnimtion[], int>(animations =>
-			{
-				//Console.WriteLine("---------");
-				var frameChange = 0;
-				for (int i = 0; i < animations.Length; i++)
-				{
-					//Thread.Sleep(animations[i].FrameDuration);
-					var thisChange = animations[i].frames[animations[i].CurrentFrame];
-					frameChange += thisChange;
-					//Console.WriteLine("Animation: " + animations[i].Type);
-					//Console.WriteLine("Frame Changes: {0}", animations[i].frames.ToString());
-					//Console.WriteLine("Current frame: " + (animations[i].CurrentFrame + 1) + "/" + animations[i].TotalFrames);
-					//Console.WriteLine("This Frame change: {0}", thisChange);
-				}
-				_animations.FrameRendered();
-				return frameChange;
-			});
-
-			_writeImage = new ActionBlock<int>(frame =>
-			{
-				watch.Stop();
-				//Console.WriteLine("Time since last frame display: {0}", watch.Elapsed);
-				//Console.ForegroundColor = ConsoleColor.DarkYellow;
-				//Console.WriteLine("Current Frame: {0}", frame);
-				//Console.ResetColor();
-				watch.Reset();
-				watch.Start();
-			});
+			_writeImage = new ActionBlock<int>(writeAction);
+			_renderFrame = new TransformBlock<CustomAnimtion[], CustomAnimtion>(renderFunction);
+			_drawFrame = new TransformBlock<CustomAnimtion, int>(drawFunction);
 
 			_animations.LinkTo(_renderFrame);
-			_renderFrame.LinkTo(_frameQueue);
-			_frameQueue.LinkTo(_writeImage);
 			_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+			_renderFrame.LinkTo(_drawFrame);
+			_drawFrame.LinkTo(_frameQueue);
+			_frameQueue.LinkTo(_writeImage);
 
-			GenerateImage();
-
-			watch = new Stopwatch();
-			watch.Start();
+			//GenerateImage();
 		}
 
 		private void GenerateImage()

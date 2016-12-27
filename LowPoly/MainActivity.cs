@@ -89,7 +89,7 @@ namespace LowPoly
 			generatedAnimation = null;
 		}
 
-		public void uuuu(LowPolyLibrary.AnimationBase.Animations anim, System.Drawing.PointF touch)
+		public void uuuu(AnimationTypes.Type anim, System.Drawing.PointF touch)
 		{
 			var temp = new Stopwatch();
 
@@ -98,16 +98,16 @@ namespace LowPoly
 			{
 			    switch (anim)
 			    {
-                    case AnimationBase.Animations.Grow:
+                    case AnimationTypes.Type.Grow:
                         //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
                         var g = new Grow(_lowPoly);
 			            generatedAnimation = g.Animation;
                         break;
-                    case AnimationBase.Animations.Sweep:
+                    case AnimationTypes.Type.Sweep:
                         var s = new Sweep(_lowPoly);
 			            generatedAnimation = s.Animation;
 			            break;
-                    case AnimationBase.Animations.Touch:
+                    case AnimationTypes.Type.Touch:
                         var t = new Touch(_lowPoly,touch.X, touch.Y, 200);
 			            generatedAnimation = t.Animation;
 			            break;
@@ -128,7 +128,7 @@ namespace LowPoly
 
 		public void stepAnimation(object sender, EventArgs e)
 		{
-			uuuu(LowPolyLibrary.AnimationBase.Animations.Sweep, new System.Drawing.PointF(0, 0));
+			uuuu(AnimationTypes.Type.Sweep, new System.Drawing.PointF(0, 0));
 		}
 
 		public bool OnTouch(View v, MotionEvent e)
@@ -141,7 +141,7 @@ namespace LowPoly
                 //COMMENTED TEMPORARILY 10/10
 				//_lowPoly.setPointsaroundTouch(touch, 200);
 				generatedAnimation = null;
-				uuuu(LowPolyLibrary.AnimationBase.Animations.Touch, touch);
+				uuuu(AnimationTypes.Type.Touch, touch);
 				return true;
 			}
 			if (e.Action == MotionEventActions.Up)

@@ -23,10 +23,10 @@ namespace LowPolyLibrary.Threading
 		// The source part of the block.
 		private readonly IReceivableSourceBlock<CustomAnimtion[]> _msource;
 
-		private List<CustomAnimtion> animList;
-
 		private readonly BroadcastBlock<CustomAnimtion[]> _source;
-	    private List<CustomAnimtion> toBeAdded;
+
+		private List<CustomAnimtion> animList;
+		private List<CustomAnimtion> toBeAdded;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
@@ -141,6 +141,7 @@ namespace LowPolyLibrary.Threading
 			}
 		}
 
+		#region Event Raising
 		private void RaiseAnimationAdded(EventArgs e)
 		{
 			if (AnimationAdded != null)
@@ -166,6 +167,7 @@ namespace LowPolyLibrary.Threading
 		{
 			RaiseNoPendingAnimations(new EventArgs());
 		}
+		#endregion
 
 		#region IReceivableSourceBlock<TOutput> members
 
