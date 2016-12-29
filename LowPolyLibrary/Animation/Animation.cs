@@ -6,27 +6,40 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
+using LowPolyLibrary.Threading;
+using LowPolyLibrary.Animation;
 
-namespace LowPolyLibrary.Threading
+namespace LowPolyLibrary.Animation
 {
-	public class AnimationRendering
+	public class Animation
 	{
-		private readonly CurrentAnimationsBlock _animations;
+		private readonly CurrentAnimationsBlock _animations; 
 		private readonly TransformBlock<CustomAnimtion[], CustomAnimtion> _renderFrame;
 		private readonly TransformBlock<CustomAnimtion, int> _drawFrame;
 		private readonly FrameQueueBlock<int> _frameQueue;
 		private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<int> _writeImage;
 
-		public AnimationRendering(Action<int> writeAction, Func<CustomAnimtion[], CustomAnimtion> renderFunction, Func<CustomAnimtion, int> drawFunction)
+		public Animation()
 		{
 			_animations = new CurrentAnimationsBlock();
 			_randomAnim = new RandomAnimationBlock(_animations, 5000);
 			_frameQueue = new FrameQueueBlock<int>();
 
-			_writeImage = new ActionBlock<int>(writeAction);
-			_renderFrame = new TransformBlock<CustomAnimtion[], CustomAnimtion>(renderFunction);
-			_drawFrame = new TransformBlock<CustomAnimtion, int>(drawFunction);
+			_renderFrame = new TransformBlock<CustomAnimtion[], CustomAnimtion>((arg) => 
+			{
+				return new CustomAnimtion(AnimationTypes.Type.Grow, -1);
+			});
+
+			_drawFrame = new TransformBlock<CustomAnimtion, int>((arg) => 
+			{
+				return -1;
+			});
+
+			_writeImage = new ActionBlock<int>((int arg) =>
+			{
+
+			});
 
 			_animations.LinkTo(_renderFrame);
 			_randomAnim.LinkTo(_animations, new DataflowLinkOptions());

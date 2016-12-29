@@ -9,8 +9,7 @@ using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views.Animations;
 using Android.Views;
-using LowPolyLibrary;
-using AnimationBase = LowPolyLibrary.AnimationBase;
+using LowPolyLibrary.Animation;
 
 namespace LowPoly
 {

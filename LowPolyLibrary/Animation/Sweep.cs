@@ -7,9 +7,9 @@ using Android.Graphics.Drawables;
 using DelaunayTriangulator;
 using PointF = System.Drawing.PointF;
 
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Animation
 {
-    public class Sweep : AnimationBase
+    class Sweep : AnimationBase
     {
 		private int Direction = -1;
 

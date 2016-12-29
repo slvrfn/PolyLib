@@ -1,5 +1,5 @@
 ﻿using System;
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Animation
 {
 	public class AnimationTypes
 	{

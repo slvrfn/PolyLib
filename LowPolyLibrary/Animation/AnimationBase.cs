@@ -11,9 +11,9 @@ using Android.Graphics;
 using Android.Graphics.Drawables;
 using LowPolyLibrary.Threading;
 
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Animation
 {
-	public abstract class AnimationBase
+	abstract class AnimationBase
 	{
 		#region Global Variables
 		internal int numFrames = 12; //static necessary for creation of FramedPoints list
@@ -29,7 +29,7 @@ namespace LowPolyLibrary
 
 		internal List<cRectangleF[]> viewRectangles;
 
-		internal AnimationRendering AnimationPipeline;
+		internal Animation AnimationPipeline;
 
 		public int boundsWidth;
 		public int boundsHeight;
@@ -52,10 +52,6 @@ namespace LowPolyLibrary
 			var direction = Geometry.get360Direction();
 			seperatePointsIntoRectangleFrames(InternalPoints, direction);
 			divyTris(InternalPoints);
-
-			AnimationPipeline = new AnimationRendering(null, null, null);
-
-			Func<List<AnimatedPoint>, Bitmap> drawFunc = DrawPointFrame;
 		}
 		#endregion
 

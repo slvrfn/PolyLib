@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Animation
 {
 	public class AnimatedPoint
 	{

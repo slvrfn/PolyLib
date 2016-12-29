@@ -7,7 +7,7 @@ using Android.Graphics.Drawables;
 using DelaunayTriangulator;
 using PointF = System.Drawing.PointF;
 
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Animation
 {
     class Grow : AnimationBase
     {
