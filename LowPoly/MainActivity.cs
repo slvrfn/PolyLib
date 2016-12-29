@@ -100,15 +100,12 @@ namespace LowPoly
                     case AnimationTypes.Type.Grow:
                         //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
                         var g = new Grow(_lowPoly);
-			            generatedAnimation = g.Animation;
                         break;
                     case AnimationTypes.Type.Sweep:
                         var s = new Sweep(_lowPoly);
-			            generatedAnimation = s.Animation;
 			            break;
                     case AnimationTypes.Type.Touch:
                         var t = new Touch(_lowPoly,touch.X, touch.Y, 200);
-			            generatedAnimation = t.Animation;
 			            break;
 			    }
 

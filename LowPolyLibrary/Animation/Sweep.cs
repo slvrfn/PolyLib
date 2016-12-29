@@ -13,7 +13,10 @@ namespace LowPolyLibrary.Animation
     {
 		private int Direction = -1;
 
-        internal Sweep(Triangulation triangulation): base(triangulation) {}
+        internal Sweep(Triangulation triangulation): base(triangulation) 
+		{
+			AnimationType = AnimationTypes.Type.Sweep;
+		}
 
 		internal override List<AnimatedPoint> RenderFrame()
         {

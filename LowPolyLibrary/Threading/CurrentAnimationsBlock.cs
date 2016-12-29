@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using LowPolyLibrary.Animation;
 
 namespace LowPolyLibrary.Threading
 {
@@ -13,20 +14,20 @@ namespace LowPolyLibrary.Threading
 	public delegate void NoPendingAnimationsEventHandler(object sender, EventArgs e);
 
 	// Propagates data in a sliding window fashion.
-	public class CurrentAnimationsBlock : IPropagatorBlock<CustomAnimtion, CustomAnimtion[]>, IReceivableSourceBlock<CustomAnimtion[]>
+	public class CurrentAnimationsBlock : IPropagatorBlock<AnimationBase, AnimationBase[]>, IReceivableSourceBlock<AnimationBase[]>
 	{
 		public event AnimationAddedEventHandler AnimationAdded;
 		public event NoPendingAnimationsEventHandler NoPendingAnimations;
 
 		// The target part of the block.
-		private readonly ITargetBlock<CustomAnimtion> _mtarget;
+		private readonly ITargetBlock<AnimationBase> _mtarget;
 		// The source part of the block.
-		private readonly IReceivableSourceBlock<CustomAnimtion[]> _msource;
+		private readonly IReceivableSourceBlock<AnimationBase[]> _msource;
 
-		private readonly BroadcastBlock<CustomAnimtion[]> _source;
+		private readonly BroadcastBlock<AnimationBase[]> _source;
 
-		private List<CustomAnimtion> animList;
-		private List<CustomAnimtion> toBeAdded;
+		private List<AnimationBase> animList;
+		private List<AnimationBase> toBeAdded;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
@@ -39,22 +40,22 @@ namespace LowPolyLibrary.Threading
 		public CurrentAnimationsBlock(DataflowBlockOptions broadcastBlockOptions, ExecutionDataflowBlockOptions actionBlockOptions)
 		{
 			// Create a queue to hold messages.
-			animList = new List<CustomAnimtion>();
+			animList = new List<AnimationBase>();
 
-            toBeAdded = new List<CustomAnimtion>();
+            toBeAdded = new List<AnimationBase>();
 
 			// The source part of the propagator holds arrays of size windowSize
 			// and propagates data out to any connected targets.
-		    _source = new BroadcastBlock<CustomAnimtion[]>(f => f, broadcastBlockOptions);
+		    _source = new BroadcastBlock<AnimationBase[]>(f => f, broadcastBlockOptions);
 
             // The target part receives data and adds them to the queue.
-            ActionBlock<CustomAnimtion> target = new ActionBlock<CustomAnimtion>(item =>
+            ActionBlock<AnimationBase> target = new ActionBlock<AnimationBase>(item =>
 			{
 				//Signal that an animation was added
                 RaiseAnimationAdded();
 				//Add the item to the queue.
 				toBeAdded.Add(item);
-				var r = new CustomAnimtion[1];
+				var r = new AnimationBase[1];
 				//if there is nothing in the 
 				if (!_source.TryReceive(null, out r))
 				{
@@ -64,7 +65,7 @@ namespace LowPolyLibrary.Threading
 				else
 				{
 					var tempAnim = r[0];
-					if (tempAnim.CurrentFrame == tempAnim.TotalFrames)
+					if (tempAnim.CurrentFrame == tempAnim.numFrames)
 					{
 						AddPendingAnimations();
 						_source.Post(CurrentAnimations);
@@ -84,10 +85,10 @@ namespace LowPolyLibrary.Threading
 		}
 		#endregion
 
-		private CustomAnimtion[] CurrentAnimations
+		private AnimationBase[] CurrentAnimations
 		{
 			get {
-				//var lis = new List<CustomAnimtion>();
+				//var lis = new List<AnimationBase>();
 				//foreach (var key in animList.Keys)
 				//{
 				//	var anim = animList[key];
@@ -101,15 +102,15 @@ namespace LowPolyLibrary.Threading
 		private void IncrementAnimations()
 		{
             //for each animation
-            var removeList = new List<CustomAnimtion>();
+            var removeList = new List<AnimationBase>();
             foreach (var t in animList)
             {
-                var anim = t as CustomAnimtion;
+                var anim = t as AnimationBase;
                 if (anim == null)
                     continue;
                 //increment the animations current frame
                 ++anim.CurrentFrame;
-                if (anim.CurrentFrame >= anim.TotalFrames)
+                if (anim.CurrentFrame >= anim.numFrames)
                 {
                     removeList.Add(t);
                 }
@@ -172,14 +173,14 @@ namespace LowPolyLibrary.Threading
 		#region IReceivableSourceBlock<TOutput> members
 
 		// Attempts to synchronously receive an item from the source.
-		public bool TryReceive(Predicate<CustomAnimtion[]> filter, out CustomAnimtion[] item)
+		public bool TryReceive(Predicate<AnimationBase[]> filter, out AnimationBase[] item)
 		{
 			return _msource.TryReceive(filter, out item);
 		}
 
 		// Attempts to remove all available elements from the source into a new 
 		// array that is returned.
-		public bool TryReceiveAll(out IList<CustomAnimtion[]> items)
+		public bool TryReceiveAll(out IList<AnimationBase[]> items)
 		{
 			return _msource.TryReceiveAll(out items);
 		}
@@ -189,30 +190,30 @@ namespace LowPolyLibrary.Threading
 		#region ISourceBlock<TOutput> members
 
 		// Links this dataflow block to the provided target.
-		public IDisposable LinkTo(ITargetBlock<CustomAnimtion[]> target, DataflowLinkOptions linkOptions)
+		public IDisposable LinkTo(ITargetBlock<AnimationBase[]> target, DataflowLinkOptions linkOptions)
 		{
 			return _msource.LinkTo(target, linkOptions);
 		}
 
 		// Called by a target to reserve a message previously offered by a source 
 		// but not yet consumed by this target.
-		bool ISourceBlock<CustomAnimtion[]>.ReserveMessage(DataflowMessageHeader messageHeader,
-		   ITargetBlock<CustomAnimtion[]> target)
+		bool ISourceBlock<AnimationBase[]>.ReserveMessage(DataflowMessageHeader messageHeader,
+		   ITargetBlock<AnimationBase[]> target)
 		{
 			return _msource.ReserveMessage(messageHeader, target);
 		}
 
 		// Called by a target to consume a previously offered message from a source.
-		CustomAnimtion[] ISourceBlock<CustomAnimtion[]>.ConsumeMessage(DataflowMessageHeader messageHeader,
-		   ITargetBlock<CustomAnimtion[]> target, out bool messageConsumed)
+		AnimationBase[] ISourceBlock<AnimationBase[]>.ConsumeMessage(DataflowMessageHeader messageHeader,
+		   ITargetBlock<AnimationBase[]> target, out bool messageConsumed)
 		{
 			return _msource.ConsumeMessage(messageHeader,
 			   target, out messageConsumed);
 		}
 
 		// Called by a target to release a previously reserved message from a source.
-		void ISourceBlock<CustomAnimtion[]>.ReleaseReservation(DataflowMessageHeader messageHeader,
-		   ITargetBlock<CustomAnimtion[]> target)
+		void ISourceBlock<AnimationBase[]>.ReleaseReservation(DataflowMessageHeader messageHeader,
+		   ITargetBlock<AnimationBase[]> target)
 		{
 			_msource.ReleaseReservation(messageHeader, target);
 		}
@@ -223,8 +224,8 @@ namespace LowPolyLibrary.Threading
 
 		// Asynchronously passes a message to the target block, giving the target the 
 		// opportunity to consume the message.
-		DataflowMessageStatus ITargetBlock<CustomAnimtion>.OfferMessage(DataflowMessageHeader messageHeader,
-		   CustomAnimtion messageValue, ISourceBlock<CustomAnimtion> source, bool consumeToAccept)
+		DataflowMessageStatus ITargetBlock<AnimationBase>.OfferMessage(DataflowMessageHeader messageHeader,
+		   AnimationBase messageValue, ISourceBlock<AnimationBase> source, bool consumeToAccept)
 		{
 			return _mtarget.OfferMessage(messageHeader,
 			   messageValue, source, consumeToAccept);

@@ -22,6 +22,8 @@ namespace LowPolyLibrary.Animation
 
         internal Touch(Triangulation triangulation, float x, float y, int radius) : base(triangulation)
         {
+			AnimationType = AnimationTypes.Type.Touch;
+
             InRange = new List<PointF>();
             InRangOfRecs = new List<PointF>();
             OutOfRange = new List<PointF>();
@@ -191,6 +193,5 @@ namespace LowPolyLibrary.Animation
 
             return renderedBitmap;
         }
-
     }
 }

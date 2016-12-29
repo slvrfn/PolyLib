@@ -13,10 +13,10 @@ using LowPolyLibrary.Threading;
 
 namespace LowPolyLibrary.Animation
 {
-	abstract class AnimationBase
+	public abstract class AnimationBase
 	{
 		#region Global Variables
-		internal int numFrames = 12; //static necessary for creation of FramedPoints list
+		internal int numFrames = 12;
 		internal int CurrentFrame = 0;
 		internal List<PointF>[] FramedPoints;
 		internal List<PointF>[] WideFramedPoints;
@@ -29,7 +29,7 @@ namespace LowPolyLibrary.Animation
 
 		internal List<cRectangleF[]> viewRectangles;
 
-		internal Animation AnimationPipeline;
+		internal AnimationTypes.Type AnimationType;
 
 		public int boundsWidth;
 		public int boundsHeight;
@@ -102,11 +102,6 @@ namespace LowPolyLibrary.Animation
 				canvas.DrawPath(trianglePath, paint);
 			}
 			return drawingCanvas;
-		}
-
-		public void AddAnimation(string animName, int totalFrames, int duration)
-		{
-			AnimationPipeline.AddEvent(animName, totalFrames, duration);
 		}
 		#endregion
 

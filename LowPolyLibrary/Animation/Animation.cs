@@ -14,8 +14,8 @@ namespace LowPolyLibrary.Animation
 	public class Animation
 	{
 		private readonly CurrentAnimationsBlock _animations; 
-		private readonly TransformBlock<CustomAnimtion[], CustomAnimtion> _renderFrame;
-		private readonly TransformBlock<CustomAnimtion, int> _drawFrame;
+		private readonly TransformBlock<AnimationBase[], AnimationBase> _renderFrame;
+		private readonly TransformBlock<AnimationBase, int> _drawFrame;
 		private readonly FrameQueueBlock<int> _frameQueue;
 		private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<int> _writeImage;
@@ -26,12 +26,37 @@ namespace LowPolyLibrary.Animation
 			_randomAnim = new RandomAnimationBlock(_animations, 5000);
 			_frameQueue = new FrameQueueBlock<int>();
 
-			_renderFrame = new TransformBlock<CustomAnimtion[], CustomAnimtion>((arg) => 
+			_renderFrame = new TransformBlock<AnimationBase[], AnimationBase>((arg) => 
 			{
-				return new CustomAnimtion(AnimationTypes.Type.Grow, -1);
+				var temp = new List<List<AnimatedPoint>>();
+				foreach (var a in arg)
+				{
+					if (a.AnimationType == AnimationTypes.Type.Touch)
+					{
+						var t = (Touch)a;
+						var x = t.RenderFrame();
+						temp.Add(x);
+					}
+					else if (a.AnimationType == AnimationTypes.Type.Sweep)
+					{
+						var t = (Sweep)a;
+						var x = t.RenderFrame();
+						temp.Add(x);
+					}
+					else if (a.AnimationType == AnimationTypes.Type.Grow)
+					{
+						var t = (Grow)a;
+						var x = t.RenderFrame();
+						temp.Add(x);
+					}
+				}
+
+
+
+				return arg[0];
 			});
 
-			_drawFrame = new TransformBlock<CustomAnimtion, int>((arg) => 
+			_drawFrame = new TransformBlock<AnimationBase, int>((arg) => 
 			{
 				return -1;
 			});
@@ -55,11 +80,23 @@ namespace LowPolyLibrary.Animation
 			_writeImage.Post(0);
 		}
 
-		public void AddEvent(string animName, int totalFrames, int duration)
+		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, int totalFrames)
 		{
-			var anim = new CustomAnimtion(animName, totalFrames, duration);
+			AnimationBase temp = null;
+			switch (animName)
+			{
+				case AnimationTypes.Type.Grow:
+					temp = new Grow(tri);
+					break;
+				case AnimationTypes.Type.Touch:
+					temp = new Touch(tri, 0, 0, 0);
+					break;
+				case AnimationTypes.Type.Sweep:
+					temp = new Sweep(tri);
+					break;
+			}
 
-			_animations.Post(anim);
+			_animations.Post(temp);
 		}
 	}
 }
