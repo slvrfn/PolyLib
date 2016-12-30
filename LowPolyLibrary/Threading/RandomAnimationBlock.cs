@@ -40,15 +40,17 @@ namespace LowPolyLibrary.Threading
 		}
 		#endregion
 
-		public void AddRandomAnimation(object sender)
+		public async Task<bool> AddRandomAnimation(object sender)
 		{
 			var rand = new System.Random();
 			var values = Enum.GetValues(typeof(AnimationTypes.Type));
 			ColorBru.Code randomAnimType = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
 
-			var newAnim = new AnimationBase("custom", 6, 200);
-			_source.Post(newAnim);
+			//var newAnim = new AnimationBase("custom", 6, 200);
+			var newAnim = new Sweep(new Triangulation(0, 0, 0, 0));
+
 			tim.Start();
+			return _source.Post(newAnim);
 		}
 
 		void AnimBlock_AnimationAdded(object sender, EventArgs e)

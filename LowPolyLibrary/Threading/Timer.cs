@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace LowPolyLibrary.Threading
 {
-	public delegate void TimerCallback(object state);
+	public delegate Task<bool> TimerCallback(object state);
 
 	//http://stackoverflow.com/a/33683963/3344317
 	public class Timer

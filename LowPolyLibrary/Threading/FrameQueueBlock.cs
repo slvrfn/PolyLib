@@ -62,12 +62,13 @@ namespace LowPolyLibrary.Threading
 		}
 		#endregion
 
-		public async void DisplayFrame(object sender)
+		public async Task<bool> DisplayFrame(object sender)
 		{
 			//Console.WriteLine("Waiting for Frame to be displayed");
 			var t = await _target.ReceiveAsync();
-			_source.Post(t);
+
 			tim.Start();
+			return _source.Post(t);
 		}
 
 		#region IReceivableSourceBlock<TOutput> members

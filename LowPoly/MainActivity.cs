@@ -21,7 +21,7 @@ namespace LowPoly
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 	    private LowPolyLibrary.Triangulation _lowPoly;
 
-		AnimationDrawable generatedAnimation;
+		private LowPolyLibrary.Animation.Animation animation;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -60,6 +60,11 @@ namespace LowPoly
 		    sizeTB.Text = "150";
 
 		    //_lowPoly.test();
+
+			animation = new LowPolyLibrary.Animation.Animation(new System.Threading.Tasks.Dataflow.ActionBlock<Bitmap>((arg) =>
+			{
+				imagePanel.SetImageDrawable(new BitmapDrawable(arg));
+			}));
 		}
 
 		private void UpdatePolyLib()
@@ -85,39 +90,28 @@ namespace LowPoly
             imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
             
 		    timeElapsed.Text = temp.Elapsed.ToString();
-			generatedAnimation = null;
 		}
 
 		public void uuuu(AnimationTypes.Type anim, System.Drawing.PointF touch)
 		{
 			var temp = new Stopwatch();
 
-			temp.Start();
-			if (generatedAnimation == null)
-			{
-			    switch (anim)
-			    {
-                    case AnimationTypes.Type.Grow:
-                        //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
-                        var g = new Grow(_lowPoly);
-                        break;
-                    case AnimationTypes.Type.Sweep:
-                        var s = new Sweep(_lowPoly);
-			            break;
-                    case AnimationTypes.Type.Touch:
-                        var t = new Touch(_lowPoly,touch.X, touch.Y, 200);
-			            break;
-			    }
 
-                //generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
-                imagePanel.SetImageDrawable(generatedAnimation);
-			}
-			else
+
+			temp.Start();
+			switch (anim)
 			{
-				generatedAnimation.Stop();
+				case AnimationTypes.Type.Grow:
+					//generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
+					break;
+				case AnimationTypes.Type.Sweep:
+					animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep, 12);
+					break;
+				case AnimationTypes.Type.Touch:
+					
+					break;
 			}
 			temp.Stop();
-			generatedAnimation.Start();
 
 			timeElapsed.Text = temp.Elapsed.ToString();
 		}
@@ -136,7 +130,6 @@ namespace LowPoly
 				touch.Y = e.GetY();
                 //COMMENTED TEMPORARILY 10/10
 				//_lowPoly.setPointsaroundTouch(touch, 200);
-				generatedAnimation = null;
 				uuuu(AnimationTypes.Type.Touch, touch);
 				return true;
 			}

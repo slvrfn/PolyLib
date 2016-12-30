@@ -31,6 +31,8 @@ namespace LowPolyLibrary.Animation
 
 		internal AnimationTypes.Type AnimationType;
 
+		internal List<AnimatedPoint> AnimatedPoints;
+
 		public int boundsWidth;
 		public int boundsHeight;
 		#endregion
