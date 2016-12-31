@@ -10,6 +10,7 @@ using Android.Graphics.Drawables;
 using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
+using System.Threading.Tasks.Dataflow;
 
 namespace LowPoly
 {
@@ -61,10 +62,14 @@ namespace LowPoly
 
 		    //_lowPoly.test();
 
-			animation = new LowPolyLibrary.Animation.Animation(new System.Threading.Tasks.Dataflow.ActionBlock<Bitmap>((arg) =>
+			animation = new LowPolyLibrary.Animation.Animation((arg) =>
 			{
-				imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-			}));
+				//imagePanel.SetImageDrawable(new BitmapDrawable(arg));
+				RunOnUiThread(() => 
+				{
+					imagePanel.SetImageDrawable(new BitmapDrawable(arg));
+				});
+			});
 		}
 
 		private void UpdatePolyLib()

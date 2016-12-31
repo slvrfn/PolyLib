@@ -20,7 +20,7 @@ namespace LowPolyLibrary.Animation
 		//private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<Android.Graphics.Bitmap> _writeImage;
 
-		public Animation(ActionBlock<Android.Graphics.Bitmap> writeImage)
+		public Animation(Action<Android.Graphics.Bitmap> writeImage)
 		{
 			_animations = new CurrentAnimationsBlock();
 			//_randomAnim = new RandomAnimationBlock(_animations, 5000);
@@ -101,7 +101,7 @@ namespace LowPolyLibrary.Animation
 				return bitmap;
 			});
 
-			_writeImage = writeImage;
+			_writeImage = new ActionBlock<Android.Graphics.Bitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
 			_animations.LinkTo(_renderFrame);
 			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
