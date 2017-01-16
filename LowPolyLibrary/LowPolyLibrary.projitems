@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Sweep.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Touch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Geometry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ObjectExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ColorBru.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Hull.cs" />

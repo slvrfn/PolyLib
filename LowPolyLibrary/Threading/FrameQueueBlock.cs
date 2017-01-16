@@ -57,14 +57,14 @@ namespace LowPolyLibrary.Threading
 			_msource = _source;
 
 			//estimated fps
-			tim = new Timer(42, DisplayFrame, true);
+			tim = new Timer(42, DisplayFrame, false);
 			tim.Start();
 		}
 		#endregion
 
 		public async Task<bool> DisplayFrame(object sender)
 		{
-			//Console.WriteLine("Waiting for Frame to be displayed");
+            tim.Stop();
 			var t = await _target.ReceiveAsync();
 
 			tim.Start();

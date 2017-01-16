@@ -17,7 +17,7 @@ namespace LowPoly
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
-		Button button, animSButton;
+		Button button, animSButton, animGButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 	    private LowPolyLibrary.Triangulation _lowPoly;
@@ -36,20 +36,18 @@ namespace LowPoly
 			button = FindViewById<Button> (Resource.Id.button1);
 			button.Click += Generate;
 			animSButton = FindViewById<Button>(Resource.Id.animSButton);
-			animSButton.Click += stepAnimation;
-
+			animSButton.Click += sweepAnimation;
+		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
+		    animGButton.Click += growAnimation;
 
 			imagePanel = FindViewById<ImageView> (Resource.Id.imageView1);
 			imagePanel.SetOnTouchListener(this);
-
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
 			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
 			varTB = FindViewById<TextView> (Resource.Id.varTextBox);
 			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
             timeElapsed = FindViewById<TextView>(Resource.Id.timeElapsed);
-
-           
 
             var metrics = Resources.DisplayMetrics;
 
@@ -64,11 +62,14 @@ namespace LowPoly
 
 			animation = new LowPolyLibrary.Animation.Animation((arg) =>
 			{
-				//imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-				RunOnUiThread(() => 
-				{
-					imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-				});
+                //imagePanel.SetImageDrawable(new BitmapDrawable(arg));
+				//RunOnUiThread(() => 
+				//{
+					//imagePanel.SetImageDrawable(new BitmapDrawable(arg));
+                    imagePanel.SetImageBitmap(arg);
+                    //imagePanel.Invalidate();
+                    //imagePanel.PostInvalidate();
+				//});
 			});
 		}
 
@@ -101,32 +102,35 @@ namespace LowPoly
 		{
 			var temp = new Stopwatch();
 
-
-
 			temp.Start();
 			switch (anim)
 			{
 				case AnimationTypes.Type.Grow:
-					//generatedAnimation = _lowPoly.makeAnimation(anim, 12, touch.X, touch.Y, 50);
-					break;
+                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Grow, 12);
+                    break;
 				case AnimationTypes.Type.Sweep:
 					animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep, 12);
 					break;
 				case AnimationTypes.Type.Touch:
-					
-					break;
+                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, 12, touch.X, touch.Y, 50);
+                    break;
 			}
 			temp.Stop();
 
 			timeElapsed.Text = temp.Elapsed.ToString();
 		}
 
-		public void stepAnimation(object sender, EventArgs e)
+		public void sweepAnimation(object sender, EventArgs e)
 		{
 			uuuu(AnimationTypes.Type.Sweep, new System.Drawing.PointF(0, 0));
 		}
 
-		public bool OnTouch(View v, MotionEvent e)
+        public void growAnimation(object sender, EventArgs e)
+        {
+            uuuu(AnimationTypes.Type.Grow, new System.Drawing.PointF(0, 0));
+        }
+
+        public bool OnTouch(View v, MotionEvent e)
 		{
 			if (e.Action == MotionEventActions.Down)
 			{

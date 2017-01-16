@@ -74,15 +74,7 @@ namespace LowPolyLibrary.Animation
 
 				_animations.FrameRendered();
 
-				//animation to be used for rendering
-				//can be any derived class of animationbase
-				//chosen anim affects drawing of the frame
-				//if grow animation is included for the frame, the frame needs to be drawn a special way
-				if (arg.Any((t) => t.AnimationType == AnimationTypes.Type.Grow))
-				{
-					return arg[0] as Grow;
-				}
-				return arg[0] as Sweep;
+				return arg[0].Copy();
 			});
 
 			_drawFrame = new TransformBlock<AnimationBase, Android.Graphics.Bitmap>((arg) => 
@@ -90,9 +82,14 @@ namespace LowPolyLibrary.Animation
 				Android.Graphics.Bitmap bitmap = null;
 
 				var growAnim = arg as Grow;
+			    var touchAnim = arg as Touch;
 				if (growAnim != null)
 				{
 					bitmap = growAnim.DrawPointFrame(growAnim.AnimatedPoints);
+				}
+                else if (touchAnim != null)
+				{
+				    bitmap = touchAnim.DrawPointFrame(touchAnim.AnimatedPoints);
 				}
 				else
 				{
@@ -112,7 +109,7 @@ namespace LowPolyLibrary.Animation
 			//GenerateImage();
 		}
 
-		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, int totalFrames)
+		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, int totalFrames, float x = 0f, float y = 0f, int radius = 0)
 		{
 			AnimationBase temp = null;
 			switch (animName)
@@ -121,7 +118,7 @@ namespace LowPolyLibrary.Animation
 					temp = new Grow(tri);
 					break;
 				case AnimationTypes.Type.Touch:
-					temp = new Touch(tri, 0, 0, 0);
+			        temp = new Touch(tri, x, y, radius);
 					break;
 				case AnimationTypes.Type.Sweep:
 					temp = new Sweep(tri);
