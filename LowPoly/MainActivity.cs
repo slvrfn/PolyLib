@@ -17,6 +17,8 @@ namespace LowPoly
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
+        Bitmap oldPic = null;
+
 		Button button, animSButton, animGButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
@@ -58,15 +60,24 @@ namespace LowPoly
 		    varTB.Text = ".75";
 		    sizeTB.Text = "150";
 
-		    //_lowPoly.test();
+            //_lowPoly.test();
+
+
 
 			animation = new LowPolyLibrary.Animation.Animation((arg) =>
 			{
                 //imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-				//RunOnUiThread(() => 
-				//{
+                //RunOnUiThread(() => 
+                //{
+                if (oldPic != null)
+                {
+                    oldPic.Recycle();
+                    //necessary?
+                    oldPic.Dispose();
+                }
+                oldPic = arg;
 					//imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-                    imagePanel.SetImageBitmap(arg);
+                    imagePanel.SetImageBitmap(oldPic);
                     //imagePanel.Invalidate();
                     //imagePanel.PostInvalidate();
 				//});
