@@ -29,6 +29,10 @@ namespace LowPolyLibrary.Threading
 		private List<AnimationBase> animList;
 		private List<AnimationBase> toBeAdded;
 
+		//bool of whether or not a new anim should be started by various conditions
+		bool NoAnimation = true;
+		
+
         #region Constructors
         // Constructs a SlidingWindowBlock object.
         public CurrentAnimationsBlock() : this(new DataflowBlockOptions(), new ExecutionDataflowBlockOptions()) { }
@@ -55,22 +59,33 @@ namespace LowPolyLibrary.Threading
                 RaiseAnimationAdded();
 				//Add the item to the queue.
 				toBeAdded.Add(item);
-				var r = new AnimationBase[1];
+
+				//var r = new AnimationBase[1];
 				//if there is nothing in the 
-				if (!_source.TryReceive(null, out r))
-				{
+				//if (!_source.TryReceive(null, out r))
+				//{
+				//	AddPendingAnimations();
+				//	_source.Post(CurrentAnimations);
+				//}
+				//else
+				//{
+				//	var tempAnim = r[0];
+				//	if (tempAnim.CurrentFrame == tempAnim.numFrames)
+				//	{
+				//		AddPendingAnimations();
+				//		_source.Post(CurrentAnimations);
+				//	}
+				//}
+				//if there is nothing in the 
+
+
+                if (NoAnimation)
+                {
 					AddPendingAnimations();
 					_source.Post(CurrentAnimations);
-				}
-				else
-				{
-					var tempAnim = r[0];
-					if (tempAnim.CurrentFrame == tempAnim.numFrames)
-					{
-						AddPendingAnimations();
-						_source.Post(CurrentAnimations);
-					}
-				}
+                }
+
+                NoAnimation = false;
 			},actionBlockOptions);
 
             // When the target is set to the completed state, propagate out any
@@ -87,15 +102,9 @@ namespace LowPolyLibrary.Threading
 
 		private AnimationBase[] CurrentAnimations
 		{
-			get {
-				//var lis = new List<AnimationBase>();
-				//foreach (var key in animList.Keys)
-				//{
-				//	var anim = animList[key];
-				//	lis.Add((T)Convert.ChangeType(anim, typeof(T)));
-				//}
-				//return lis.ToArray();
-			    return animList.ToArray();
+			get 
+            {
+				return animList.ToArray();
 			}
 		}
 
@@ -132,12 +141,13 @@ namespace LowPolyLibrary.Threading
 		{
 			IncrementAnimations();
             AddPendingAnimations();
-			if (animList.Count > 0)
+			if (CurrentAnimations.Length > 0)
 			{
 				_source.Post(CurrentAnimations);
 			}
 			else 
 			{
+                NoAnimation = true;
 				RaiseNoPendingAnimations();
 			}
 		}
