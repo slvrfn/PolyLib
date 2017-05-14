@@ -18,6 +18,7 @@ namespace LowPoly
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
         Bitmap oldPic = null;
+        List<Bitmap> removeOldPics = new List<Bitmap>();
 
 		Button button, animSButton, animGButton;
 		ImageView imagePanel;
@@ -69,15 +70,34 @@ namespace LowPoly
                 //imagePanel.SetImageDrawable(new BitmapDrawable(arg));
                 //RunOnUiThread(() => 
                 //{
-                if (oldPic != null)
+                if (imagePanel.Drawable != null)
                 {
-                    oldPic.Recycle();
-                    //necessary?
-                    oldPic.Dispose();
-                }
-                oldPic = arg;
+                    //recycle necessary?TODO
+                    ((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
+					((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
+
+				}
+                imagePanel.SetImageBitmap(arg);
+
+                //if (oldPic != null)
+                //{
+                //    removeOldPics.Add(oldPic);
+                //}
+
+                //if (removeOldPics.Count>5)
+                //{
+                //    foreach (var pic in removeOldPics)
+                //    {
+                //        pic.Recycle();
+                //        //necessary?
+                //       // pic.Dispose();
+
+                //    }
+                //    removeOldPics.Clear();
+                //}
+                //oldPic = arg;
 					//imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-                    imagePanel.SetImageBitmap(oldPic);
+                    
                     //imagePanel.Invalidate();
                     //imagePanel.PostInvalidate();
 				//});
@@ -103,7 +123,12 @@ namespace LowPoly
             temp.Start();
 		    var generatedBitmap = _lowPoly.GeneratedBitmap;
             temp.Stop();
+			if (imagePanel.Drawable != null)
+			{
+				((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
+				((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
 
+			}
             imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
             
 		    timeElapsed.Text = temp.Elapsed.ToString();
@@ -123,7 +148,7 @@ namespace LowPoly
 					animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep, 12);
 					break;
 				case AnimationTypes.Type.Touch:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, 12, touch.X, touch.Y, 50);
+                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, 12, touch.X, touch.Y, 500);
                     break;
 			}
 			temp.Stop();

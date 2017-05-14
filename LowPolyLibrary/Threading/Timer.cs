@@ -44,7 +44,9 @@ namespace LowPolyLibrary.Threading
 
 				if (timerRunning)
 				{
-					tick(this);
+					//tick(this);
+					//intention is to complete whatever frame before the next
+                    await tick(this);
 
 					if (runOnce)
 					{

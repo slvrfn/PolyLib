@@ -20,83 +20,90 @@ namespace LowPolyLibrary.Animation
 		//private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<Android.Graphics.Bitmap> _writeImage;
 
-		public Animation(Action<Android.Graphics.Bitmap> writeImage)
-		{
-			_animations = new CurrentAnimationsBlock();
-			//_randomAnim = new RandomAnimationBlock(_animations, 5000);
-			_frameQueue = new FrameQueueBlock<Android.Graphics.Bitmap>();
+        public Animation(Action<Android.Graphics.Bitmap> writeImage)
+        {
+            _animations = new CurrentAnimationsBlock();
+            //_randomAnim = new RandomAnimationBlock(_animations, 5000);
+            _frameQueue = new FrameQueueBlock<Android.Graphics.Bitmap>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
-			_renderFrame = new TransformBlock<AnimationBase[], AnimationBase>((arg) => 
-			{
-				var temp = new List<List<AnimatedPoint>>();
-				foreach (var a in arg)
-				{
-					if (a.AnimationType == AnimationTypes.Type.Touch)
-					{
-						var t = (Touch)a;
-						var x = t.RenderFrame();
-						temp.Add(x);
-					}
-					else if (a.AnimationType == AnimationTypes.Type.Sweep)
-					{
-						var t = (Sweep)a;
-						var x = t.RenderFrame();
-						temp.Add(x);
-					}
-					else if (a.AnimationType == AnimationTypes.Type.Grow)
-					{
-						var t = (Grow)a;
-						var x = t.RenderFrame();
-						temp.Add(x);
-					}
-				}
-				var dict = new Dictionary<System.Drawing.PointF, AnimatedPoint>();
-				//for each animation render for this frame
-				foreach (var frame in temp)
-				{
-					//for each point changed in the rendered animation
-					foreach (var pointChange in frame)
-					{
-						//if point has been previously animated, update it
-						if (dict.ContainsKey(pointChange.Point))
-						{
-							dict[pointChange.Point].XDisplacement += pointChange.XDisplacement;
-							dict[pointChange.Point].YDisplacement += pointChange.YDisplacement;
-						}
-						//or add it
-						else
-						{
-							dict[pointChange.Point] = pointChange;
-						}
-					}
-				}
-				arg[0].AnimatedPoints = dict.Values.ToList();
+            _renderFrame = new TransformBlock<AnimationBase[], AnimationBase>((arg) =>
+            {
+                var temp = new List<List<AnimatedPoint>>();
+                foreach (var a in arg)
+                {
+                    if (a.AnimationType == AnimationTypes.Type.Touch)
+                    {
+                        var t = (Touch)a;
+                        var x = t.RenderFrame();
+                        temp.Add(x);
+                    }
+                    else if (a.AnimationType == AnimationTypes.Type.Sweep)
+                    {
+                        var t = (Sweep)a;
+                        var x = t.RenderFrame();
+                        temp.Add(x);
+                    }
+                    else if (a.AnimationType == AnimationTypes.Type.Grow)
+                    {
+                        var t = (Grow)a;
+                        var x = t.RenderFrame();
+                        temp.Add(x);
+                    }
+                }
+                var dict = new Dictionary<System.Drawing.PointF, AnimatedPoint>();
+                //for each animation render for this frame
+                foreach (var frame in temp)
+                {
+                    //for each point changed in the rendered animation
+                    foreach (var pointChange in frame)
+                    {
+                        //if point has been previously animated, update it
+                        if (dict.ContainsKey(pointChange.Point))
+                        {
+                            dict[pointChange.Point].XDisplacement += pointChange.XDisplacement;
+                            dict[pointChange.Point].YDisplacement += pointChange.YDisplacement;
+                        }
+                        //or add it
+                        else
+                        {
+                            dict[pointChange.Point] = pointChange;
+                        }
+                    }
+                }
+                arg[0].AnimatedPoints = dict.Values.ToList();
 
-				_animations.FrameRendered();
+                _animations.FrameRendered();
 
-				return arg[0].Copy();
-			});
+                return arg[0].Copy();
+            }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
 
-			_drawFrame = new TransformBlock<AnimationBase, Android.Graphics.Bitmap>((arg) => 
-			{
-				Android.Graphics.Bitmap bitmap = null;
+            _drawFrame = new TransformBlock<AnimationBase, Android.Graphics.Bitmap>((arg) =>
+            {
+                Android.Graphics.Bitmap bitmap = null;
+                try
+                {
+                    var growAnim = arg as Grow;
+                    var touchAnim = arg as Touch;
+                    if (growAnim != null)
+                    {
+                        bitmap = growAnim.DrawPointFrame(growAnim.AnimatedPoints);
+                    }
+                    else if (touchAnim != null)
+                    {
+                        bitmap = touchAnim.DrawPointFrame(touchAnim.AnimatedPoints);
+                    }
+                    else
+                    {
+                        bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
+                    }
+                    return bitmap;
+                }
+                catch (Exception ex)
+                {
+                    return bitmap;
+                }
 
-				var growAnim = arg as Grow;
-			    var touchAnim = arg as Touch;
-				if (growAnim != null)
-				{
-					bitmap = growAnim.DrawPointFrame(growAnim.AnimatedPoints);
-				}
-                else if (touchAnim != null)
-				{
-				    bitmap = touchAnim.DrawPointFrame(touchAnim.AnimatedPoints);
-				}
-				else
-				{
-					bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
-				}
-				return bitmap;
-			});
+            }, new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
 			_writeImage = new ActionBlock<Android.Graphics.Bitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
