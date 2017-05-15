@@ -44,6 +44,12 @@ namespace LowPolyLibrary.Animation
 			animateList.Enqueue(point);
 		}
 
+        //placeholder until better solution implemented
+        internal Grow(Triangulation tr, List<AnimatedPoint> ls) : base(tr)
+        {
+            AnimatedPoints = ls;
+        }
+
         internal override Bitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {
 			Paint paint = new Paint();
@@ -59,7 +65,7 @@ namespace LowPolyLibrary.Animation
 			}
 			catch (Exception e)
 			{
-				
+                var t = 0;
 			}
 			Canvas canvas = new Canvas(drawingCanvas);
 

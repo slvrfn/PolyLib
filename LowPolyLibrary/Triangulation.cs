@@ -43,6 +43,12 @@ namespace LowPolyLibrary
 		    TriangulatedPoints = angulator.Triangulation(InternalPoints);
 		}
 
+        //~Triangulation()
+        //{
+        //    Gradient.Recycle();
+        //    Gradient.Dispose();
+        //}
+
 	    public Bitmap GeneratedBitmap
 	    {
             get { return DrawFrame(); }

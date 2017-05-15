@@ -35,11 +35,17 @@ namespace LowPolyLibrary.Animation
 
 		public int boundsWidth;
 		public int boundsHeight;
-		#endregion
+        #endregion
+
+        //test
+        public Triangulation triangulation;
 
 		#region Constructor
 		protected AnimationBase(Triangulation triangulation)
 		{
+            //test
+            this.triangulation = triangulation;
+
 			bleed_x = triangulation.bleed_x;
 			bleed_y = triangulation.bleed_y;
 			InternalPoints = triangulation.InternalPoints;

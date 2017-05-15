@@ -28,53 +28,61 @@ namespace LowPolyLibrary.Animation
 
             _renderFrame = new TransformBlock<AnimationBase[], AnimationBase>((arg) =>
             {
-                var temp = new List<List<AnimatedPoint>>();
-                foreach (var a in arg)
+                var animFrame = new List<List<AnimatedPoint>>();
+                foreach (var anim in arg)
                 {
-                    if (a.AnimationType == AnimationTypes.Type.Touch)
-                    {
-                        var t = (Touch)a;
-                        var x = t.RenderFrame();
-                        temp.Add(x);
-                    }
-                    else if (a.AnimationType == AnimationTypes.Type.Sweep)
-                    {
-                        var t = (Sweep)a;
-                        var x = t.RenderFrame();
-                        temp.Add(x);
-                    }
-                    else if (a.AnimationType == AnimationTypes.Type.Grow)
-                    {
-                        var t = (Grow)a;
-                        var x = t.RenderFrame();
-                        temp.Add(x);
-                    }
+                    var x = anim.RenderFrame();
+                    animFrame.Add(x);
                 }
-                var dict = new Dictionary<System.Drawing.PointF, AnimatedPoint>();
-                //for each animation render for this frame
-                foreach (var frame in temp)
+
+                //no use in "combining" animations unless there is more than 1 anim for this frame
+                if (animFrame.Count > 1)
                 {
-                    //for each point changed in the rendered animation
-                    foreach (var pointChange in frame)
+                    var dict = new Dictionary<System.Drawing.PointF, AnimatedPoint>();
+                    //for each animation render for this frame
+                    foreach (var frame in animFrame)
                     {
-                        //if point has been previously animated, update it
-                        if (dict.ContainsKey(pointChange.Point))
+                        //for each point changed in the rendered animation
+                        foreach (var pointChange in frame)
                         {
-                            dict[pointChange.Point].XDisplacement += pointChange.XDisplacement;
-                            dict[pointChange.Point].YDisplacement += pointChange.YDisplacement;
-                        }
-                        //or add it
-                        else
-                        {
-                            dict[pointChange.Point] = pointChange;
+                            //if point has been previously animated, update it
+                            if (dict.ContainsKey(pointChange.Point))
+                            {
+                                dict[pointChange.Point].XDisplacement += pointChange.XDisplacement;
+                                dict[pointChange.Point].YDisplacement += pointChange.YDisplacement;
+                            }
+                            //or add it
+                            else
+                            {
+                                dict[pointChange.Point] = pointChange;
+                            }
                         }
                     }
+                    arg[0].AnimatedPoints = dict.Values.ToList();
                 }
-                arg[0].AnimatedPoints = dict.Values.ToList();
+                else
+                {
+                    arg[0].AnimatedPoints = animFrame[0];
+                }
 
                 _animations.FrameRendered();
+                AnimationBase a;
+                switch (arg[0].AnimationType)
+                {
+                    case AnimationTypes.Type.Sweep:
+                        a = new Sweep(arg[0].triangulation, arg[0].AnimatedPoints.ToList());
+                        break;
+                    case AnimationTypes.Type.Touch:
+                        a = new Touch(arg[0].triangulation, arg[0].AnimatedPoints.ToList());
+                        break;
+                    case AnimationTypes.Type.Grow:
+                        a = new Grow(arg[0].triangulation, arg[0].AnimatedPoints.ToList());
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-                return arg[0].Copy();
+                return a;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
 
             _drawFrame = new TransformBlock<AnimationBase, Android.Graphics.Bitmap>((arg) =>
@@ -82,20 +90,7 @@ namespace LowPolyLibrary.Animation
                 Android.Graphics.Bitmap bitmap = null;
                 try
                 {
-                    var growAnim = arg as Grow;
-                    var touchAnim = arg as Touch;
-                    if (growAnim != null)
-                    {
-                        bitmap = growAnim.DrawPointFrame(growAnim.AnimatedPoints);
-                    }
-                    else if (touchAnim != null)
-                    {
-                        bitmap = touchAnim.DrawPointFrame(touchAnim.AnimatedPoints);
-                    }
-                    else
-                    {
-                        bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
-                    }
+                    bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
                     return bitmap;
                 }
                 catch (Exception ex)
@@ -105,7 +100,7 @@ namespace LowPolyLibrary.Animation
 
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
-			_writeImage = new ActionBlock<Android.Graphics.Bitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
+            _writeImage = new ActionBlock<Android.Graphics.Bitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
 			_animations.LinkTo(_renderFrame);
 			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());

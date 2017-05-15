@@ -18,7 +18,13 @@ namespace LowPolyLibrary.Animation
 			AnimationType = AnimationTypes.Type.Sweep;
 		}
 
-		internal override List<AnimatedPoint> RenderFrame()
+        //placeholder until better solution implemented
+        internal Sweep(Triangulation tr, List<AnimatedPoint> ls) : base(tr)
+        {
+            AnimatedPoints = ls;
+        }
+
+        internal override List<AnimatedPoint> RenderFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();
             //all the points will move within 15 degrees of the same direction
