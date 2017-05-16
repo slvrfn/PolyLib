@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Threading\Timer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Animation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\RenderedFrame.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulator\" />

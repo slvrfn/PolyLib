@@ -18,12 +18,6 @@ namespace LowPolyLibrary.Animation
 			AnimationType = AnimationTypes.Type.Sweep;
 		}
 
-        //placeholder until better solution implemented
-        internal Sweep(Triangulation tr, List<AnimatedPoint> ls) : base(tr)
-        {
-            AnimatedPoints = ls;
-        }
-
         internal override List<AnimatedPoint> RenderFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();

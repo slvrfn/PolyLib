@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿﻿using System.Drawing;
 using System.Collections.Generic;
 using DelaunayTriangulator;
 using Triad = DelaunayTriangulator.Triad;
@@ -36,9 +36,6 @@ namespace LowPolyLibrary.Animation
 		public int boundsWidth;
 		public int boundsHeight;
         #endregion
-
-        //test
-        public Triangulation triangulation;
 
 		#region Constructor
 		protected AnimationBase(Triangulation triangulation)

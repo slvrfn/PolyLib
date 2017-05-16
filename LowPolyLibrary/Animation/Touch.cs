@@ -33,12 +33,6 @@ namespace LowPolyLibrary.Animation
             setPointsAroundTouch();
         }
 
-        //placeholder until better solution implemented
-        internal Touch(Triangulation tr, List<AnimatedPoint> ls) : base(tr)
-        {
-            AnimatedPoints = ls;
-        }
-
         internal List<PointF> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
         {
             var touch = new List<PointF>();

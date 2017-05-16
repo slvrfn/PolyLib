@@ -60,25 +60,6 @@ namespace LowPolyLibrary.Threading
 				//Add the item to the queue.
 				toBeAdded.Add(item);
 
-				//var r = new AnimationBase[1];
-				//if there is nothing in the 
-				//if (!_source.TryReceive(null, out r))
-				//{
-				//	AddPendingAnimations();
-				//	_source.Post(CurrentAnimations);
-				//}
-				//else
-				//{
-				//	var tempAnim = r[0];
-				//	if (tempAnim.CurrentFrame == tempAnim.numFrames)
-				//	{
-				//		AddPendingAnimations();
-				//		_source.Post(CurrentAnimations);
-				//	}
-				//}
-				//if there is nothing in the 
-
-
                 if (NoAnimation)
                 {
 					AddPendingAnimations();
