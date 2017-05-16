@@ -3,3 +3,4 @@ LowPoly/bin/
 .vs/LowPoly/v14/.suo
 LowPoly/Resources/Resource.designer.cs
 packages/
+LowPoly/LowPoly.csproj.user

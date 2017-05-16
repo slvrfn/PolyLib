@@ -73,34 +73,13 @@ namespace LowPoly
                 if (imagePanel.Drawable != null)
                 {
                     //recycle necessary?TODO
-                    ((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
-					((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
+                    //((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
+                    //((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
+                    imagePanel.Drawable.Dispose();
+                    imagePanel.SetImageBitmap(null);
 
-				}
+                }
                 imagePanel.SetImageBitmap(arg);
-
-                //if (oldPic != null)
-                //{
-                //    removeOldPics.Add(oldPic);
-                //}
-
-                //if (removeOldPics.Count>5)
-                //{
-                //    foreach (var pic in removeOldPics)
-                //    {
-                //        pic.Recycle();
-                //        //necessary?
-                //       // pic.Dispose();
-
-                //    }
-                //    removeOldPics.Clear();
-                //}
-                //oldPic = arg;
-					//imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-                    
-                    //imagePanel.Invalidate();
-                    //imagePanel.PostInvalidate();
-				//});
 			});
 		}
 
@@ -125,12 +104,14 @@ namespace LowPoly
             temp.Stop();
 			if (imagePanel.Drawable != null)
 			{
-				((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
-				((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
+				//((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
+				//((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
+                imagePanel.Drawable.Dispose();
 
 			}
-            imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
-            
+            //imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
+            imagePanel.SetImageBitmap(generatedBitmap);
+
 		    timeElapsed.Text = temp.Elapsed.ToString();
 		}
 

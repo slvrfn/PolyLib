@@ -35,6 +35,8 @@ namespace LowPolyLibrary.Animation
 
 		public int boundsWidth;
 		public int boundsHeight;
+
+	    internal Paint _paint;
         #endregion
 
 		#region Constructor
@@ -51,7 +53,11 @@ namespace LowPolyLibrary.Animation
 			FramedPoints = new List<PointF>[numFrames];
 			WideFramedPoints = new List<PointF>[numFrames];
 
-			var direction = Geometry.get360Direction();
+            _paint = new Paint();
+		    _paint.SetStyle(Paint.Style.FillAndStroke);
+		    _paint.AntiAlias = true;
+
+            var direction = Geometry.get360Direction();
 			seperatePointsIntoRectangleFrames(InternalPoints, direction);
 			divyTris(InternalPoints);
 		}
@@ -72,12 +78,10 @@ namespace LowPolyLibrary.Animation
 			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
 			Canvas canvas = new Canvas(drawingCanvas);
 
-			Paint paint = new Paint();
-			paint.SetStyle(Paint.Style.FillAndStroke);
-			paint.AntiAlias = true;
+		    _paint.SetStyle(Paint.Style.FillAndStroke);
 
-			//ensure copy of internal points because it will be modified
-			var convertedPoints = InternalPoints.ToList();
+            //ensure copy of internal points because it will be modified
+            var convertedPoints = InternalPoints.ToList();
 			//can we just stay in PointF's?
 			foreach (var animatedPoint in pointChanges)
 			{
@@ -94,14 +98,14 @@ namespace LowPolyLibrary.Animation
 				var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
 				var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
-				Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
-
 				var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
 				var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-				paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-
-				canvas.DrawPath(trianglePath, paint);
+				_paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+			    using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+			    {
+			        canvas.DrawPath(trianglePath, _paint);
+			    }
 			}
 			return drawingCanvas;
 		}

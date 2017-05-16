@@ -46,9 +46,7 @@ namespace LowPolyLibrary.Animation
 
         internal override Bitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {
-			Paint paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
+			_paint.SetStyle(Paint.Style.FillAndStroke);
 
 			Bitmap drawingCanvas = null;
 #warning Trycatch for bitmap memory error
@@ -73,14 +71,15 @@ namespace LowPolyLibrary.Animation
 					var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
 					var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
 
-					Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
-
 					var center = Geometry.centroid(tri, InternalPoints);
 
 					var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-					paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+					_paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
-					canvas.DrawPath(trianglePath, paint);
+				    using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+				    {
+				        canvas.DrawPath(trianglePath, _paint);
+                    }
 				}
 			}
 			return drawingCanvas;

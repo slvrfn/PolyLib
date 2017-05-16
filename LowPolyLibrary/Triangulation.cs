@@ -28,6 +28,8 @@ namespace LowPolyLibrary
         internal Bitmap Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
+	    private Paint _paint;
+
         public List<Triad> TriangulatedPoints;
 
         public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
@@ -36,6 +38,10 @@ namespace LowPolyLibrary
             BoundsHeight = boundsHeight;
             Variance = variance;
             CellSize = cellSize;
+
+            _paint = new Paint();
+            _paint.SetStyle(Paint.Style.FillAndStroke);
+            _paint.AntiAlias = true;
 
             UpdateVars();
 			InternalPoints = GeneratePoints();
@@ -58,10 +64,6 @@ namespace LowPolyLibrary
         {
             Bitmap drawingCanvas = Bitmap.CreateBitmap(BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
             Canvas canvas = new Canvas(drawingCanvas);
-
-            Paint paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
             
             for (int i = 0; i < TriangulatedPoints.Count; i++)
             {
@@ -69,14 +71,15 @@ namespace LowPolyLibrary
                 var b = new PointF(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
                 var c = new PointF(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
 
-                Path trianglePath = Geometry.DrawTrianglePath(a, b, c);
-
                 var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
 
 				var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-                paint.Color =Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+                _paint.Color =Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
-                canvas.DrawPath(trianglePath, paint);
+                using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
+                {
+                    canvas.DrawPath(trianglePath, _paint);
+                }
             }
             return drawingCanvas;
         }
@@ -160,10 +163,11 @@ namespace LowPolyLibrary
             Bitmap bmp = Bitmap.CreateBitmap (BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
 
             Canvas canvas = new Canvas (bmp);
-			Paint pnt = new Paint();
-			pnt.SetStyle (Paint.Style.Fill);
-			pnt.SetShader (gradientShader);
-			canvas.DrawRect(0,0,BoundsWidth,BoundsHeight,pnt);
+			_paint.SetStyle (Paint.Style.Fill);
+		    var oldShader = _paint.Shader;
+			_paint.SetShader (gradientShader);
+			canvas.DrawRect(0,0,BoundsWidth,BoundsHeight,_paint);
+		    _paint.SetShader(oldShader);
 			return bmp;
 		}
 

@@ -185,12 +185,10 @@ namespace LowPolyLibrary.Animation
 			//Create a canvas to draw touch location on the bitmap
             Canvas canvas = new Canvas(renderedBitmap);
 
-			Paint paint = new Paint();
-            paint.AntiAlias = true;
-			paint.SetStyle(Paint.Style.Stroke);
-            paint.Color = Android.Graphics.Color.Crimson;
+			_paint.SetStyle(Paint.Style.Stroke);
+            _paint.Color = Android.Graphics.Color.Crimson;
 
-            canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
+            canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, _paint);
 
             return renderedBitmap;
         }
