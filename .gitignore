@@ -4,3 +4,4 @@ LowPoly/bin/
 LowPoly/Resources/Resource.designer.cs
 packages/
 LowPoly/LowPoly.csproj.user
+*.csproj.user

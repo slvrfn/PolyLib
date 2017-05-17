@@ -35,8 +35,6 @@ namespace LowPolyLibrary.Animation
 
 		public int boundsWidth;
 		public int boundsHeight;
-
-	    internal Paint _paint;
         #endregion
 
 		#region Constructor
@@ -52,10 +50,6 @@ namespace LowPolyLibrary.Animation
 
 			FramedPoints = new List<PointF>[numFrames];
 			WideFramedPoints = new List<PointF>[numFrames];
-
-            _paint = new Paint();
-		    _paint.SetStyle(Paint.Style.FillAndStroke);
-		    _paint.AntiAlias = true;
 
             var direction = Geometry.get360Direction();
 			seperatePointsIntoRectangleFrames(InternalPoints, direction);
@@ -78,7 +72,9 @@ namespace LowPolyLibrary.Animation
 			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
 			Canvas canvas = new Canvas(drawingCanvas);
 
-		    _paint.SetStyle(Paint.Style.FillAndStroke);
+		    var paint = new Paint();
+		    paint.AntiAlias = true;
+            paint.SetStyle(Paint.Style.FillAndStroke);
 
             //ensure copy of internal points because it will be modified
             var convertedPoints = InternalPoints.ToList();
@@ -101,11 +97,12 @@ namespace LowPolyLibrary.Animation
 				var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
 				var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-				_paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+				paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 			    using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
 			    {
-			        canvas.DrawPath(trianglePath, _paint);
+			        canvas.DrawPath(trianglePath, paint);
 			    }
+                
 			}
 			return drawingCanvas;
 		}

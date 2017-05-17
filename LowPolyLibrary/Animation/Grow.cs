@@ -15,7 +15,7 @@ namespace LowPolyLibrary.Animation
 		Queue<Vertex> animateList;
 		List<AnimatedPoint> TotalAnimatedPoints;
 
-		internal Grow(Triangulation triangulation): base(triangulation) 
+        internal Grow(Triangulation triangulation): base(triangulation) 
 		{
 			AnimationType = AnimationTypes.Type.Grow;
 
@@ -26,7 +26,7 @@ namespace LowPolyLibrary.Animation
 				pointUsed[i] = false;
 			}
 
-			var rand = new Random();
+            var rand = new Random();
 			//visible rec so that the start of the anim is from a point visible on screen
 			var visibleRecIndex = rand.Next(FramedPoints.Length);
 			//index of a randoom point on the random visible rec
@@ -46,7 +46,9 @@ namespace LowPolyLibrary.Animation
 
         internal override Bitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {
-			_paint.SetStyle(Paint.Style.FillAndStroke);
+            var paint = new Paint();
+            paint.SetStyle(Paint.Style.FillAndStroke);
+            paint.AntiAlias = true;
 
 			Bitmap drawingCanvas = null;
 #warning Trycatch for bitmap memory error
@@ -59,29 +61,31 @@ namespace LowPolyLibrary.Animation
 			{
                 var t = 0;
 			}
-			Canvas canvas = new Canvas(drawingCanvas);
+            using (Canvas canvas = new Canvas(drawingCanvas))
+            {
+                var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
 
-			var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
+                foreach (var tri in triangulatedPoints)
+                {
+                    if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
+                    {
+                        var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
+                        var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
+                        var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
 
-			foreach (var tri in triangulatedPoints)
-			{
-				if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
-				{
-					var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
-					var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
-					var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
+                        var center = Geometry.centroid(tri, InternalPoints);
 
-					var center = Geometry.centroid(tri, InternalPoints);
+                        var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+                        paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
-					var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-					_paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-
-				    using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
-				    {
-				        canvas.DrawPath(trianglePath, _paint);
+                        using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+                        {
+                            canvas.DrawPath(trianglePath, paint);
+                        }
                     }
-				}
-			}
+                }
+            }
+			
 			return drawingCanvas;
 		}
 

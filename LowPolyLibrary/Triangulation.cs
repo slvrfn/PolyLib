@@ -162,11 +162,15 @@ namespace LowPolyLibrary
 
             Bitmap bmp = Bitmap.CreateBitmap (BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
 
-            Canvas canvas = new Canvas (bmp);
+            
 			_paint.SetStyle (Paint.Style.Fill);
 		    var oldShader = _paint.Shader;
 			_paint.SetShader (gradientShader);
-			canvas.DrawRect(0,0,BoundsWidth,BoundsHeight,_paint);
+		    using (Canvas canvas = new Canvas(bmp))
+		    {
+		        canvas.DrawRect(0, 0, BoundsWidth, BoundsHeight, _paint);
+            }
+			
 		    _paint.SetShader(oldShader);
 			return bmp;
 		}

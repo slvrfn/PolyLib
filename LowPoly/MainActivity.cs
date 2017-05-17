@@ -17,10 +17,7 @@ namespace LowPoly
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
-        Bitmap oldPic = null;
-        List<Bitmap> removeOldPics = new List<Bitmap>();
-
-		Button button, animSButton, animGButton;
+        Button button, animSButton, animGButton;
 		ImageView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 	    private LowPolyLibrary.Triangulation _lowPoly;
