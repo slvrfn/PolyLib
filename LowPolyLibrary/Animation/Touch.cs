@@ -182,8 +182,7 @@ namespace LowPolyLibrary.Animation
 			//base DrawPointFrame will render the animation correctly, get the bitmap
 			var renderedBitmap = base.DrawPointFrame(pointChanges);
 
-			//Create a canvas to draw touch location on the bitmap
-            Canvas canvas = new Canvas(renderedBitmap);
+			
 
 
 
@@ -191,7 +190,13 @@ namespace LowPolyLibrary.Animation
             paint.SetStyle(Paint.Style.Stroke);
             paint.Color = Android.Graphics.Color.Crimson;
 
-            canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
+            //Create a canvas to draw touch location on the bitmap
+            using (Canvas canvas = new Canvas(renderedBitmap))
+            {
+                canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
+            }
+
+            
 
             return renderedBitmap;
         }
