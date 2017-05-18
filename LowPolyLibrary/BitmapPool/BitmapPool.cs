@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Android.Graphics;
 
 namespace LowPolyLibrary.BitmapPool
@@ -17,7 +17,7 @@ namespace LowPolyLibrary.BitmapPool
 		private readonly int _width;
 		private readonly int _height;
 		private readonly Bitmap.Config _config;
-		private readonly Stack<Bitmap> _bitmaps = new Stack<Bitmap>();
+		private readonly ConcurrentStack<Bitmap> _bitmaps = new ConcurrentStack<Bitmap>();
 		private bool _isRecycled;
 
 		//private final Handler handler = new Handler();
@@ -49,7 +49,22 @@ namespace LowPolyLibrary.BitmapPool
         */
         public IManagedBitmap getBitmap()
         {
-            return new LeasedBitmap(_bitmaps.Count == 0 ? Bitmap.CreateBitmap(_width, _height, _config) : _bitmaps.Pop(), this);
+            Bitmap map;
+            if (_bitmaps.Count == 0)
+            {
+                map = Bitmap.CreateBitmap(_width, _height, _config);
+            }
+            else
+            {
+                if (!_bitmaps.TryPop(out map))
+                {
+                    //should never reach here
+                    //if this point is reached, trypop failed
+                    var t = 0;
+                }
+            }
+
+            return new LeasedBitmap(map, this);
 		}
 
         public class LeasedBitmap : IManagedBitmap
