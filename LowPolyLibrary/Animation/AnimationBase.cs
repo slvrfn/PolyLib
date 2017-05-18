@@ -10,6 +10,7 @@ using System.Linq;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using LowPolyLibrary.Threading;
+using BitmapPool = LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary.Animation
 {
@@ -33,6 +34,8 @@ namespace LowPolyLibrary.Animation
 
 		internal List<AnimatedPoint> AnimatedPoints;
 
+        protected BitmapPool.BitmapPool ReuseableImagePool;
+
 		public int boundsWidth;
 		public int boundsHeight;
         #endregion
@@ -51,6 +54,10 @@ namespace LowPolyLibrary.Animation
 			FramedPoints = new List<PointF>[numFrames];
 			WideFramedPoints = new List<PointF>[numFrames];
 
+
+
+            ReuseableImagePool = new BitmapPool.BitmapPool(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+
             var direction = Geometry.get360Direction();
 			seperatePointsIntoRectangleFrames(InternalPoints, direction);
 			divyTris(InternalPoints);
@@ -58,19 +65,13 @@ namespace LowPolyLibrary.Animation
 		#endregion
 
 		#region Animation Methods
-		public Bitmap CreateBitmap()
-		{
-			var frameList = RenderFrame();
-			var frameBitmap = DrawPointFrame(frameList);
-			return frameBitmap;
-		}
 
 		internal abstract List<AnimatedPoint> RenderFrame();
 
-		internal virtual Bitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
+		internal virtual BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
 		{
-			Bitmap drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
-		    using (Canvas canvas = new Canvas(drawingCanvas))
+			var drawingCanvas = ReuseableImagePool.getBitmap();
+            using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
 		    {
 		        var paint = new Paint();
 		        paint.AntiAlias = true;

@@ -44,24 +44,24 @@ namespace LowPolyLibrary.Animation
 			animateList.Enqueue(point);
 		}
 
-        internal override Bitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
+        internal override BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {
             var paint = new Paint();
             paint.SetStyle(Paint.Style.FillAndStroke);
             paint.AntiAlias = true;
 
-			Bitmap drawingCanvas = null;
+			BitmapPool.IManagedBitmap drawingCanvas = null;
 #warning Trycatch for bitmap memory error
 			//TODO this trycatch is temp to avoid out of memory on grow animation
 			try
 			{
-				drawingCanvas = Bitmap.CreateBitmap(boundsWidth, boundsHeight, Bitmap.Config.Argb4444);
+                drawingCanvas = ReuseableImagePool.getBitmap();
 			}
 			catch (Exception e)
 			{
                 var t = 0;
 			}
-            using (Canvas canvas = new Canvas(drawingCanvas))
+            using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
             {
                 var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
 
