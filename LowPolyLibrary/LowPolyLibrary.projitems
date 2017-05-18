@@ -30,9 +30,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Animation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\RenderedFrame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BitmapPool\IManagedBitmap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BitmapPool\BitmapPool.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Triangulator\" />
     <Folder Include="$(MSBuildThisFileDirectory)Threading\" />
+    <Folder Include="$(MSBuildThisFileDirectory)BitmapPool\" />
   </ItemGroup>
 </Project>
