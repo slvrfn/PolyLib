@@ -182,22 +182,18 @@ namespace LowPolyLibrary.Animation
         {
 			//base DrawPointFrame will render the animation correctly, get the bitmap
 			var renderedBitmap = base.DrawPointFrame(pointChanges);
-
-			
-
-
-
-            var paint = new Paint();
-            paint.SetStyle(Paint.Style.Stroke);
-            paint.Color = Android.Graphics.Color.Crimson;
-
+            
             //Create a canvas to draw touch location on the bitmap
             using (Canvas canvas = new Canvas(renderedBitmap.GetBitmap()))
             {
-                canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
-            }
+                using (var paint = new Paint())
+                {
+                    paint.SetStyle(Paint.Style.Stroke);
+                    paint.Color = Android.Graphics.Color.Crimson;
 
-            
+                    canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
+                }
+            }
 
             return renderedBitmap;
         }

@@ -46,11 +46,7 @@ namespace LowPolyLibrary.Animation
 
         internal override BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {
-            var paint = new Paint();
-            paint.SetStyle(Paint.Style.FillAndStroke);
-            paint.AntiAlias = true;
-
-			BitmapPool.IManagedBitmap drawingCanvas = null;
+            BitmapPool.IManagedBitmap drawingCanvas = null;
 #warning Trycatch for bitmap memory error
 			//TODO this trycatch is temp to avoid out of memory on grow animation
 			try
@@ -63,27 +59,34 @@ namespace LowPolyLibrary.Animation
 			}
             using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
             {
-                var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
-
-                foreach (var tri in triangulatedPoints)
+                using (var paint = new Paint())
                 {
-                    if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
+                    paint.SetStyle(Paint.Style.FillAndStroke);
+                    paint.AntiAlias = true;
+
+                    var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
+
+                    foreach (var tri in triangulatedPoints)
                     {
-                        var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
-                        var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
-                        var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
-
-                        var center = Geometry.centroid(tri, InternalPoints);
-
-                        var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-                        paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-
-                        using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+                        if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
                         {
-                            canvas.DrawPath(trianglePath, paint);
+                            var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
+                            var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
+                            var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
+
+                            var center = Geometry.centroid(tri, InternalPoints);
+
+                            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+                            paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+
+                            using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+                            {
+                                canvas.DrawPath(trianglePath, paint);
+                            }
                         }
                     }
                 }
+                
             }
 			
 			return drawingCanvas;

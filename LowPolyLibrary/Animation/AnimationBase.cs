@@ -72,38 +72,40 @@ namespace LowPolyLibrary.Animation
 			var drawingCanvas = ReuseableImagePool.getBitmap();
             using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
 		    {
-		        var paint = new Paint();
-		        paint.AntiAlias = true;
-		        paint.SetStyle(Paint.Style.FillAndStroke);
-
-		        //ensure copy of internal points because it will be modified
-		        var convertedPoints = InternalPoints.ToList();
-		        //can we just stay in PointF's?
-		        foreach (var animatedPoint in pointChanges)
+		        using (var paint = new Paint())
 		        {
-		            var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
-		            var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
-		            convertedPoints.Remove(oldPoint);
-		            convertedPoints.Add(newPoint);
-		        }
-		        var angulator = new Triangulator();
-		        var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
-		        for (int i = 0; i < newTriangulatedPoints.Count; i++)
-		        {
-		            var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
-		            var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
-		            var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
+		            paint.AntiAlias = true;
+		            paint.SetStyle(Paint.Style.FillAndStroke);
 
-		            var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
-
-		            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-		            paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-		            using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+		            //ensure copy of internal points because it will be modified
+		            var convertedPoints = InternalPoints.ToList();
+		            //can we just stay in PointF's?
+		            foreach (var animatedPoint in pointChanges)
 		            {
-		                canvas.DrawPath(trianglePath, paint);
+		                var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
+		                var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
+		                convertedPoints.Remove(oldPoint);
+		                convertedPoints.Add(newPoint);
 		            }
+		            var angulator = new Triangulator();
+		            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
+		            for (int i = 0; i < newTriangulatedPoints.Count; i++)
+		            {
+		                var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
+		                var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
+		                var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
-		        }
+		                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
+
+		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+		                paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+		                using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+		                {
+		                    canvas.DrawPath(trianglePath, paint);
+		                }
+
+		            }
+                }
             }
 		    
 			return drawingCanvas;

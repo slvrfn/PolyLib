@@ -31,9 +31,7 @@ namespace LowPolyLibrary
 
 	    internal BitmapPool.BitmapPool ReuseableBitmapPool;
 
-	    private Paint _paint;
-
-        public List<Triad> TriangulatedPoints;
+	    public List<Triad> TriangulatedPoints;
 
         public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize, BitmapPool.BitmapPool imagePool)
         {
@@ -42,9 +40,7 @@ namespace LowPolyLibrary
             Variance = variance;
             CellSize = cellSize;
 
-            _paint = new Paint();
-            _paint.SetStyle(Paint.Style.FillAndStroke);
-            _paint.AntiAlias = true;
+            
 
             ReuseableBitmapPool = imagePool;
 
@@ -68,25 +64,33 @@ namespace LowPolyLibrary
 		private IManagedBitmap DrawFrame()
 		{
 		    var drawingCanvas = ReuseableBitmapPool.getBitmap();
-            Canvas canvas = new Canvas(drawingCanvas.GetBitmap());
-            
-            for (int i = 0; i < TriangulatedPoints.Count; i++)
-            {
-                var a = new PointF(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
-                var b = new PointF(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
-                var c = new PointF(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
 
-                var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
+		    using (var paint = new Paint())
+		    {
+		        paint.SetStyle(Paint.Style.FillAndStroke);
+		        paint.AntiAlias = true;
 
-				var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-                _paint.Color =Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+		        for (int i = 0; i < TriangulatedPoints.Count; i++)
+		        {
+		            var a = new PointF(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
+		            var b = new PointF(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
+		            var c = new PointF(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
 
-                using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
-                {
-                    canvas.DrawPath(trianglePath, _paint);
-                }
+		            var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
+
+		            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+		            paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+
+		            using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
+		            {
+		                using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
+		                {
+		                    canvas.DrawPath(trianglePath, paint);
+		                }
+		            }
+		        }
+		        return drawingCanvas;
             }
-            return drawingCanvas;
         }
 
         private void UpdateVars()
@@ -166,17 +170,23 @@ namespace LowPolyLibrary
 			}
 
 		    var bmp = ReuseableBitmapPool.getBitmap();
-
-            
-			_paint.SetStyle (Paint.Style.Fill);
-		    var oldShader = _paint.Shader;
-			_paint.SetShader (gradientShader);
-		    using (Canvas canvas = new Canvas(bmp.GetBitmap()))
+		    using (var paint = new Paint())
 		    {
-		        canvas.DrawRect(0, 0, BoundsWidth, BoundsHeight, _paint);
+		        paint.SetStyle(Paint.Style.Fill);
+                paint.AntiAlias = true;
+
+		        var oldShader = paint.Shader;
+		        paint.SetShader(gradientShader);
+		        using (Canvas canvas = new Canvas(bmp.GetBitmap()))
+		        {
+		            canvas.DrawRect(0, 0, BoundsWidth, BoundsHeight, paint);
+		        }
+
+		        paint.SetShader(oldShader);
             }
-			
-		    _paint.SetShader(oldShader);
+
+		    
+		    
 			return bmp;
 		}
 
