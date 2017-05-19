@@ -95,6 +95,11 @@ namespace LowPolyLibrary.BitmapPool
 					}
 					else
 					{
+                        //set the image to black for reuse
+                        using(var c = new Canvas(_bitmap))
+                        {
+                            c.DrawRGB(0,0,0);
+                        }
 						_pool._bitmaps.Push(_bitmap);
 					}
 				}
