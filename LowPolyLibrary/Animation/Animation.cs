@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
 using LowPolyLibrary.Threading;
 using LowPolyLibrary.Animation;
+ using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary.Animation
 {
@@ -15,16 +16,16 @@ namespace LowPolyLibrary.Animation
 	{
 		private readonly CurrentAnimationsBlock _animations; 
 		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
-		private readonly TransformBlock<RenderedFrame, Android.Graphics.Bitmap> _drawFrame;
-		private readonly FrameQueueBlock<Android.Graphics.Bitmap> _frameQueue;
+		private readonly TransformBlock<RenderedFrame, IManagedBitmap> _drawFrame;
+		private readonly FrameQueueBlock<IManagedBitmap> _frameQueue;
 		//private readonly RandomAnimationBlock _randomAnim;
-		private readonly ActionBlock<Android.Graphics.Bitmap> _writeImage;
+		private readonly ActionBlock<IManagedBitmap> _writeImage;
 
-        public Animation(Action<Android.Graphics.Bitmap> writeImage)
+        public Animation(Action<IManagedBitmap> writeImage)
         {
             _animations = new CurrentAnimationsBlock();
             //_randomAnim = new RandomAnimationBlock(_animations, 5000);
-            _frameQueue = new FrameQueueBlock<Android.Graphics.Bitmap>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
+            _frameQueue = new FrameQueueBlock<IManagedBitmap>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
             {
@@ -35,7 +36,7 @@ namespace LowPolyLibrary.Animation
                 animFrame.Add(x);
             }
 
-                //storage to be more generic in future, allows any dwrived draw function
+                //storage to be more generic in future, allows any derived draw function
                 var rend = new RenderedFrame(arg[0].DrawPointFrame);
             
                 //no use in "combining" animations unless there is more than 1 anim for this frame
@@ -73,9 +74,9 @@ namespace LowPolyLibrary.Animation
                 return rend;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
 
-            _drawFrame = new TransformBlock<RenderedFrame, Android.Graphics.Bitmap>((arg) =>
+            _drawFrame = new TransformBlock<RenderedFrame, IManagedBitmap>((arg) =>
             {
-                Android.Graphics.Bitmap bitmap = null;
+                IManagedBitmap bitmap = null;
                 try
                 {
                     //bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
@@ -89,7 +90,7 @@ namespace LowPolyLibrary.Animation
 
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
-            _writeImage = new ActionBlock<Android.Graphics.Bitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
+            _writeImage = new ActionBlock<IManagedBitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
 			_animations.LinkTo(_renderFrame);
 			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());

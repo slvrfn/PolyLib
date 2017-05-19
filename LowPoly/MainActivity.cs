@@ -11,6 +11,7 @@ using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
 using System.Threading.Tasks.Dataflow;
+using LowPolyLibrary.BitmapPool;
 
 namespace LowPoly
 {
@@ -23,6 +24,8 @@ namespace LowPoly
 	    private LowPolyLibrary.Triangulation _lowPoly;
 
 		private LowPolyLibrary.Animation.Animation animation;
+
+	    private BitmapPool ReuseableBitmapPool;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -76,7 +79,7 @@ namespace LowPoly
                     imagePanel.SetImageBitmap(null);
 
                 }
-                imagePanel.SetImageBitmap(arg);
+                imagePanel.SetImageBitmap(arg.GetBitmap());
 			});
 		}
 
@@ -85,10 +88,16 @@ namespace LowPoly
             var boundsWidth = Int32.Parse(widthTB.Text);
 			var boundsHeight = Int32.Parse(heightTB.Text);
 
-			var variance = double.Parse(varTB.Text);
+		    //first occurence
+		    if (ReuseableBitmapPool == null)
+		    {
+		        ReuseableBitmapPool = new BitmapPool(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+		    }
+
+            var variance = double.Parse(varTB.Text);
 			var cellSize = double.Parse(sizeTB.Text);
 
-            _lowPoly = new LowPolyLibrary.Triangulation(boundsWidth,boundsHeight,variance, cellSize);
+            _lowPoly = new LowPolyLibrary.Triangulation(boundsWidth,boundsHeight,variance, cellSize, ReuseableBitmapPool);
         }
 
 		public void Generate (object sender, EventArgs e){
@@ -107,7 +116,7 @@ namespace LowPoly
 
 			}
             //imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
-            imagePanel.SetImageBitmap(generatedBitmap);
+            imagePanel.SetImageBitmap(generatedBitmap.GetBitmap());
 
 		    timeElapsed.Text = temp.Elapsed.ToString();
 		}

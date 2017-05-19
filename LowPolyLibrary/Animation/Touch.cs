@@ -5,6 +5,7 @@ using System.Linq;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using DelaunayTriangulator;
+using LowPolyLibrary.BitmapPool;
 using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary.Animation
@@ -177,7 +178,7 @@ namespace LowPolyLibrary.Animation
         }
 
 		//only overriding to force display of red ring of current touch area
-        internal override Bitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
+        internal override IManagedBitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
         {
 			//base DrawPointFrame will render the animation correctly, get the bitmap
 			var renderedBitmap = base.DrawPointFrame(pointChanges);
@@ -191,7 +192,7 @@ namespace LowPolyLibrary.Animation
             paint.Color = Android.Graphics.Color.Crimson;
 
             //Create a canvas to draw touch location on the bitmap
-            using (Canvas canvas = new Canvas(renderedBitmap))
+            using (Canvas canvas = new Canvas(renderedBitmap.GetBitmap()))
             {
                 canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
             }

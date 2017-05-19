@@ -47,7 +47,7 @@ namespace LowPolyLibrary.Threading
 			ColorBru.Code randomAnimType = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
 
 			//var newAnim = new AnimationBase("custom", 6, 200);
-			var newAnim = new Sweep(new Triangulation(0, 0, 0, 0));
+			var newAnim = new Sweep(new Triangulation(0, 0, 0, 0, null));
 
 			tim.Start();
 			return _source.Post(newAnim);

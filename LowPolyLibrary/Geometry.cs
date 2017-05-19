@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using DelaunayTriangulator;
+using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary
 {
@@ -290,14 +291,14 @@ namespace LowPolyLibrary
 			return new System.Drawing.Point(x, y);
 		}
 
-		internal static Android.Graphics.Color GetTriangleColor(Android.Graphics.Bitmap gradient, System.Drawing.Point center)
+		internal static Android.Graphics.Color GetTriangleColor(IManagedBitmap gradient, System.Drawing.Point center)
 		{
 			//center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
 
 			System.Drawing.Color colorFromRGB;
 			try
 			{
-				colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetPixel(center.X, center.Y));
+				colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetBitmap().GetPixel(center.X, center.Y));
 			}
 			catch
 			{

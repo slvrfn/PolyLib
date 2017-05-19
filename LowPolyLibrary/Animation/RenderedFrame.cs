@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Android.Graphics;
+using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary.Animation
 {
@@ -9,14 +10,14 @@ namespace LowPolyLibrary.Animation
     {
         public List<AnimatedPoint> FramePoints = null;
 
-        public Func<List<AnimatedPoint>, Bitmap> DrawFunction = null;
+        public Func<List<AnimatedPoint>, IManagedBitmap> DrawFunction = null;
 
-        public RenderedFrame(Func<List<AnimatedPoint>, Bitmap> funct)
+        public RenderedFrame(Func<List<AnimatedPoint>, IManagedBitmap> funct)
         {
             DrawFunction = funct;
         }
 
-        public RenderedFrame(Func<List<AnimatedPoint>, Bitmap> funct, List<AnimatedPoint> points )
+        public RenderedFrame(Func<List<AnimatedPoint>, IManagedBitmap> funct, List<AnimatedPoint> points )
         {
             FramePoints = points;
             DrawFunction = funct;

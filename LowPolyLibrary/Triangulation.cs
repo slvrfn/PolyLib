@@ -14,6 +14,7 @@ using System;
 using Android.Test.Suitebuilder;
 using Java.IO;
 using Javax.Security.Auth;
+using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary
 {
@@ -25,14 +26,16 @@ namespace LowPolyLibrary
 		public double Variance = .75;
 		private double calcVariance, cells_x, cells_y;
 		internal double bleed_x, bleed_y;
-        internal Bitmap Gradient;
+        internal IManagedBitmap Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
+
+	    internal BitmapPool.BitmapPool ReuseableBitmapPool;
 
 	    private Paint _paint;
 
         public List<Triad> TriangulatedPoints;
 
-        public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
+        public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize, BitmapPool.BitmapPool imagePool)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;
@@ -42,6 +45,8 @@ namespace LowPolyLibrary
             _paint = new Paint();
             _paint.SetStyle(Paint.Style.FillAndStroke);
             _paint.AntiAlias = true;
+
+            ReuseableBitmapPool = imagePool;
 
             UpdateVars();
 			InternalPoints = GeneratePoints();
@@ -55,15 +60,15 @@ namespace LowPolyLibrary
         //    Gradient.Dispose();
         //}
 
-	    public Bitmap GeneratedBitmap
+	    public IManagedBitmap GeneratedBitmap
 	    {
             get { return DrawFrame(); }
 	    }
 
-		private Bitmap DrawFrame()
-        {
-            Bitmap drawingCanvas = Bitmap.CreateBitmap(BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
-            Canvas canvas = new Canvas(drawingCanvas);
+		private IManagedBitmap DrawFrame()
+		{
+		    var drawingCanvas = ReuseableBitmapPool.getBitmap();
+            Canvas canvas = new Canvas(drawingCanvas.GetBitmap());
             
             for (int i = 0; i < TriangulatedPoints.Count; i++)
             {
@@ -110,7 +115,7 @@ namespace LowPolyLibrary
 			return colorArray;
 		}
 
-		private Bitmap GetGradient()
+		private IManagedBitmap GetGradient()
 		{
             var rand = new System.Random();
             var colorArray = getGradientColors ();
@@ -160,13 +165,13 @@ namespace LowPolyLibrary
 				    break;
 			}
 
-            Bitmap bmp = Bitmap.CreateBitmap (BoundsWidth, BoundsHeight, Bitmap.Config.Rgb565);
+		    var bmp = ReuseableBitmapPool.getBitmap();
 
             
 			_paint.SetStyle (Paint.Style.Fill);
 		    var oldShader = _paint.Shader;
 			_paint.SetShader (gradientShader);
-		    using (Canvas canvas = new Canvas(bmp))
+		    using (Canvas canvas = new Canvas(bmp.GetBitmap()))
 		    {
 		        canvas.DrawRect(0, 0, BoundsWidth, BoundsHeight, _paint);
             }

@@ -1,5 +1,6 @@
 ﻿﻿using System.Drawing;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using DelaunayTriangulator;
 using Triad = DelaunayTriangulator.Triad;
 using Double = System.Double;
@@ -10,7 +11,7 @@ using System.Linq;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using LowPolyLibrary.Threading;
-using BitmapPool = LowPolyLibrary.BitmapPool;
+using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary.Animation
 {
@@ -25,7 +26,7 @@ namespace LowPolyLibrary.Animation
 		internal double bleed_x, bleed_y;
 
 		internal List<Triad> triangulatedPoints;
-		internal Bitmap Gradient;
+		internal IManagedBitmap Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
 		internal List<cRectangleF[]> viewRectangles;
@@ -54,9 +55,7 @@ namespace LowPolyLibrary.Animation
 			FramedPoints = new List<PointF>[numFrames];
 			WideFramedPoints = new List<PointF>[numFrames];
 
-
-
-            ReuseableImagePool = new BitmapPool.BitmapPool(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+		    ReuseableImagePool = triangulation.ReuseableBitmapPool;
 
             var direction = Geometry.get360Direction();
 			seperatePointsIntoRectangleFrames(InternalPoints, direction);
