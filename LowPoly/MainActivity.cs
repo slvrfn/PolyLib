@@ -26,6 +26,7 @@ namespace LowPoly
 		private LowPolyLibrary.Animation.Animation animation;
 
 	    private BitmapPool ReuseableBitmapPool;
+        private IManagedBitmap LastBitmap;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -70,18 +71,28 @@ namespace LowPoly
                 //imagePanel.SetImageDrawable(new BitmapDrawable(arg));
                 //RunOnUiThread(() => 
                 //{
-                if (imagePanel.Drawable != null)
+                if (LastBitmap != null)
                 {
                     //recycle necessary?TODO
                     //((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
                     //((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
-                    imagePanel.Drawable.Dispose();
-                    imagePanel.SetImageBitmap(null);
+                    //imagePanel.Drawable.Dispose();
+                    //imagePanel.SetImageBitmap(null);
+                    LastBitmap.recycle();
 
                 }
                 imagePanel.SetImageBitmap(arg.GetBitmap());
+                LastBitmap = arg;
 			});
 		}
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            LastBitmap.recycle();
+            ReuseableBitmapPool.recycle();
+
+        }
 
 		private void UpdatePolyLib()
 		{
@@ -108,15 +119,17 @@ namespace LowPoly
             temp.Start();
 		    var generatedBitmap = _lowPoly.GeneratedBitmap;
             temp.Stop();
-			if (imagePanel.Drawable != null)
+			if (LastBitmap != null)
 			{
 				//((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
 				//((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
-                imagePanel.Drawable.Dispose();
+                //imagePanel.Drawable.Dispose();
+                LastBitmap.recycle();
 
 			}
             //imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
             imagePanel.SetImageBitmap(generatedBitmap.GetBitmap());
+            LastBitmap = generatedBitmap;
 
 		    timeElapsed.Text = temp.Elapsed.ToString();
 		}
