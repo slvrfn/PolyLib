@@ -73,11 +73,6 @@ namespace LowPoly
                 //{
                 if (LastBitmap != null)
                 {
-                    //recycle necessary?TODO
-                    //((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
-                    //((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
-                    //imagePanel.Drawable.Dispose();
-                    //imagePanel.SetImageBitmap(null);
                     LastBitmap.recycle();
 
                 }
@@ -121,13 +116,9 @@ namespace LowPoly
             temp.Stop();
 			if (LastBitmap != null)
 			{
-				//((BitmapDrawable)imagePanel.Drawable).Bitmap.Recycle();
-				//((BitmapDrawable)imagePanel.Drawable).Bitmap.Dispose();
-                //imagePanel.Drawable.Dispose();
-                LastBitmap.recycle();
+				LastBitmap.recycle();
 
 			}
-            //imagePanel.SetImageDrawable (new BitmapDrawable (generatedBitmap));
             imagePanel.SetImageBitmap(generatedBitmap.GetBitmap());
             LastBitmap = generatedBitmap;
 

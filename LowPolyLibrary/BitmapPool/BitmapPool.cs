@@ -38,7 +38,9 @@ namespace LowPolyLibrary.BitmapPool
             _isRecycled = true;
             foreach (var bitmap in _bitmaps)
             {
-                bitmap.Recycle();
+                //check which gives better performance
+                //bitmap.Recycle();
+                bitmap.Dispose();
             }
             _bitmaps.Clear();
         }
@@ -91,7 +93,9 @@ namespace LowPolyLibrary.BitmapPool
 				{
 					if (_pool._isRecycled)
 					{
-						_bitmap.Recycle();
+					    //check which gives better performance
+					    //_bitmap.Recycle();
+                        _bitmap.Dispose();
 					}
 					else
 					{
