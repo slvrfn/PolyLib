@@ -37,6 +37,8 @@ namespace LowPolyLibrary.Animation
 
         protected BitmapPool.BitmapPool ReuseableImagePool;
 
+        internal bool IsSetup = false;
+
 		public int boundsWidth;
 		public int boundsHeight;
         #endregion
@@ -56,14 +58,17 @@ namespace LowPolyLibrary.Animation
 			WideFramedPoints = new List<PointF>[numFrames];
 
 		    ReuseableImagePool = triangulation.ReuseableBitmapPool;
+		}
+        #endregion
 
-            var direction = Geometry.get360Direction();
+        #region Animation Methods
+
+        internal virtual void SetupAnimation()
+        {
+			var direction = Geometry.get360Direction();
 			seperatePointsIntoRectangleFrames(InternalPoints, direction);
 			divyTris(InternalPoints);
-		}
-		#endregion
-
-		#region Animation Methods
+        }
 
 		internal abstract List<AnimatedPoint> RenderFrame();
 

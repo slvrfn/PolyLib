@@ -32,6 +32,11 @@ namespace LowPolyLibrary.Animation
             var animFrame = new List<List<AnimatedPoint>>();
             foreach (var anim in arg)
             {
+                    if (!anim.IsSetup)
+                    {
+                        anim.SetupAnimation();
+                    }
+
                 var x = anim.RenderFrame();
                 animFrame.Add(x);
             }
@@ -101,7 +106,7 @@ namespace LowPolyLibrary.Animation
 			//GenerateImage();
 		}
 
-		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, int totalFrames, float x = 0f, float y = 0f, int radius = 0)
+		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, float x = 0f, float y = 0f, int radius = 0)
 		{
 			AnimationBase temp = null;
 			switch (animName)

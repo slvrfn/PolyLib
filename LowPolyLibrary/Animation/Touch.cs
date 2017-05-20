@@ -30,8 +30,6 @@ namespace LowPolyLibrary.Animation
             OutOfRange = new List<PointF>();
             TouchLocation = new PointF(x, y);
             TouchRadius = radius;
-
-            setPointsAroundTouch();
         }
 
         internal List<PointF> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
@@ -150,6 +148,15 @@ namespace LowPolyLibrary.Animation
 			var thisCoord = ratioToFinalMovement * distanceToCcover;
 			return thisCoord;
 		}
+
+        internal override void SetupAnimation()
+        {
+            base.SetupAnimation();
+
+            setPointsAroundTouch();
+
+            IsSetup = true;
+        }
 
         internal override List<AnimatedPoint> RenderFrame()
         {

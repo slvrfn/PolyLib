@@ -15,6 +15,8 @@ namespace LowPolyLibrary.Animation
 		Queue<Vertex> animateList;
 		List<AnimatedPoint> TotalAnimatedPoints;
 
+        private bool previouslySetup;
+
         internal Grow(Triangulation triangulation): base(triangulation) 
 		{
 			AnimationType = AnimationTypes.Type.Grow;
@@ -25,6 +27,11 @@ namespace LowPolyLibrary.Animation
 			{
 				pointUsed[i] = false;
 			}
+		}
+
+        internal override void SetupAnimation()
+        {
+            base.SetupAnimation();
 
             var rand = new Random();
 			//visible rec so that the start of the anim is from a point visible on screen
@@ -42,7 +49,9 @@ namespace LowPolyLibrary.Animation
 
 			animateList = new Queue<Vertex>();
 			animateList.Enqueue(point);
-		}
+
+            IsSetup = true;
+        }
 
         internal override BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
         {

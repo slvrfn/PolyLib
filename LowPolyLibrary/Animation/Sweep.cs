@@ -18,6 +18,13 @@ namespace LowPolyLibrary.Animation
 			AnimationType = AnimationTypes.Type.Sweep;
 		}
 
+        //necessary to prevent animationbase from "setting up" multiple times
+        internal override void SetupAnimation()
+        {
+            base.SetupAnimation();
+            IsSetup = true;
+        }
+
         internal override List<AnimatedPoint> RenderFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();

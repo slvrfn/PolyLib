@@ -133,13 +133,13 @@ namespace LowPoly
 			switch (anim)
 			{
 				case AnimationTypes.Type.Grow:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Grow, 12);
+                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
                     break;
 				case AnimationTypes.Type.Sweep:
-					animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep, 12);
+					animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
 					break;
 				case AnimationTypes.Type.Touch:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, 12, touch.X, touch.Y, 500);
+                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
                     break;
 			}
 			temp.Stop();
