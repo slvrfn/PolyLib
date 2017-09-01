@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using Android.Graphics;
-using Android.Graphics.Drawables;
 using DelaunayTriangulator;
 using LowPolyLibrary.BitmapPool;
-using PointF = System.Drawing.PointF;
 
 namespace LowPolyLibrary.Animation
 {

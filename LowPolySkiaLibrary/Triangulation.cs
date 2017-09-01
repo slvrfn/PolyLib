@@ -1,19 +1,10 @@
-﻿using System.Drawing;
-using System.Collections.Generic;
-using Android.Graphics;
-using Android.Graphics.Drawables;
-using Java.Lang;
-using Java.Util;
+﻿using System.Collections.Generic;
 using Triangulator = DelaunayTriangulator.Triangulator;
 using Triad = DelaunayTriangulator.Triad;
 using Double = System.Double;
 using Enum = System.Enum;
 using Math = System.Math;
-using PointF = System.Drawing.PointF;
 using System;
-using Android.Test.Suitebuilder;
-using Java.IO;
-using Javax.Security.Auth;
 using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary

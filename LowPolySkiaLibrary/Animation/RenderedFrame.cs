@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Android.Graphics;
 using LowPolyLibrary.BitmapPool;
 
 namespace LowPolyLibrary.Animation

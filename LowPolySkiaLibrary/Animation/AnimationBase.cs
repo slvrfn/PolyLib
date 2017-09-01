@@ -1,15 +1,11 @@
-﻿﻿using System.Drawing;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Concurrent;
 using DelaunayTriangulator;
 using Triad = DelaunayTriangulator.Triad;
 using Double = System.Double;
 using Math = System.Math;
-using PointF = System.Drawing.PointF;
 using System;
 using System.Linq;
-using Android.Graphics;
-using Android.Graphics.Drawables;
 using LowPolyLibrary.Threading;
 using LowPolyLibrary.BitmapPool;
 
