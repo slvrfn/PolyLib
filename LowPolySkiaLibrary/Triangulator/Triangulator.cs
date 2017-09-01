@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+
 
 /*
   copyright s-hull.org 2011
@@ -115,6 +117,7 @@ namespace DelaunayTriangulator
 
             // Sort the _other_ points in order of distance to circumcentre
             Array.Sort(distance2ToCentre, sortedIndices, 3, nump - 3);
+
 
             // Add new points into hull (removing obscured ones from the chain)
             // and creating triangles....
@@ -663,21 +666,21 @@ namespace DelaunayTriangulator
             }
         }
 
-        private void WriteTriangles(List<Triad> triangles, string name)
-        {
-            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(name + ".dtt"))
-            {
-                writer.WriteLine(triangles.Count.ToString());
-                for (int i = 0; i < triangles.Count; i++)
-                {
-                    Triad t = triangles[i];
-                    writer.WriteLine(string.Format("{0}: {1} {2} {3} - {4} {5} {6}",
-                        i + 1,
-                        t.a, t.b, t.c,
-                        t.ab + 1, t.bc + 1, t.ac + 1));
-                }
-            }
-        }
+   //     private void WriteTriangles(List<Triad> triangles, string name)
+   //     {
+   //         using (System.IO.StreamWriter writer = new System.IO.StreamWriter(name + ".dtt"))
+			//{
+        //        writer.WriteLine(triangles.Count.ToString());
+        //        for (int i = 0; i < triangles.Count; i++)
+        //        {
+        //            Triad t = triangles[i];
+        //            writer.WriteLine(string.Format("{0}: {1} {2} {3} - {4} {5} {6}",
+        //                i + 1,
+        //                t.a, t.b, t.c,
+        //                t.ab + 1, t.bc + 1, t.ac + 1));
+        //        }
+        //    }
+        //}
 
 #endif
 

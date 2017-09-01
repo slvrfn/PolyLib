@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DelaunayTriangulator;
+using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
@@ -63,29 +64,29 @@ namespace LowPolyLibrary.Animation
 			{
                 var t = 0;
 			}
-            using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
+            using (var canvas = drawingCanvas.GetBitmap().Canvas)
             {
-                using (var paint = new Paint())
+                using (var paint = new SKPaint())
                 {
-                    paint.SetStyle(Paint.Style.FillAndStroke);
-                    paint.AntiAlias = true;
+                    paint.Style = SKPaintStyle.StrokeAndFill;
+                    paint.IsAntialias = true;
 
-                    var thisFrame = edgeFrameList.ConvertAll((input) => { return new Vertex(input.Point.X, input.Point.Y); });
+                    var thisFrame = edgeFrameList.Select((input) => { return new Vertex(input.Point.X, input.Point.Y); });
 
                     foreach (var tri in triangulatedPoints)
                     {
                         if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
                         {
-                            var a = new PointF(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
-                            var b = new PointF(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
-                            var c = new PointF(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
+                            var a = new SKPoint(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
+                            var b = new SKPoint(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
+                            var c = new SKPoint(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
 
                             var center = Geometry.centroid(tri, InternalPoints);
 
                             var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
                             paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
 
-                            using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+                            using (SKPath trianglePath = Geometry.DrawTrianglePath(a, b, c))
                             {
                                 canvas.DrawPath(trianglePath, paint);
                             }
@@ -112,7 +113,7 @@ namespace LowPolyLibrary.Animation
 				outPoints.Add(new AnimatedPoint(currentPoint));
 
                 var drawList = new List<Triad>();
-                drawList = poTriDic[new PointF(currentPoint.x, currentPoint.y)];
+                drawList = poTriDic[new SKPoint(currentPoint.x, currentPoint.y)];
                 foreach (var tri in drawList)
                 {
                     //if the point is not used

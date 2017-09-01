@@ -3,36 +3,37 @@ using System.Collections.Generic;
 using System.Text;
 using DelaunayTriangulator;
 using LowPolyLibrary.BitmapPool;
+using SkiaSharp;
 
 namespace LowPolyLibrary
 {
 	class Geometry
 	{
-		internal static System.Drawing.Point KeepInPicBounds(System.Drawing.Point center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
+		internal static SKPoint KeepInPicBounds(SKPoint center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
 		{
 			if (center.X < 0)
 				center.X += (int)bleed_x;
 			else if (center.X > BoundsWidth)
 				center.X -= (int)bleed_x;
-			else if (center.X == BoundsWidth)
+			else if (center.X.Equals(BoundsWidth))
 				center.X -= (int)bleed_x - 1;
 			if (center.Y < 0)
 				center.Y += (int)bleed_y;
 			else if (center.Y > BoundsHeight)
 				center.Y -= (int)bleed_y + 1;
-			else if (center.Y == BoundsHeight)
+			else if (center.Y.Equals(BoundsHeight))
 				center.Y -= (int)bleed_y - 1;
 			return center;
 		}
 
 		#region Circles
-		internal static bool pointInsideCircle(PointF point, PointF center, int radius)
+		internal static bool pointInsideCircle(SKPoint point, SKPoint center, int radius)
 		{
 			//http://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
 			return (point.X - center.X) * (point.X - center.X) + (point.Y - center.Y) * (point.Y - center.Y) < radius * radius;
 		}
 
-		internal static double GetPolarCoordinates(Point center, Point point)
+		internal static double GetPolarCoordinates(SKPoint center, SKPoint point)
 		{
 			//http://stackoverflow.com/questions/2676719/calculating-the-angle-between-the-line-defined-by-two-points
 			var x = point.X - center.X;
@@ -75,17 +76,17 @@ namespace LowPolyLibrary
 			var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
 			var recipSlope = -1 / slope;
 
-			PointF ADIntersection;
-			PointF DCIntersection;
-			var drawingAreaA = new PointF(0, boundsHeight);
-			var drawingAreaB = new PointF(boundsWidth, boundsHeight);
-			var drawingAreaC = new PointF(boundsWidth, 0);
-			var drawingAreaD = new PointF(0, 0);
+			SKPoint ADIntersection;
+			SKPoint DCIntersection;
+			var drawingAreaA = new SKPoint(0, boundsHeight);
+			var drawingAreaB = new SKPoint(boundsWidth, boundsHeight);
+			var drawingAreaC = new SKPoint(boundsWidth, 0);
+			var drawingAreaD = new SKPoint(0, 0);
 
-			PointF cornerA;
-			PointF cornerB;
-			PointF cornerC;
-			PointF cornerD;
+			SKPoint cornerA;
+			SKPoint cornerB;
+			SKPoint cornerC;
+			SKPoint cornerD;
 
 			if (angle < 90)
 			{
@@ -131,10 +132,10 @@ namespace LowPolyLibrary
 			var walkedC = Geometry.walkAngle(angle, frameWidth, DCIntersection);
 			frames[0] = new cRectangleF
 			{
-				A = new PointF(ADIntersection.X, ADIntersection.Y),
-				B = new PointF(walkedB.X, walkedB.Y),
-				C = new PointF(walkedC.X, walkedC.Y),
-				D = new PointF(DCIntersection.X, DCIntersection.Y)
+				A = new SKPoint(ADIntersection.X, ADIntersection.Y),
+				B = new SKPoint(walkedB.X, walkedB.Y),
+				C = new SKPoint(walkedC.X, walkedC.Y),
+				D = new SKPoint(DCIntersection.X, DCIntersection.Y)
 			};
 
 			//starts from second array entry because first entry is assigned above
@@ -153,7 +154,7 @@ namespace LowPolyLibrary
 			return returnList;
 		}
 
-		internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, PointF A, PointF D, int angle, int numFrames, int boundsWidth, int boundsHeight)
+		internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
 			//first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
 			//all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
@@ -163,8 +164,8 @@ namespace LowPolyLibrary
 
 
 			//represents the corner A of the regular overlays
-			var overlayA = new PointF(A.X, A.Y);
-			var overlayD = new PointF(D.X, D.Y);
+			var overlayA = new SKPoint(A.X, A.Y);
+			var overlayD = new SKPoint(D.X, D.Y);
 
 			var tempWidth = boundsWidth / 2;
 			var tempHeight = boundsHeight / 2;
@@ -185,15 +186,15 @@ namespace LowPolyLibrary
 				cRectangleF overlay = new cRectangleF();
 				if (i == numFrames - 1)
 				{
-					overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
-					overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
+					overlay.A = new SKPoint(frames[i - 1].B.X, frames[i - 1].B.Y);
+					overlay.D = new SKPoint(frames[i - 1].C.X, frames[i - 1].C.Y);
 					overlay.B = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.A);
 					overlay.C = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.D);
 				}
 				else
 				{
-					overlay.A = new PointF(frames[i - 1].B.X, frames[i - 1].B.Y);
-					overlay.D = new PointF(frames[i - 1].C.X, frames[i - 1].C.Y);
+					overlay.A = new SKPoint(frames[i - 1].B.X, frames[i - 1].B.Y);
+					overlay.D = new SKPoint(frames[i - 1].C.X, frames[i - 1].C.Y);
 					overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
 					overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
 				}
@@ -205,9 +206,9 @@ namespace LowPolyLibrary
 		#endregion
 
 		#region Lines
-		internal static PointF getIntersection(float slope, PointF linePoint, PointF perpendicularLinePoint)
+		internal static SKPoint getIntersection(float slope, SKPoint linePoint, SKPoint perpendicularLinePoint)
 		{
-			var linePoint2 = new PointF();
+			var linePoint2 = new SKPoint();
 			var point2Offset = (float)(2 * dist(linePoint, perpendicularLinePoint));
 			//if (slope > 0)
 			//    point2Offset = -point2Offset;
@@ -226,12 +227,12 @@ namespace LowPolyLibrary
 			var x4 = linePoint.X + t * (linePoint2.X - linePoint.X);
 			var y4 = linePoint.Y + t * (linePoint2.Y - linePoint.Y);
 
-			return new PointF(x4, y4);
+			return new SKPoint(x4, y4);
 		}
 
-		internal static PointF walkAngle(int angle, float distance, PointF startingPoint)
+		internal static SKPoint walkAngle(int angle, float distance, SKPoint startingPoint)
 		{
-			var endPoint = new PointF(startingPoint.X, startingPoint.Y);
+			var endPoint = new SKPoint(startingPoint.X, startingPoint.Y);
 			var y = distance * ((float)Math.Sin(degreesToRadians(angle)));
 			var x = distance * ((float)Math.Cos(degreesToRadians(angle)));
 			endPoint.X += x;
@@ -239,14 +240,14 @@ namespace LowPolyLibrary
 			return endPoint;
 		}
 
-		internal static double dist(PointF workingPoint, DelaunayTriangulator.Vertex vertex)
+		internal static double dist(SKPoint workingPoint, DelaunayTriangulator.Vertex vertex)
 		{
 			var xSquare = (workingPoint.X - vertex.x) * (workingPoint.X - vertex.x);
 			var ySquare = (workingPoint.Y - vertex.y) * (workingPoint.Y - vertex.y);
 			return Math.Sqrt(xSquare + ySquare);
 		}
 
-		internal static double dist(PointF workingPoint, PointF vertex)
+		internal static double dist(SKPoint workingPoint, SKPoint vertex)
 		{
 			var xSquare = (workingPoint.X - vertex.X) * (workingPoint.X - vertex.X);
 			var ySquare = (workingPoint.Y - vertex.Y) * (workingPoint.Y - vertex.Y);
@@ -282,36 +283,35 @@ namespace LowPolyLibrary
 		#endregion
 
 		#region Triangles
-		internal static System.Drawing.Point centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
+		internal static SKPoint centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
 		{
 			var x = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
 			var y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);
 
-			return new System.Drawing.Point(x, y);
+			return new SKPoint(x, y);
 		}
 
-		internal static Android.Graphics.Color GetTriangleColor(IManagedBitmap gradient, System.Drawing.Point center)
+		internal static SKColor GetTriangleColor(IManagedBitmap gradient, SKPoint center)
 		{
 			//center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
 
-			System.Drawing.Color colorFromRGB;
+			SKColor colorFromRGB;
 			try
 			{
-				colorFromRGB = System.Drawing.Color.FromArgb(gradient.GetBitmap().GetPixel(center.X, center.Y));
+				colorFromRGB = SKColor.FromArgb(gradient.GetBitmap().Canvas.GetPixel(center.X, center.Y));
+
 			}
 			catch
 			{
-				colorFromRGB = System.Drawing.Color.Cyan;
+                colorFromRGB = new SKColor(93,231,240);
 			}
-
-			Android.Graphics.Color triColor = Android.Graphics.Color.Rgb(colorFromRGB.R, colorFromRGB.G, colorFromRGB.B);
-			return triColor;
+			return colorFromRGB;
 		}
 
-		internal static Android.Graphics.Path DrawTrianglePath(System.Drawing.PointF a, System.Drawing.PointF b, System.Drawing.PointF c)
+		internal static SKPath DrawTrianglePath(SKPoint a, SKPoint b, SKPoint c)
 		{
-			var path = new Android.Graphics.Path();
-			path.SetFillType(Android.Graphics.Path.FillType.EvenOdd);
+			var path = new SKPath();
+            path.FillType = SKPathFillType.EvenOdd;
 			path.MoveTo(b.X, b.Y);
 			path.LineTo(c.X, c.Y);
 			path.LineTo(a.X, a.Y);

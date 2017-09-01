@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using SkiaSharp;
 
 namespace LowPolyLibrary.BitmapPool
 {
@@ -13,18 +14,14 @@ namespace LowPolyLibrary.BitmapPool
     */
     public class BitmapPool
     {
-		private readonly int _width;
-		private readonly int _height;
-		private readonly Bitmap.Config _config;
-		private readonly ConcurrentStack<Bitmap> _bitmaps = new ConcurrentStack<Bitmap>();
+		private readonly SKImageInfo _config;
+		private readonly ConcurrentStack<SKSurface> _bitmaps = new ConcurrentStack<SKSurface>();
 		private bool _isRecycled;
 
 		//private final Handler handler = new Handler();
 
-		public BitmapPool(int bitmapWidth, int bitmapHeight, Bitmap.Config conf)
+		public BitmapPool(SKImageInfo conf)
         {
-            _width = bitmapWidth;
-            _height = bitmapHeight;
             _config = conf;
         }
 
@@ -50,10 +47,10 @@ namespace LowPolyLibrary.BitmapPool
         */
         public IManagedBitmap getBitmap()
         {
-            Bitmap map;
+            SKSurface map;
             if (_bitmaps.Count == 0)
             {
-                map = Bitmap.CreateBitmap(_width, _height, _config);
+                map = SKSurface.Create(_config);
             }
             else
             {
@@ -73,15 +70,15 @@ namespace LowPolyLibrary.BitmapPool
             private BitmapPool _pool;
 
             private int referenceCounter = 1;
-            private readonly Bitmap _bitmap;
+            private readonly SKSurface _bitmap;
 
-            internal LeasedBitmap(Bitmap bitmap, BitmapPool pool)
+            internal LeasedBitmap(SKSurface bitmap, BitmapPool pool)
             {
                 _bitmap = bitmap;
                 _pool = pool;
             }
 
-            public Bitmap GetBitmap()
+            public SKSurface GetBitmap()
             {
                 return _bitmap;
             }
@@ -99,9 +96,9 @@ namespace LowPolyLibrary.BitmapPool
 					else
 					{
                         //set the image to black for reuse
-                        using(var c = new Canvas(_bitmap))
+                        using(var c = _bitmap.Canvas)
                         {
-                            c.DrawRGB(0,0,0);
+                            c.Clear();
                         }
 						_pool._bitmaps.Push(_bitmap);
 					}

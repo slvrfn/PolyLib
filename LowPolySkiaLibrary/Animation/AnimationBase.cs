@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using LowPolyLibrary.Threading;
 using LowPolyLibrary.BitmapPool;
+using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
@@ -16,9 +17,9 @@ namespace LowPolyLibrary.Animation
 		#region Global Variables
 		internal int numFrames = 12;
 		internal int CurrentFrame = 0;
-		internal List<PointF>[] FramedPoints;
-		internal List<PointF>[] WideFramedPoints;
-		internal Dictionary<PointF, List<Triad>> poTriDic = new Dictionary<PointF, List<Triad>>();
+		internal List<SKPoint>[] FramedPoints;
+		internal List<SKPoint>[] WideFramedPoints;
+		internal Dictionary<SKPoint, List<Triad>> poTriDic = new Dictionary<SKPoint, List<Triad>>();
 		internal double bleed_x, bleed_y;
 
 		internal List<Triad> triangulatedPoints;
@@ -50,8 +51,8 @@ namespace LowPolyLibrary.Animation
 			boundsHeight = triangulation.BoundsHeight;
 			boundsWidth = triangulation.BoundsWidth;
 
-			FramedPoints = new List<PointF>[numFrames];
-			WideFramedPoints = new List<PointF>[numFrames];
+			FramedPoints = new List<SKPoint>[numFrames];
+			WideFramedPoints = new List<SKPoint>[numFrames];
 
 		    ReuseableImagePool = triangulation.ReuseableBitmapPool;
 		}
@@ -71,12 +72,12 @@ namespace LowPolyLibrary.Animation
 		internal virtual BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
 		{
 			var drawingCanvas = ReuseableImagePool.getBitmap();
-            using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
+            using (var canvas = drawingCanvas.GetBitmap().Canvas)
 		    {
-		        using (var paint = new Paint())
+		        using (var paint = new SKPaint())
 		        {
-		            paint.AntiAlias = true;
-		            paint.SetStyle(Paint.Style.FillAndStroke);
+		            paint.IsAntialias = true;
+                    paint.Style = SKPaintStyle.StrokeAndFill;
 
 		            //ensure copy of internal points because it will be modified
 		            var convertedPoints = InternalPoints.ToList();
@@ -92,15 +93,15 @@ namespace LowPolyLibrary.Animation
 		            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
 		            for (int i = 0; i < newTriangulatedPoints.Count; i++)
 		            {
-		                var a = new PointF(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
-		                var b = new PointF(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
-		                var c = new PointF(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
+		                var a = new SKPoint(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
+		                var b = new SKPoint(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
+		                var c = new SKPoint(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
 
 		                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
 		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
 		                paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-		                using (Path trianglePath = Geometry.DrawTrianglePath(a, b, c))
+		                using (SKPath trianglePath = Geometry.DrawTrianglePath(a, b, c))
 		                {
 		                    canvas.DrawPath(trianglePath, paint);
 		                }
@@ -117,8 +118,8 @@ namespace LowPolyLibrary.Animation
 		internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int angle)
 		{
 			viewRectangles = Geometry.createRectangleOverlays(angle, numFrames, boundsWidth, boundsHeight);
-			FramedPoints = new List<PointF>[numFrames];
-			WideFramedPoints = new List<PointF>[numFrames];
+			FramedPoints = new List<SKPoint>[numFrames];
+			WideFramedPoints = new List<SKPoint>[numFrames];
 
 			//if this number is above zero it means a point is not being captured in a rectangle
 			//should break(debug) if greater than 0
@@ -126,13 +127,13 @@ namespace LowPolyLibrary.Animation
 
 			for (int i = 0; i < FramedPoints.Length; i++)
 			{
-				FramedPoints[i] = new List<PointF>();
-				WideFramedPoints[i] = new List<PointF>();
+				FramedPoints[i] = new List<SKPoint>();
+				WideFramedPoints[i] = new List<SKPoint>();
 			}
 
 			foreach (var point in points)
 			{
-				var newPoint = new PointF();
+				var newPoint = new SKPoint();
 				newPoint.X = point.x;
 				newPoint.Y = point.y;
 
@@ -164,7 +165,7 @@ namespace LowPolyLibrary.Animation
 			}
 		}
 
-		internal double shortestDistanceFromPoints(PointF workingPoint)
+		internal double shortestDistanceFromPoints(SKPoint workingPoint)
 		{
 			//this list consists of all the triangles containing the point.
 			var tris = poTriDic[workingPoint];
@@ -202,7 +203,7 @@ namespace LowPolyLibrary.Animation
 			return shortest;
 		}
 
-		private void divyTris(System.Drawing.PointF point, int arrayLoc)
+		private void divyTris(SKPoint point, int arrayLoc)
 		{
 			//if the point/triList distionary has a point already, add that triangle to the list at that key(point)
 			if (poTriDic.ContainsKey(point))
@@ -219,9 +220,9 @@ namespace LowPolyLibrary.Animation
 		{
 			for (int i = 0; i < triangulatedPoints.Count; i++)
 			{
-				var a = new PointF(points[triangulatedPoints[i].a].x, points[triangulatedPoints[i].a].y);
-				var b = new PointF(points[triangulatedPoints[i].b].x, points[triangulatedPoints[i].b].y);
-				var c = new PointF(points[triangulatedPoints[i].c].x, points[triangulatedPoints[i].c].y);
+				var a = new SKPoint(points[triangulatedPoints[i].a].x, points[triangulatedPoints[i].a].y);
+				var b = new SKPoint(points[triangulatedPoints[i].b].x, points[triangulatedPoints[i].b].y);
+				var c = new SKPoint(points[triangulatedPoints[i].c].x, points[triangulatedPoints[i].c].y);
 
 				//animation logic
 				divyTris(a, i);

@@ -6,6 +6,7 @@ using Enum = System.Enum;
 using Math = System.Math;
 using System;
 using LowPolyLibrary.BitmapPool;
+using SkiaSharp;
 
 namespace LowPolyLibrary
 {
@@ -56,16 +57,16 @@ namespace LowPolyLibrary
 		{
 		    var drawingCanvas = ReuseableBitmapPool.getBitmap();
 
-		    using (var paint = new Paint())
+            using (var paint = new SKPaint())
 		    {
-		        paint.SetStyle(Paint.Style.FillAndStroke);
-		        paint.AntiAlias = true;
+                paint.Style = SKPaintStyle.StrokeAndFill;
+                paint.IsAntialias = true;
 
 		        for (int i = 0; i < TriangulatedPoints.Count; i++)
 		        {
-		            var a = new PointF(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
-		            var b = new PointF(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
-		            var c = new PointF(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
+		            var a = new SKPoint(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
+		            var b = new SKPoint(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
+		            var c = new SKPoint(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
 
 		            var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
 
@@ -74,7 +75,7 @@ namespace LowPolyLibrary
 
 		            using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
 		            {
-		                using (Canvas canvas = new Canvas(drawingCanvas.GetBitmap()))
+                        using (var canvas = drawingCanvas.GetBitmap().Canvas)
 		                {
 		                    canvas.DrawPath(trianglePath, paint);
 		                }
@@ -94,7 +95,7 @@ namespace LowPolyLibrary
             Gradient = GetGradient();
 		}
 
-		private int[] getGradientColors()
+		private SKColor[] getGradientColors()
 		{
             var rand = new System.Random();
             //get all gradient codes
@@ -103,9 +104,9 @@ namespace LowPolyLibrary
 			//gets specified colors in gradient length: #
 			var brewColors = ColorBru.GetHtmlCodes (randomCode, 6);
 			//array of ints converted from brewColors
-			var colorArray = new int[brewColors.Length];
+			var colorArray = new SKColor[brewColors.Length];
 			for (int i = 0; i < brewColors.Length; i++) {
-				colorArray [i] = Android.Graphics.Color.ParseColor (brewColors [i]);
+				colorArray[i] = SKColor.Parse(brewColors[i]);
 			}
 			return colorArray;
 		}
@@ -115,65 +116,64 @@ namespace LowPolyLibrary
             var rand = new System.Random();
             var colorArray = getGradientColors ();
 
-			Shader gradientShader;
+			SKShader gradientShader;
             //set to 2, bc want to temporarily not make sweep gradient
 			switch (rand.Next(2)) {
 			    case 0:
-				    gradientShader = new LinearGradient (
-					                          0,
-					                          0,
-					                          BoundsWidth,
-					                          BoundsHeight,
+				    gradientShader = SKShader.CreateLinearGradient (
+					                          new SKPoint(0,0),
+					                          new SKPoint(BoundsWidth, BoundsHeight),
 					                          colorArray,
 					                          null,
-					                          Shader.TileMode.Repeat
+					                          SKShaderTileMode.Repeat
 				                          );
 				    break;
 			    case 1:
-				    gradientShader = new RadialGradient (
-					                            ((float)BoundsWidth / 2),
-					                            ((float)BoundsHeight / 2),
+				    gradientShader = SKShader.CreateRadialGradient (
+					                            new SKPoint(BoundsWidth/2, BoundsHeight/2),
 					                            ((float)BoundsWidth / 2),
 					                            colorArray,
 					                            null,
-					                            Shader.TileMode.Clamp
+					                            SKShaderTileMode.Clamp
 				                            );
 				    break;
                case 2:
-                        gradientShader = new SweepGradient(
-                            ((float)BoundsWidth / 2),
-                            ((float)BoundsHeight / 2),
+                    gradientShader = SKShader.CreateSweepGradient(
+                    new SKPoint(BoundsWidth / 2, BoundsHeight / 2),
                             colorArray,
                             null
                         );
                         break;
               default:
-				    gradientShader = new LinearGradient (
-					    0,
-					    0,
-					    BoundsWidth,
-					    BoundsHeight,
-					    colorArray,
-					    null,
-					    Shader.TileMode.Repeat
-				    );
+					gradientShader = SKShader.CreateLinearGradient(
+											  new SKPoint(0, 0),
+											  new SKPoint(BoundsWidth, BoundsHeight),
+											  colorArray,
+											  null,
+											  SKShaderTileMode.Repeat
+										  );
 				    break;
 			}
 
 		    var bmp = ReuseableBitmapPool.getBitmap();
-		    using (var paint = new Paint())
+		    using (var paint = new SKPaint())
 		    {
-		        paint.SetStyle(Paint.Style.Fill);
-                paint.AntiAlias = true;
+                paint.Style = SKPaintStyle.Fill;
+                paint.IsAntialias = true;
 
 		        var oldShader = paint.Shader;
-		        paint.SetShader(gradientShader);
-		        using (Canvas canvas = new Canvas(bmp.GetBitmap()))
+                paint.Shader = gradientShader;
+                using (var canvas = bmp.GetBitmap().Canvas)
 		        {
-		            canvas.DrawRect(0, 0, BoundsWidth, BoundsHeight, paint);
+                    var r = new SKRect();
+                    r.Top = 0;
+                    r.Left = 0;
+                    r.Right = BoundsWidth;
+                    r.Bottom = BoundsHeight;
+		            canvas.DrawRect(r, paint);
 		        }
 
-		        paint.SetShader(oldShader);
+                paint.Shader = oldShader;
             }
 
 		    

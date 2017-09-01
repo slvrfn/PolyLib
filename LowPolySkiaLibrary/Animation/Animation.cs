@@ -9,6 +9,7 @@ using System.Threading.Tasks.Dataflow;
 using LowPolyLibrary.Threading;
 using LowPolyLibrary.Animation;
  using LowPolyLibrary.BitmapPool;
+using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
@@ -47,7 +48,7 @@ namespace LowPolyLibrary.Animation
                 //no use in "combining" animations unless there is more than 1 anim for this frame
             if (animFrame.Count > 1)
             {
-                var dict = new Dictionary<System.Drawing.PointF, AnimatedPoint>();
+                var dict = new Dictionary<SKPoint, AnimatedPoint>();
                 //for each animation render for this frame
                 foreach (var frame in animFrame)
                 {

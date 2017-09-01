@@ -1,4 +1,5 @@
 ﻿using System;
+using SkiaSharp;
 
 namespace LowPolyLibrary.BitmapPool
 {
@@ -13,7 +14,7 @@ namespace LowPolyLibrary.BitmapPool
         * Get the underlying Bitmap object.
         * NEVER call Bitmap.recycle() on this object.
         */
-		Bitmap GetBitmap();
+		SKSurface GetBitmap();
 
 		/**
         * Decrease the reference counter and recycle the underlying Bitmap

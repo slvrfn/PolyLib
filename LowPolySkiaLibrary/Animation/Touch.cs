@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using DelaunayTriangulator;
 using LowPolyLibrary.BitmapPool;
+using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
@@ -12,26 +13,26 @@ namespace LowPolyLibrary.Animation
         private int _lowerBound;
         private int _upperBound;
 
-        public List<PointF> InRange;
-        public List<PointF> InRangOfRecs;
-        public List<PointF> OutOfRange;
-        public PointF TouchLocation;
+        public List<SKPoint> InRange;
+        public List<SKPoint> InRangOfRecs;
+        public List<SKPoint> OutOfRange;
+        public SKPoint TouchLocation;
         public int TouchRadius;
 
         internal Touch(Triangulation triangulation, float x, float y, int radius) : base(triangulation)
         {
 			AnimationType = AnimationTypes.Type.Touch;
 
-            InRange = new List<PointF>();
-            InRangOfRecs = new List<PointF>();
-            OutOfRange = new List<PointF>();
-            TouchLocation = new PointF(x, y);
+            InRange = new List<SKPoint>();
+            InRangOfRecs = new List<SKPoint>();
+            OutOfRange = new List<SKPoint>();
+            TouchLocation = new SKPoint(x, y);
             TouchRadius = radius;
         }
 
-        internal List<PointF> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
+        internal List<SKPoint> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
         {
-            var touch = new List<PointF>();
+            var touch = new List<SKPoint>();
 
             currentIndex += displacement;
 
@@ -120,7 +121,7 @@ namespace LowPolyLibrary.Animation
             }
 
             //actually ween down the points in the touch area to the points inside the "circle" touch area
-            var removeFromTouchPoints = new List<PointF>();
+            var removeFromTouchPoints = new List<SKPoint>();
             foreach (var point in InRange)
             {
 
@@ -158,7 +159,7 @@ namespace LowPolyLibrary.Animation
         internal override List<AnimatedPoint> RenderFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();
-            //var pointsForMeasure = new List<PointF>();
+            //var pointsForMeasure = new List<SKPoint>();
             //pointsForMeasure.AddRange(InRange);
             //pointsForMeasure.AddRange(InRangOfRecs);
             var rand = new Random();
@@ -184,16 +185,16 @@ namespace LowPolyLibrary.Animation
 		//only overriding to force display of red ring of current touch area
         internal override IManagedBitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
         {
-			//base DrawPointFrame will render the animation correctly, get the bitmap
+			//base DrawSKPointrame will render the animation correctly, get the bitmap
 			var renderedBitmap = base.DrawPointFrame(pointChanges);
             
             //Create a canvas to draw touch location on the bitmap
-            using (Canvas canvas = new Canvas(renderedBitmap.GetBitmap()))
+            using (var canvas = renderedBitmap.GetBitmap().Canvas)
             {
-                using (var paint = new Paint())
+                using (var paint = new SKPaint())
                 {
-                    paint.SetStyle(Paint.Style.Stroke);
-                    paint.Color = Android.Graphics.Color.Crimson;
+                    paint.Style = SKPaintStyle.Stroke;
+                    paint.Color = new SKColor(247, 77, 77);
 
                     canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
                 }

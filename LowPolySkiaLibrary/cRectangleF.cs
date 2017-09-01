@@ -1,38 +1,39 @@
 ﻿using System;
+using SkiaSharp;
 
 namespace LowPolyLibrary
 {
 	internal class cRectangleF
 	{
-		public PointF A;
-		public PointF B;
-		public PointF C;
-		public PointF D;
+		public SKPoint A;
+		public SKPoint B;
+		public SKPoint C;
+		public SKPoint D;
 
 	    internal cRectangleF(){}
 
-	    internal cRectangleF(PointF a, PointF b, PointF c, PointF d)
+	    internal cRectangleF(SKPoint a, SKPoint b, SKPoint c, SKPoint d)
 	    {
-	        A = new PointF(a.X, a.Y);
-	        B = new PointF(b.X, b.Y);
-	        C = new PointF(c.X, c.Y);
-	        D = new PointF(d.X, d.Y);
+	        A = new SKPoint(a.X, a.Y);
+	        B = new SKPoint(b.X, b.Y);
+	        C = new SKPoint(c.X, c.Y);
+	        D = new SKPoint(d.X, d.Y);
 	    }
 
-	    private PointF vector(PointF p1, PointF p2)
+	    private SKPoint vector(SKPoint p1, SKPoint p2)
 	    {
-	        var point = new PointF();
+	        var point = new SKPoint();
 	        point.X = p2.X - p1.X;
 	        point.Y = p2.Y - p1.Y;
 	        return point;
 	    }
 
-	    private float dot(PointF u, PointF v)
+	    private float dot(SKPoint u, SKPoint v)
 	    {
 	        return u.X*v.X + u.Y*v.Y;
 	    }
 
-        public bool Contains(PointF m)
+        public bool Contains(SKPoint m)
 		{
             //all contains logic from
             //http://math.stackexchange.com/a/190373
@@ -48,7 +49,7 @@ namespace LowPolyLibrary
             return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
         }
 
-		internal bool circleContainsPoints(PointF circle, int radius, PointF point1, PointF point2)
+		internal bool circleContainsPoints(SKPoint circle, int radius, SKPoint point1, SKPoint point2)
 		{
 			//http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
 
@@ -60,7 +61,7 @@ namespace LowPolyLibrary
 			return distance <= radius;
 		}
 
-		public bool isInsideCircle(PointF center, int radius)
+		public bool isInsideCircle(SKPoint center, int radius)
 		{
 			return  circleContainsPoints(center, radius, A, B) ||
 				    circleContainsPoints(center, radius, B, C) ||
