@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2BC2AA4B-1DD1-432B-8A5A-B32C5BBA0839}</ProjectGuid>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <UseMSBuildEngine>true</UseMSBuildEngine>
+    <OutputType>Library</OutputType>
+    <RootNamespace>LowPolySkiaLibrary</RootNamespace>
+    <AssemblyName>LowPolySkiaLibrary</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile111</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ColorBru.cs" />
+    <Compile Include="cRectangleF.cs" />
+    <Compile Include="Geometry.cs" />
+    <Compile Include="Triangulation.cs" />
+    <Compile Include="Animation\AnimatedPoint.cs" />
+    <Compile Include="Animation\Animation.cs" />
+    <Compile Include="Animation\AnimationBase.cs" />
+    <Compile Include="Animation\AnimationTypes.cs" />
+    <Compile Include="Animation\Grow.cs" />
+    <Compile Include="Animation\RenderedFrame.cs" />
+    <Compile Include="Animation\Sweep.cs" />
+    <Compile Include="Animation\Touch.cs" />
+    <Compile Include="BitmapPool\BitmapPool.cs" />
+    <Compile Include="BitmapPool\IManagedBitmap.cs" />
+    <Compile Include="Threading\CurrentAnimationsBlock.cs" />
+    <Compile Include="Threading\FrameQueueBlock.cs" />
+    <Compile Include="Threading\RandomAnimationBlock.cs" />
+    <Compile Include="Threading\Timer.cs" />
+    <Compile Include="Triangulator\Hull.cs" />
+    <Compile Include="Triangulator\Set.cs" />
+    <Compile Include="Triangulator\Triad.cs" />
+    <Compile Include="Triangulator\Triangulator.cs" />
+    <Compile Include="Triangulator\Vertex.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Animation\" />
+    <Folder Include="BitmapPool\" />
+    <Folder Include="Threading\" />
+    <Folder Include="Triangulator\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+</Project>

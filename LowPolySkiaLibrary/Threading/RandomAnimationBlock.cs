@@ -18,7 +18,10 @@ namespace LowPolyLibrary.Threading
 
 		private readonly BroadcastBlock<AnimationBase> _source;
 
+        private Triangulation tri;
+
 		Timer tim;
+        Random rand;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
@@ -30,28 +33,53 @@ namespace LowPolyLibrary.Threading
 
 			//LinkTo(animBlock, new DataflowLinkOptions());
 
+			rand = new System.Random();
+
+
 			animBlock.AnimationAdded += AnimBlock_AnimationAdded;
 			animBlock.NoPendingAnimations += AnimBlock_NoPendingAnimations;
 
 			//delay until random animation is added
 			tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
-
-			tim.Start();
 		}
 		#endregion
 
 		public async Task<bool> AddRandomAnimation(object sender)
 		{
-			var rand = new System.Random();
-			var values = Enum.GetValues(typeof(AnimationTypes.Type));
-			ColorBru.Code randomAnimType = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
+            var values = Enum.GetValues(typeof(AnimationTypes.Type));
+            var t = values.GetValue(rand.Next(values.Length));
+            ColorBru.Code randomAnimType = (ColorBru.Code)t;
+            var conv = (AnimationTypes.Type)t;
 
-			//var newAnim = new AnimationBase("custom", 6, 200);
-			var newAnim = new Sweep(new Triangulation(0, 0, 0, 0, null));
+            //var newAnim = new AnimationBase("custom", 6, 200);
+            AnimationBase newAnim;
 
-			tim.Start();
+            switch (conv)
+            {
+                case AnimationTypes.Type.Sweep:
+                    newAnim = new Sweep(tri);
+                    break;
+                case AnimationTypes.Type.Touch:
+                    var x = rand.Next(0, tri.BoundsWidth);
+                    var y = rand.Next(0, tri.BoundsHeight);
+                    newAnim = new Touch(tri, x, y, 200);
+                    break;
+                case AnimationTypes.Type.Grow:
+                    newAnim = new Grow(tri);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            tim.Start();
 			return _source.Post(newAnim);
 		}
+
+        public void UpdateTriangulation(Triangulation _tri)
+        {
+            tri = _tri;
+            tim.Start();
+        }
 
 		void AnimBlock_AnimationAdded(object sender, EventArgs e)
 		{

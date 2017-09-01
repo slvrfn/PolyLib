@@ -90,7 +90,12 @@
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
-  <Import Project="..\LowPolyLibrary\LowPolyLibrary.projitems" Label="Shared" Condition="Exists('..\LowPolyLibrary\LowPolyLibrary.projitems')" />
+  <ItemGroup>
+    <ProjectReference Include="..\LowPolySkiaLibrary\LowPolyLibrary.csproj">
+      <Project>{2BC2AA4B-1DD1-432B-8A5A-B32C5BBA0839}</Project>
+      <Name>LowPolyLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
 </Project>

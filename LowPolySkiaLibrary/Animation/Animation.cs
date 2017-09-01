@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,13 +18,13 @@ namespace LowPolyLibrary.Animation
 		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
 		private readonly TransformBlock<RenderedFrame, IManagedBitmap> _drawFrame;
 		private readonly FrameQueueBlock<IManagedBitmap> _frameQueue;
-		//private readonly RandomAnimationBlock _randomAnim;
+		private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<IManagedBitmap> _writeImage;
 
         public Animation(Action<IManagedBitmap> writeImage)
         {
             _animations = new CurrentAnimationsBlock();
-            //_randomAnim = new RandomAnimationBlock(_animations, 5000);
+            _randomAnim = new RandomAnimationBlock(_animations, 5000);
             _frameQueue = new FrameQueueBlock<IManagedBitmap>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
@@ -99,6 +99,8 @@ namespace LowPolyLibrary.Animation
 
 			_animations.LinkTo(_renderFrame);
 			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+			_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+
 			_renderFrame.LinkTo(_drawFrame);
 			_drawFrame.LinkTo(_frameQueue);
 			_frameQueue.LinkTo(_writeImage);
@@ -124,5 +126,10 @@ namespace LowPolyLibrary.Animation
 
 			_animations.Post(temp);
 		}
+
+        public void UpdateTriangulationForRandom(Triangulation tri)
+        {
+            _randomAnim.UpdateTriangulation(tri);
+        }
 	}
 }
