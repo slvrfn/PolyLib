@@ -163,6 +163,7 @@ namespace LowPolyLibrary
 
 		        var oldShader = paint.Shader;
                 paint.Shader = gradientShader;
+
                 using (var canvas = bmp.GetBitmap().Canvas)
 		        {
                     var r = new SKRect();

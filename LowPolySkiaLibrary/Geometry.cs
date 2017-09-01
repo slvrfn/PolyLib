@@ -296,11 +296,14 @@ namespace LowPolyLibrary
 			//center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
 
 			SKColor colorFromRGB;
-			try
-			{
-				colorFromRGB = SKColor.FromArgb(gradient.GetBitmap().Canvas.GetPixel(center.X, center.Y));
-
-			}
+            try
+            {
+                //colorFromRGB = SKColor.FromArgb(gradient.GetBitmap().Canvas.GetPixel(center.X, center.Y));
+                var info = new SKImageInfo(1, 1);
+                SKData outt = SKData.Empty;
+                gradient.GetBitmap().ReadPixels(info, outt.Data, (byte)outt.Size, (int)center.X, (int)center.Y);
+#warning probably doesnt work
+            }
 			catch
 			{
                 colorFromRGB = new SKColor(93,231,240);

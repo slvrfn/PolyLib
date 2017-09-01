@@ -20,8 +20,9 @@ namespace LowPolyLibrary.BitmapPool
 
 		//private final Handler handler = new Handler();
 
-		public BitmapPool(SKImageInfo conf)
+		public BitmapPool(int width, int height)
         {
+            var conf = new SKImageInfo(width, height);
             _config = conf;
         }
 

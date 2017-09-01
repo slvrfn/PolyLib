@@ -10,8 +10,10 @@ using Android.Graphics.Drawables;
 using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
-using System.Threading.Tasks.Dataflow;
 using LowPolyLibrary.BitmapPool;
+using LowPolyLibrary;
+using SkiaSharp;
+using SkiaSharp.Views.Android;
 
 namespace LowPoly
 {
@@ -19,7 +21,7 @@ namespace LowPoly
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
         Button button, animSButton, animGButton;
-		ImageView imagePanel;
+	    SKSurfaceView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 	    private LowPolyLibrary.Triangulation _lowPoly;
 
@@ -44,7 +46,7 @@ namespace LowPoly
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
 
-			imagePanel = FindViewById<ImageView> (Resource.Id.imageView1);
+			imagePanel = FindViewById<SKSurfaceView> (Resource.Id.imageView1);
 			imagePanel.SetOnTouchListener(this);
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
@@ -77,6 +79,7 @@ namespace LowPoly
 
                 }
                 imagePanel.SetImageBitmap(arg.GetBitmap());
+                imagePanel.
                 LastBitmap = arg;
 			});
 		}
@@ -97,7 +100,8 @@ namespace LowPoly
 		    //first occurence
 		    if (ReuseableBitmapPool == null)
 		    {
-		        ReuseableBitmapPool = new BitmapPool(boundsWidth, boundsHeight, Bitmap.Config.Rgb565);
+                
+		        ReuseableBitmapPool = new BitmapPool(boundsWidth, boundsHeight);
 		    }
 
             var variance = double.Parse(varTB.Text);
