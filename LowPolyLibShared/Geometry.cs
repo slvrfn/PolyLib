@@ -295,7 +295,7 @@ namespace LowPolyLibrary
 		{
 			//center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
 
-			SKColor colorFromRGB;
+			SKColor colorFromRGB = new SKColor();
             try
             {
                 //colorFromRGB = SKColor.FromArgb(gradient.GetBitmap().Canvas.GetPixel(center.X, center.Y));

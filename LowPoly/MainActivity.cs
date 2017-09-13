@@ -7,12 +7,12 @@ using System.Diagnostics;
 using System.Timers;
 using Android.Graphics;
 using Android.Graphics.Drawables;
+using Android.Text.Format;
 using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
 using LowPolyLibrary.BitmapPool;
 using LowPolyLibrary;
-using SkiaSharp;
 using SkiaSharp.Views.Android;
 
 namespace LowPoly
@@ -21,7 +21,7 @@ namespace LowPoly
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
         Button button, animSButton, animGButton;
-	    SKSurfaceView imagePanel;
+	    SKCanvasView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 	    private LowPolyLibrary.Triangulation _lowPoly;
 
@@ -46,7 +46,7 @@ namespace LowPoly
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
 
-			imagePanel = FindViewById<SKSurfaceView> (Resource.Id.imageView1);
+			imagePanel = FindViewById<SKCanvasView> (Resource.Id.imageView1);
 			imagePanel.SetOnTouchListener(this);
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
@@ -78,8 +78,8 @@ namespace LowPoly
                     LastBitmap.recycle();
 
                 }
-                imagePanel.SetImageBitmap(arg.GetBitmap());
-                imagePanel.
+                //imagePanel.SetImageBitmap(arg.GetBitmap());
+			    Console.WriteLine($"frame posted: {DateTime.Now.Millisecond}*******************************");
                 LastBitmap = arg;
 			});
 		}
@@ -123,7 +123,7 @@ namespace LowPoly
 				LastBitmap.recycle();
 
 			}
-            imagePanel.SetImageBitmap(generatedBitmap.GetBitmap());
+            //imagePanel.SetImageBitmap(generatedBitmap.GetBitmap());
             LastBitmap = generatedBitmap;
 
 		    timeElapsed.Text = temp.Elapsed.ToString();

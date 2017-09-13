@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -29,36 +29,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ColorBru.cs" />
-    <Compile Include="cRectangleF.cs" />
-    <Compile Include="Geometry.cs" />
-    <Compile Include="Triangulation.cs" />
-    <Compile Include="Animation\AnimatedPoint.cs" />
-    <Compile Include="Animation\Animation.cs" />
-    <Compile Include="Animation\AnimationBase.cs" />
-    <Compile Include="Animation\AnimationTypes.cs" />
-    <Compile Include="Animation\Grow.cs" />
-    <Compile Include="Animation\RenderedFrame.cs" />
-    <Compile Include="Animation\Sweep.cs" />
-    <Compile Include="Animation\Touch.cs" />
-    <Compile Include="BitmapPool\BitmapPool.cs" />
-    <Compile Include="BitmapPool\IManagedBitmap.cs" />
-    <Compile Include="Threading\CurrentAnimationsBlock.cs" />
-    <Compile Include="Threading\FrameQueueBlock.cs" />
-    <Compile Include="Threading\RandomAnimationBlock.cs" />
-    <Compile Include="Threading\Timer.cs" />
-    <Compile Include="Triangulator\Hull.cs" />
-    <Compile Include="Triangulator\Set.cs" />
-    <Compile Include="Triangulator\Triad.cs" />
-    <Compile Include="Triangulator\Triangulator.cs" />
-    <Compile Include="Triangulator\Vertex.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Animation\" />
-    <Folder Include="BitmapPool\" />
-    <Folder Include="Threading\" />
-    <Folder Include="Triangulator\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Reference Include="SkiaSharp">
       <HintPath>..\packages\SkiaSharp.1.59.1\lib\portable-net45+win8+wpa81+wp8\SkiaSharp.dll</HintPath>

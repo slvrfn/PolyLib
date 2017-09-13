@@ -41,8 +41,7 @@ namespace DelaunayTriangulator
             }
 
             // Sort by distance to seed point
-            //Array.Sort(distance2ToCentre, sortedIndices);
-            ArraySort(distance2ToCentre, sortedIndices);
+            Array.Sort(distance2ToCentre, sortedIndices);
 
             // Duplicates are more efficiently rejected now we have sorted the vertices
             if (rejectDuplicatePoints)
@@ -118,8 +117,7 @@ namespace DelaunayTriangulator
                 distance2ToCentre[k] = points[sortedIndices[k]].distance2To(centre);
 
             // Sort the _other_ points in order of distance to circumcentre
-            //Array.Sort(distance2ToCentre, sortedIndices, 3, nump - 3);
-            ArraySort(distance2ToCentre, sortedIndices, 3, nump-3);
+            Array.Sort(distance2ToCentre, sortedIndices, 3, nump - 3);
 
             // Add new points into hull (removing obscured ones from the chain)
             // and creating triangles....
@@ -668,44 +666,21 @@ namespace DelaunayTriangulator
             }
         }
 
-        //Created since Array.Sort(Array,Array) isnt available in PCLs
-        private void ArraySort(float[] keys, int[] values, int lowerBound = 0, int length = 0)
-        { 
-            int upperBound;
-            if (length == 0)
+        private void WriteTriangles(List<Triad> triangles, string name)
+        {
+            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(name + ".dtt"))
             {
-                upperBound = keys.Length;
+                writer.WriteLine(triangles.Count.ToString());
+                for (int i = 0; i < triangles.Count; i++)
+                {
+                    Triad t = triangles[i];
+                    writer.WriteLine(string.Format("{0}: {1} {2} {3} - {4} {5} {6}",
+                        i + 1,
+                        t.a, t.b, t.c,
+                        t.ab + 1, t.bc + 1, t.ac + 1));
+                }
             }
-            else
-            {
-                upperBound = lowerBound + length;
-            }
-            //upperBound-1 b/c Enumerable.Range(0,3) outputs 0,1,2,3. to only do length elements, sub 1 from upperBound
-            var list = Enumerable.Range(lowerBound, upperBound-1).Select(i => new { Val = keys[i], Obj = values[i] }).ToList();
-			list.Sort((v1, v2) => v1.Val.CompareTo(v2.Val));
-
-			for (int i = lowerBound; i < upperBound; i++)
-			{
-				values[i] = list[i].Obj;
-				keys[i] = list[i].Val;
-			}
         }
-
-   //     private void WriteTriangles(List<Triad> triangles, string name)
-   //     {
-   //         using (System.IO.StreamWriter writer = new System.IO.StreamWriter(name + ".dtt"))
-			//{
-        //        writer.WriteLine(triangles.Count.ToString());
-        //        for (int i = 0; i < triangles.Count; i++)
-        //        {
-        //            Triad t = triangles[i];
-        //            writer.WriteLine(string.Format("{0}: {1} {2} {3} - {4} {5} {6}",
-        //                i + 1,
-        //                t.a, t.b, t.c,
-        //                t.ab + 1, t.bc + 1, t.ac + 1));
-        //        }
-        //    }
-        //}
 
 #endif
 

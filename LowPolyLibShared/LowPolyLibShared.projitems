@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d4829e6f-2bec-4337-809f-8999afc1669b</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>LowPolyLibrary</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimatedPoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\Animation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\Grow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\RenderedFrame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\Sweep.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\Touch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BitmapPool\BitmapPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BitmapPool\IManagedBitmap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ColorBru.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)cRectangleF.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Geometry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\CurrentAnimationsBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\FrameQueueBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\RandomAnimationBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\Timer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Hull.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Set.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Triad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Triangulator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Vertex.cs" />
+  </ItemGroup>
+</Project>
