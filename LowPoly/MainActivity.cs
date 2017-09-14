@@ -11,24 +11,21 @@ using Android.Text.Format;
 using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
-using LowPolyLibrary.BitmapPool;
 using LowPolyLibrary;
+using SkiaSharp;
 using SkiaSharp.Views.Android;
 
 namespace LowPoly
 {
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
-	public class MainActivity : Activity, View.IOnTouchListener
+	public class MainActivity : Activity
 	{
         Button button, animSButton, animGButton;
 	    CustomCanvasView imagePanel;
-		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
-	    private LowPolyLibrary.Triangulation _lowPoly;
+		TextView widthTB, heightTB, varTB, sizeTB;
+	    
 
-		private LowPolyLibrary.Animation.Animation animation;
-
-	    private BitmapPool ReuseableBitmapPool;
-        private IManagedBitmap LastBitmap;
+		
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -40,12 +37,12 @@ namespace LowPoly
 			// Get our button from the layout resource,
 			// and attach an event to it
 			button = FindViewById<Button> (Resource.Id.button1);
-			button.Click += Generate;
+			button.Click += UpdatePolyLib;
 			animSButton = FindViewById<Button>(Resource.Id.animSButton);
 			animSButton.Click += sweepAnimation;
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
-
+		    
 			imagePanel = FindViewById<CustomCanvasView> (Resource.Id.imageView1);
 			//imagePanel.SetOnTouchListener(this);
 
@@ -53,7 +50,6 @@ namespace LowPoly
 			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
 			varTB = FindViewById<TextView> (Resource.Id.varTextBox);
 			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
-            timeElapsed = FindViewById<TextView>(Resource.Id.timeElapsed);
 
             var metrics = Resources.DisplayMetrics;
 
@@ -63,124 +59,39 @@ namespace LowPoly
 			heightTB.Text = "1920";
 		    varTB.Text = ".75";
 		    sizeTB.Text = "150";
-
-            //_lowPoly.test();
-
-
-
-			animation = new LowPolyLibrary.Animation.Animation((arg) =>
-			{
-                //imagePanel.SetImageDrawable(new BitmapDrawable(arg));
-                //RunOnUiThread(() => 
-                //{
-                if (LastBitmap != null)
-                {
-                    LastBitmap.recycle();
-
-                }
-                //imagePanel.SetImageBitmap(arg.GetBitmap());
-			    Console.WriteLine($"frame posted: {DateTime.Now.Millisecond}*******************************");
-                LastBitmap = arg;
-			});
+            
 		}
+
+        private void growAnimation(object sender, EventArgs e)
+        {
+            imagePanel.growAnimation();
+        }
+
+        private void sweepAnimation(object sender, EventArgs e)
+        {
+            imagePanel.sweepAnimation();
+        }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            LastBitmap.recycle();
-            ReuseableBitmapPool.recycle();
-
+            imagePanel = null;
+            widthTB = null;
+            heightTB = null;
+            varTB = null;
+            sizeTB = null;
         }
 
-		private void UpdatePolyLib()
-		{
+		private void UpdatePolyLib(object sender, EventArgs e)
+        {
             var boundsWidth = Int32.Parse(widthTB.Text);
 			var boundsHeight = Int32.Parse(heightTB.Text);
-
-		    //first occurence
-		    if (ReuseableBitmapPool == null)
-		    {
-                
-		        ReuseableBitmapPool = new BitmapPool(boundsWidth, boundsHeight);
-		    }
 
             var variance = double.Parse(varTB.Text);
 			var cellSize = double.Parse(sizeTB.Text);
 
-            _lowPoly = new LowPolyLibrary.Triangulation(boundsWidth,boundsHeight,variance, cellSize, ReuseableBitmapPool);
+		    imagePanel.Generate(boundsWidth, boundsHeight, variance, cellSize);
         }
-
-		public void Generate (object sender, EventArgs e){
-            var temp = new Stopwatch();
-
-			UpdatePolyLib();
-            
-            temp.Start();
-		    var generatedBitmap = _lowPoly.GeneratedBitmap;
-            temp.Stop();
-			if (LastBitmap != null)
-			{
-				LastBitmap.recycle();
-
-			}
-            //imagePanel.SetImageBitmap(generatedBitmap.GetBitmap());
-            LastBitmap = generatedBitmap;
-
-		    timeElapsed.Text = temp.Elapsed.ToString();
-		}
-
-		public void uuuu(AnimationTypes.Type anim, System.Drawing.PointF touch)
-		{
-			var temp = new Stopwatch();
-
-			temp.Start();
-			switch (anim)
-			{
-				case AnimationTypes.Type.Grow:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
-                    break;
-				case AnimationTypes.Type.Sweep:
-					animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
-					break;
-				case AnimationTypes.Type.Touch:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
-                    break;
-			}
-			temp.Stop();
-
-			timeElapsed.Text = temp.Elapsed.ToString();
-		}
-
-		public void sweepAnimation(object sender, EventArgs e)
-		{
-			uuuu(AnimationTypes.Type.Sweep, new System.Drawing.PointF(0, 0));
-		}
-
-        public void growAnimation(object sender, EventArgs e)
-        {
-            uuuu(AnimationTypes.Type.Grow, new System.Drawing.PointF(0, 0));
-        }
-
-        public bool OnTouch(View v, MotionEvent e)
-		{
-			if (e.Action == MotionEventActions.Down)
-			{
-				var touch = new System.Drawing.PointF();
-				touch.X = e.GetX();
-				touch.Y = e.GetY();
-                //COMMENTED TEMPORARILY 10/10
-				//_lowPoly.setPointsaroundTouch(touch, 200);
-				uuuu(AnimationTypes.Type.Touch, touch);
-				return true;
-			}
-			if (e.Action == MotionEventActions.Up)
-			{
-				// do other stuff
-				return true;
-			}
-
-			return false;
-		}
 	}
 }
 

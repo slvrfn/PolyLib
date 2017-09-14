@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using LowPolyLibrary.BitmapPool;
+using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
@@ -9,14 +9,14 @@ namespace LowPolyLibrary.Animation
     {
         public List<AnimatedPoint> FramePoints = null;
 
-        public Func<List<AnimatedPoint>, IManagedBitmap> DrawFunction = null;
+        public Action<SKSurface, List<AnimatedPoint>> DrawFunction = null;
 
-        public RenderedFrame(Func<List<AnimatedPoint>, IManagedBitmap> funct)
+        public RenderedFrame(Action<SKSurface, List<AnimatedPoint>> funct)
         {
             DrawFunction = funct;
         }
 
-        public RenderedFrame(Func<List<AnimatedPoint>, IManagedBitmap> funct, List<AnimatedPoint> points )
+        public RenderedFrame(Action<SKSurface, List<AnimatedPoint>> funct, List<AnimatedPoint> points )
         {
             FramePoints = points;
             DrawFunction = funct;

@@ -51,20 +51,9 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        internal override BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> edgeFrameList)
+        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> edgeFrameList)
         {
-            BitmapPool.IManagedBitmap drawingCanvas = null;
-#warning Trycatch for bitmap memory error
-			//TODO this trycatch is temp to avoid out of memory on grow animation
-			try
-			{
-                drawingCanvas = ReuseableImagePool.getBitmap();
-			}
-			catch (Exception e)
-			{
-                var t = 0;
-			}
-            using (var canvas = drawingCanvas.GetBitmap().Canvas)
+            using (var canvas = surface.Canvas)
             {
                 using (var paint = new SKPaint())
                 {
@@ -95,8 +84,6 @@ namespace LowPolyLibrary.Animation
                 }
                 
             }
-			
-			return drawingCanvas;
 		}
 
         internal override List<AnimatedPoint> RenderFrame()

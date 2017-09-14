@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using DelaunayTriangulator;
-using LowPolyLibrary.BitmapPool;
 using SkiaSharp;
 
 namespace LowPolyLibrary
@@ -291,25 +290,28 @@ namespace LowPolyLibrary
 			return new SKPoint(x, y);
 		}
 
-		internal static SKColor GetTriangleColor(IManagedBitmap gradient, SKPoint center)
+		internal static SKColor GetTriangleColor(SKSurface gradient, SKPoint center)
 		{
-			//center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+            //center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+            
+		    //https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
+            SKImageInfo dstinf = new SKImageInfo();
+		    //dstinf.ColorType = SKColorType.Argb4444;
+		    dstinf.Width = 1;
+		    dstinf.Height = 1;
 
-			SKColor colorFromRGB = new SKColor();
-            try
-            {
-                //colorFromRGB = SKColor.FromArgb(gradient.GetBitmap().Canvas.GetPixel(center.X, center.Y));
-                var info = new SKImageInfo(1, 1);
-                SKData outt = SKData.Empty;
-                gradient.GetBitmap().ReadPixels(info, outt.Data, (byte)outt.Size, (int)center.X, (int)center.Y);
-#warning probably doesnt work
-            }
-			catch
-			{
-                colorFromRGB = new SKColor(93,231,240);
-			}
-			return colorFromRGB;
-		}
+		    // create the 1x1 bitmap (auto allocates the pixel buffer)
+		    SKBitmap bitmap = new SKBitmap(dstinf);
+
+		    // get the pixel buffer for the bitmap
+		    IntPtr dstpixels = bitmap.GetPixels();
+
+		    // read the surface into the bitmap
+		    gradient.ReadPixels(dstinf, dstpixels, dstinf.RowBytes, (int)center.X, (int)center.Y);
+
+		    // access the color
+		    return bitmap.GetPixel(0, 0);
+        }
 
 		internal static SKPath DrawTrianglePath(SKPoint a, SKPoint b, SKPoint c)
 		{

@@ -5,7 +5,6 @@ using Double = System.Double;
 using Enum = System.Enum;
 using Math = System.Math;
 using System;
-using LowPolyLibrary.BitmapPool;
 using SkiaSharp;
 
 namespace LowPolyLibrary
@@ -18,25 +17,19 @@ namespace LowPolyLibrary
 		public double Variance = .75;
 		private double calcVariance, cells_x, cells_y;
 		internal double bleed_x, bleed_y;
-        internal IManagedBitmap Gradient;
+        internal SKSurface Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
-
-	    internal BitmapPool.BitmapPool ReuseableBitmapPool;
 
 	    public List<Triad> TriangulatedPoints;
 
-        public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize, BitmapPool.BitmapPool imagePool)
+        public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;
             Variance = variance;
             CellSize = cellSize;
-
-            
-
-            ReuseableBitmapPool = imagePool;
-
-            UpdateVars();
+            var info = new SKImageInfo(boundsWidth, boundsHeight);
+            UpdateVars(info);
 			InternalPoints = GeneratePoints();
 		    var angulator = new Triangulator();
 		    TriangulatedPoints = angulator.Triangulation(InternalPoints);
@@ -48,51 +41,48 @@ namespace LowPolyLibrary
         //    Gradient.Dispose();
         //}
 
-	    public IManagedBitmap GeneratedBitmap
+	    public void GeneratedBitmap(SKSurface surface)
 	    {
-            get { return DrawFrame(); }
-	    }
+	        DrawFrame(surface);
+        }
 
-		private IManagedBitmap DrawFrame()
+		private void DrawFrame(SKSurface surface)
 		{
-		    var drawingCanvas = ReuseableBitmapPool.getBitmap();
-
-            using (var paint = new SKPaint())
+		    using (var canvas = surface.Canvas)
 		    {
-                paint.Style = SKPaintStyle.StrokeAndFill;
-                paint.IsAntialias = true;
-
-		        for (int i = 0; i < TriangulatedPoints.Count; i++)
+		        using (var paint = new SKPaint())
 		        {
-		            var a = new SKPoint(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
-		            var b = new SKPoint(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
-		            var c = new SKPoint(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
+		            paint.Style = SKPaintStyle.StrokeAndFill;
+		            paint.IsAntialias = true;
 
-		            var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
-
-		            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-		            paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
-
-		            using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
+		            for (int i = 0; i < TriangulatedPoints.Count; i++)
 		            {
-                        using (var canvas = drawingCanvas.GetBitmap().Canvas)
+		                var a = new SKPoint(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
+		                var b = new SKPoint(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
+		                var c = new SKPoint(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
+
+		                var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
+
+		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+		                paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+
+		                using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
 		                {
 		                    canvas.DrawPath(trianglePath, paint);
 		                }
 		            }
 		        }
-		        return drawingCanvas;
             }
         }
 
-        private void UpdateVars()
+        private void UpdateVars(SKImageInfo info)
         {
             calcVariance = CellSize * Variance / 2;
             cells_x = Math.Floor((BoundsWidth + 4 * CellSize) / CellSize);
             cells_y = Math.Floor((BoundsHeight + 4 * CellSize) / CellSize);
             bleed_x = ((cells_x * CellSize) - BoundsWidth) / 2;
             bleed_y = ((cells_y * CellSize) - BoundsHeight) / 2;
-            Gradient = GetGradient();
+            Gradient = GetGradient(info);
 		}
 
 		private SKColor[] getGradientColors()
@@ -111,7 +101,7 @@ namespace LowPolyLibrary
 			return colorArray;
 		}
 
-		private IManagedBitmap GetGradient()
+		private SKSurface GetGradient(SKImageInfo info)
 		{
             var rand = new System.Random();
             var colorArray = getGradientColors ();
@@ -154,8 +144,7 @@ namespace LowPolyLibrary
 										  );
 				    break;
 			}
-
-		    var bmp = ReuseableBitmapPool.getBitmap();
+		    var bmp = SKSurface.Create(info);
 		    using (var paint = new SKPaint())
 		    {
                 paint.Style = SKPaintStyle.Fill;
@@ -164,7 +153,7 @@ namespace LowPolyLibrary
 		        var oldShader = paint.Shader;
                 paint.Shader = gradientShader;
 
-                using (var canvas = bmp.GetBitmap().Canvas)
+                using (var canvas = bmp.Canvas)
 		        {
                     var r = new SKRect();
                     r.Top = 0;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using DelaunayTriangulator;
-using LowPolyLibrary.BitmapPool;
 using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
@@ -183,13 +182,13 @@ namespace LowPolyLibrary.Animation
         }
 
 		//only overriding to force display of red ring of current touch area
-        internal override IManagedBitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
+        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
         {
-			//base DrawSKPointrame will render the animation correctly, get the bitmap
-			var renderedBitmap = base.DrawPointFrame(pointChanges);
-            
+            //base DrawSKPointrame will render the animation correctly, get the bitmap
+            base.DrawPointFrame(surface, pointChanges);
+
             //Create a canvas to draw touch location on the bitmap
-            using (var canvas = renderedBitmap.GetBitmap().Canvas)
+            using (var canvas = surface.Canvas)
             {
                 using (var paint = new SKPaint())
                 {
@@ -199,8 +198,6 @@ namespace LowPolyLibrary.Animation
                     canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
                 }
             }
-
-            return renderedBitmap;
         }
     }
 }

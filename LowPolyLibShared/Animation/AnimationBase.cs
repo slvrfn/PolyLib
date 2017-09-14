@@ -7,7 +7,6 @@ using Math = System.Math;
 using System;
 using System.Linq;
 using LowPolyLibrary.Threading;
-using LowPolyLibrary.BitmapPool;
 using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
@@ -23,7 +22,7 @@ namespace LowPolyLibrary.Animation
 		internal double bleed_x, bleed_y;
 
 		internal List<Triad> triangulatedPoints;
-		internal IManagedBitmap Gradient;
+		internal SKSurface Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
 		internal List<cRectangleF[]> viewRectangles;
@@ -31,8 +30,6 @@ namespace LowPolyLibrary.Animation
 		internal AnimationTypes.Type AnimationType;
 
 		internal List<AnimatedPoint> AnimatedPoints;
-
-        protected BitmapPool.BitmapPool ReuseableImagePool;
 
         internal bool IsSetup = false;
 
@@ -53,8 +50,6 @@ namespace LowPolyLibrary.Animation
 
 			FramedPoints = new List<SKPoint>[numFrames];
 			WideFramedPoints = new List<SKPoint>[numFrames];
-
-		    ReuseableImagePool = triangulation.ReuseableBitmapPool;
 		}
         #endregion
 
@@ -69,10 +64,9 @@ namespace LowPolyLibrary.Animation
 
 		internal abstract List<AnimatedPoint> RenderFrame();
 
-		internal virtual BitmapPool.IManagedBitmap DrawPointFrame(List<AnimatedPoint> pointChanges)
+		internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
 		{
-			var drawingCanvas = ReuseableImagePool.getBitmap();
-            using (var canvas = drawingCanvas.GetBitmap().Canvas)
+			using (var canvas = surface.Canvas)
 		    {
 		        using (var paint = new SKPaint())
 		        {
@@ -109,8 +103,6 @@ namespace LowPolyLibrary.Animation
 		            }
                 }
             }
-		    
-			return drawingCanvas;
 		}
 		#endregion
 

@@ -1,32 +1,32 @@
-﻿using System;
-using SkiaSharp;
+﻿//using System;
+//using SkiaSharp;
 
-namespace LowPolyLibrary.BitmapPool
-{
+//namespace LowPolyLibrary.TempChange.BitmapPool
+//{
 
-	/**
-    * A reference-counted Bitmap object. The Bitmap is not really recycled
-    * until the reference counter drops to zero.
-    */
-    public interface IManagedBitmap
-    {
-		/*
-        * Get the underlying Bitmap object.
-        * NEVER call Bitmap.recycle() on this object.
-        */
-		SKSurface GetBitmap();
+//	/**
+//    * A reference-counted Bitmap object. The Bitmap is not really recycled
+//    * until the reference counter drops to zero.
+//    */
+//    public interface IManagedBitmap
+//    {
+//		/*
+//        * Get the underlying Bitmap object.
+//        * NEVER call Bitmap.recycle() on this object.
+//        */
+//		SKSurface GetBitmap();
 
-		/**
-        * Decrease the reference counter and recycle the underlying Bitmap
-        * if there are no more references.
-        */
-        void recycle();
+//		/**
+//        * Decrease the reference counter and recycle the underlying Bitmap
+//        * if there are no more references.
+//        */
+//        void recycle();
 
-		/**
-        * Increase the reference counter.
-        * @return self
-        */
-        IManagedBitmap retain();
+//		/**
+//        * Increase the reference counter.
+//        * @return self
+//        */
+//        IManagedBitmap retain();
 
-    }
-}
+//    }
+//}

@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
 using LowPolyLibrary.Threading;
 using LowPolyLibrary.Animation;
- using LowPolyLibrary.BitmapPool;
 using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
@@ -17,58 +16,65 @@ namespace LowPolyLibrary.Animation
 	{
 		private readonly CurrentAnimationsBlock _animations; 
 		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
-		private readonly TransformBlock<RenderedFrame, IManagedBitmap> _drawFrame;
-		private readonly FrameQueueBlock<IManagedBitmap> _frameQueue;
+		//private readonly TransformBlock<RenderedFrame, IManagedBitmap> _drawFrame;
+		private readonly FrameQueueBlock<RenderedFrame> _frameQueue;
 		private readonly RandomAnimationBlock _randomAnim;
-		private readonly ActionBlock<IManagedBitmap> _writeImage;
+		private readonly ActionBlock<RenderedFrame> _writeImage;
 
-        public Animation(Action<IManagedBitmap> writeImage)
+	    private CustomCanvasView _currentDisplay;
+
+	    private RenderedFrame currentRenderedFrame;
+
+        public Animation(CustomCanvasView currentDisplay)
         {
+            _currentDisplay = currentDisplay;
             _animations = new CurrentAnimationsBlock();
             _randomAnim = new RandomAnimationBlock(_animations, 5000);
-            _frameQueue = new FrameQueueBlock<IManagedBitmap>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
+            _frameQueue = new FrameQueueBlock<RenderedFrame>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
             {
-            var animFrame = new List<List<AnimatedPoint>>();
-            foreach (var anim in arg)
-            {
-                    if (!anim.IsSetup)
-                    {
-                        anim.SetupAnimation();
-                    }
 
-                var x = anim.RenderFrame();
-                animFrame.Add(x);
-            }
+                var animFrame = new List<List<AnimatedPoint>>();
+                foreach (var anim in arg)
+                {
+                        if (!anim.IsSetup)
+                        {
+                            anim.SetupAnimation();
+                        }
 
+                    var x = anim.RenderFrame();
+                    animFrame.Add(x);
+                }
+                
                 //storage to be more generic in future, allows any derived draw function
                 var rend = new RenderedFrame(arg[0].DrawPointFrame);
             
-                //no use in "combining" animations unless there is more than 1 anim for this frame
-            if (animFrame.Count > 1)
-            {
-                var dict = new Dictionary<SKPoint, AnimatedPoint>();
-                //for each animation render for this frame
-                foreach (var frame in animFrame)
+                    //no use in "combining" animations unless there is more than 1 anim for this frame
+                if (animFrame.Count > 1)
                 {
-                    //for each point changed in the rendered animation
-                    foreach (var pointChange in frame)
+                    var dict = new Dictionary<SKPoint, AnimatedPoint>();
+                    //for each animation render for this frame
+                    foreach (var frame in animFrame)
                     {
-                        //if point has been previously animated, update it
-                        if (dict.ContainsKey(pointChange.Point))
+                        //for each point changed in the rendered animation
+                        foreach (var pointChange in frame)
                         {
-                            dict[pointChange.Point].XDisplacement += pointChange.XDisplacement;
-                            dict[pointChange.Point].YDisplacement += pointChange.YDisplacement;
+                            //if point has been previously animated, update it
+                            if (dict.ContainsKey(pointChange.Point))
+                            {
+                                dict[pointChange.Point].XDisplacement += pointChange.XDisplacement;
+                                dict[pointChange.Point].YDisplacement += pointChange.YDisplacement;
+                            }
+                            //or add it
+                            else
+                            {
+                                dict[pointChange.Point] = pointChange;
+                            }
                         }
-                        //or add it
-                        else
-                        {
-                            dict[pointChange.Point] = pointChange;
-                        }
+
                     }
-                }
-                    rend.FramePoints = dict.Values.ToList();
+                        rend.FramePoints = dict.Values.ToList();
                 }
                 else
                 {
@@ -79,31 +85,37 @@ namespace LowPolyLibrary.Animation
 
                 return rend;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
+            //TODO I don think this needs to exist any more
+     //       _drawFrame = new TransformBlock<RenderedFrame, IManagedBitmap>((arg) =>
+     //       {
+     //           IManagedBitmap bitmap = null;
+     //           try
+     //           {
+     //               //bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
+     //               bitmap = arg.DrawFunction(arg.FramePoints);
+					//return bitmap;
+     //           }
+     //           catch (Exception ex)
+     //           {
+     //               return bitmap;
+     //           }
 
-            _drawFrame = new TransformBlock<RenderedFrame, IManagedBitmap>((arg) =>
+     //       }, new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
+
+            _writeImage = new ActionBlock<RenderedFrame>((arg) =>
             {
-                IManagedBitmap bitmap = null;
-                try
-                {
-                    //bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
-                    bitmap = arg.DrawFunction(arg.FramePoints);
-					return bitmap;
-                }
-                catch (Exception ex)
-                {
-                    return bitmap;
-                }
-
-            }, new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
-
-            _writeImage = new ActionBlock<IManagedBitmap>(writeImage, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
+                currentRenderedFrame = arg;
+                _currentDisplay.Invalidate();
+                System.Console.WriteLine($"frame written {DateTime.Now}");
+            }, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
 			_animations.LinkTo(_renderFrame);
 			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
-			_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
 
-			_renderFrame.LinkTo(_drawFrame);
-			_drawFrame.LinkTo(_frameQueue);
+			//_renderFrame.LinkTo(_drawFrame);
+			//_drawFrame.LinkTo(_frameQueue);
+            _renderFrame.LinkTo(_frameQueue);
 			_frameQueue.LinkTo(_writeImage);
 
 			//GenerateImage();
@@ -127,6 +139,16 @@ namespace LowPolyLibrary.Animation
 
 			_animations.Post(temp);
 		}
+
+	    public void DrawOnMe(SKSurface surface)
+	    {
+	        if (currentRenderedFrame!= null)
+	        {
+	            currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
+            }
+	        
+
+	    }
 
         public void UpdateTriangulationForRandom(Triangulation tri)
         {
