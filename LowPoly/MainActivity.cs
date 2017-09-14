@@ -21,7 +21,7 @@ namespace LowPoly
 	public class MainActivity : Activity, View.IOnTouchListener
 	{
         Button button, animSButton, animGButton;
-	    SKCanvasView imagePanel;
+	    CustomCanvasView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB, timeElapsed;
 	    private LowPolyLibrary.Triangulation _lowPoly;
 
@@ -46,8 +46,8 @@ namespace LowPoly
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
 
-			imagePanel = FindViewById<SKCanvasView> (Resource.Id.imageView1);
-			imagePanel.SetOnTouchListener(this);
+			imagePanel = FindViewById<CustomCanvasView> (Resource.Id.imageView1);
+			//imagePanel.SetOnTouchListener(this);
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
 			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
