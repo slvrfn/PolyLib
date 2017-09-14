@@ -87,10 +87,10 @@ namespace LowPoly
             var boundsWidth = Int32.Parse(widthTB.Text);
 			var boundsHeight = Int32.Parse(heightTB.Text);
 
-            var variance = double.Parse(varTB.Text);
-			var cellSize = double.Parse(sizeTB.Text);
-
-		    imagePanel.Generate(boundsWidth, boundsHeight, variance, cellSize);
+            var variance = float.Parse(varTB.Text);
+			var cellSize = int.Parse(sizeTB.Text);
+			
+		    imagePanel = imagePanel.Generate(boundsWidth, boundsHeight, variance, cellSize);
         }
 	}
 }

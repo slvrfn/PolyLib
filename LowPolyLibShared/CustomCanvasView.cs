@@ -23,6 +23,9 @@ namespace LowPolyLibrary
         private LowPolyLibrary.Animation.Animation animationEngine;
         private LowPolyLibrary.Triangulation _lowPoly;
 
+        float Variance = .75f;
+        int CellSize = 150;
+
         public CustomCanvasView(Context context) : base(context)
         {
             Initialize();
@@ -45,7 +48,7 @@ namespace LowPolyLibrary
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, .75f, 150);
+                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
                 Invalidate();
             }));
         }
@@ -74,7 +77,7 @@ namespace LowPolyLibrary
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, .75f, 150);
+                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
                 Invalidate();
             }));
         }
@@ -88,7 +91,7 @@ namespace LowPolyLibrary
                 case MotionEventActions.Down:
                     var touch = new SKPoint(e.GetX(), e.GetY());
 
-                    uuuu(AnimationTypes.Type.Touch, touch);
+                    AddEvent(AnimationTypes.Type.Touch, touch);
                     break;
                 case MotionEventActions.Move:
                     break;
@@ -99,26 +102,31 @@ namespace LowPolyLibrary
             return true;
         }
 
-        public void Generate(int boundsWidth, int boundsHeight, double variance, double cellSize)
+        public CustomCanvasView Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
+            //SKCanvasView cannot change size. Instead, generate a new one in this views place
+
             var parent = ((ViewGroup)Parent);
             var index = parent.IndexOfChild(this);
             parent.RemoveView(this);
-            var C = new CustomCanvasView(Context);
-            parent.AddView(C, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
+            var newCanvasView = new CustomCanvasView(Context);
+            newCanvasView.Variance = variance;
+            newCanvasView.CellSize = cellSize;
+            parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
+            return newCanvasView;
         }
 
         public void sweepAnimation()
         {
-            uuuu(AnimationTypes.Type.Sweep, new SKPoint(0,0));
+            AddEvent(AnimationTypes.Type.Sweep, new SKPoint(0,0));
         }
 
         public void growAnimation()
         {
-            uuuu(AnimationTypes.Type.Grow, new SKPoint(0, 0));
+            AddEvent(AnimationTypes.Type.Grow, new SKPoint(0, 0));
         }
 
-        private void uuuu(AnimationTypes.Type anim, SKPoint touch)
+        private void AddEvent(AnimationTypes.Type anim, SKPoint touch)
         {
             switch (anim)
             {
