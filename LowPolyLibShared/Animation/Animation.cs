@@ -25,6 +25,11 @@ namespace LowPolyLibrary.Animation
 
 	    private RenderedFrame currentRenderedFrame;
 
+	    public int PostedAnimations
+	    {
+	        get { return _animations.AnimationCount; }
+	    }
+
         public Animation(CustomCanvasView currentDisplay)
         {
             _currentDisplay = currentDisplay;

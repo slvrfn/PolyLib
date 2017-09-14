@@ -296,8 +296,10 @@ namespace LowPolyLibrary
             
 		    //https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
             SKImageInfo dstinf = new SKImageInfo();
-		    //dstinf.ColorType = SKColorType.Argb4444;
-		    dstinf.Width = 1;
+		    dstinf.ColorType = SKColorType.Argb4444;
+		    dstinf.AlphaType = SKAlphaType.Premul;
+
+            dstinf.Width = 1;
 		    dstinf.Height = 1;
 
 		    // create the 1x1 bitmap (auto allocates the pixel buffer)

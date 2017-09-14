@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)cRectangleF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CustomCanvasView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Geometry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalLayoutListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\CurrentAnimationsBlock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\FrameQueueBlock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\RandomAnimationBlock.cs" />

@@ -20,8 +20,13 @@ namespace LowPolyLibrary
 {
     public class CustomCanvasView : SKCanvasView, View.IOnTouchListener
     {
-        private LowPolyLibrary.Animation.Animation animation;
+        private LowPolyLibrary.Animation.Animation animationEngine;
         private LowPolyLibrary.Triangulation _lowPoly;
+
+        public CustomCanvasView(Context context) : base(context)
+        {
+            Initialize();
+        }
 
         public CustomCanvasView(Context context, IAttributeSet attrs) : base(context, attrs)
         {
@@ -35,17 +40,44 @@ namespace LowPolyLibrary
 
         private void Initialize()
         {
-            animation = new LowPolyLibrary.Animation.Animation(this);
+            animationEngine = new LowPolyLibrary.Animation.Animation(this);
             SetOnTouchListener(this);
+            ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
+            {
+                ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
+                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, .75f, 150);
+                Invalidate();
+            }));
         }
 
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
+            surface.Canvas.Clear();
+
             base.OnDraw(surface, info);
-            animation.DrawOnMe(surface);
+            if (animationEngine.PostedAnimations > 0)
+            {
+                animationEngine.DrawOnMe(surface);
+            }
+            else
+            {
+                if (_lowPoly != null)
+                {
+                    _lowPoly.GeneratedBitmap(surface);
+                }
+            }
         }
-
-
+        //necessary?
+        protected override void OnSizeChanged(int w, int h, int oldw, int oldh)
+        {
+            base.OnSizeChanged(w, h, oldw, oldh);
+            ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
+            {
+                ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
+                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, .75f, 150);
+                Invalidate();
+            }));
+        }
 
         public bool OnTouch(View v, MotionEvent e)
         {
@@ -69,7 +101,11 @@ namespace LowPolyLibrary
 
         public void Generate(int boundsWidth, int boundsHeight, double variance, double cellSize)
         {
-            _lowPoly = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, variance, cellSize);
+            var parent = ((ViewGroup)Parent);
+            var index = parent.IndexOfChild(this);
+            parent.RemoveView(this);
+            var C = new CustomCanvasView(Context);
+            parent.AddView(C, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
         }
 
         public void sweepAnimation()
@@ -87,13 +123,13 @@ namespace LowPolyLibrary
             switch (anim)
             {
                 case AnimationTypes.Type.Grow:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
+                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
                     break;
                 case AnimationTypes.Type.Sweep:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
+                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
                     break;
                 case AnimationTypes.Type.Touch:
-                    animation.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
+                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
                     break;
             }
         }
