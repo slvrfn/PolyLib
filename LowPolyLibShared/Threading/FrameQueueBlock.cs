@@ -23,11 +23,6 @@ namespace LowPolyLibrary.Threading
 
 		Timer tim;
 
-	    public int WaitingFrameCount
-	    {
-	        get { return _target.Count; }
-	    }
-
         #region Constructors
         // Constructs a SlidingWindowBlock object.
         public FrameQueueBlock() : this(new DataflowBlockOptions(), new ExecutionDataflowBlockOptions()) { }

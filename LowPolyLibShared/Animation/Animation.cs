@@ -25,9 +25,9 @@ namespace LowPolyLibrary.Animation
 
 	    private RenderedFrame currentRenderedFrame;
 
-	    public int WaitingFrameCount
+	    public bool HasFrameToDraw
         {
-	        get { return _frameQueue.WaitingFrameCount; }
+	        get { return currentRenderedFrame != null; }
 	    }
 
         public Animation(CustomCanvasView currentDisplay)
@@ -150,7 +150,8 @@ namespace LowPolyLibrary.Animation
 	        if (currentRenderedFrame!= null)
 	        {
 	            currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
-            }
+	            currentRenderedFrame = null;
+	        }
 	        
 
 	    }

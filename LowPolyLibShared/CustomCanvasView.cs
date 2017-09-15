@@ -56,7 +56,7 @@ namespace LowPolyLibrary
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
             base.OnDraw(surface, info);
-            if (animationEngine.WaitingFrameCount > 0)
+            if (animationEngine.HasFrameToDraw)
             {
                 animationEngine.DrawOnMe(surface);
             }
