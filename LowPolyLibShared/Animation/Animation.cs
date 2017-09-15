@@ -16,10 +16,9 @@ namespace LowPolyLibrary.Animation
 	{
 		private readonly CurrentAnimationsBlock _animations; 
 		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
-		//private readonly TransformBlock<RenderedFrame, IManagedBitmap> _drawFrame;
 		private readonly FrameQueueBlock<RenderedFrame> _frameQueue;
 		private readonly RandomAnimationBlock _randomAnim;
-		private readonly ActionBlock<RenderedFrame> _writeImage;
+		private readonly ActionBlock<RenderedFrame> _signalFrameRendered;
 
 	    private CustomCanvasView _currentDisplay;
 
@@ -90,24 +89,8 @@ namespace LowPolyLibrary.Animation
 
                 return rend;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
-            //TODO I don think this needs to exist any more
-     //       _drawFrame = new TransformBlock<RenderedFrame, IManagedBitmap>((arg) =>
-     //       {
-     //           IManagedBitmap bitmap = null;
-     //           try
-     //           {
-     //               //bitmap = arg.DrawPointFrame(arg.AnimatedPoints);
-     //               bitmap = arg.DrawFunction(arg.FramePoints);
-					//return bitmap;
-     //           }
-     //           catch (Exception ex)
-     //           {
-     //               return bitmap;
-     //           }
 
-     //       }, new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
-
-            _writeImage = new ActionBlock<RenderedFrame>((arg) =>
+            _signalFrameRendered = new ActionBlock<RenderedFrame>((arg) =>
             {
                 currentRenderedFrame = arg;
                 _currentDisplay.Invalidate();
@@ -116,14 +99,9 @@ namespace LowPolyLibrary.Animation
 
 			_animations.LinkTo(_renderFrame);
 			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
-			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
 
-			//_renderFrame.LinkTo(_drawFrame);
-			//_drawFrame.LinkTo(_frameQueue);
             _renderFrame.LinkTo(_frameQueue);
-			_frameQueue.LinkTo(_writeImage);
-
-			//GenerateImage();
+			_frameQueue.LinkTo(_signalFrameRendered);
 		}
 
 		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, float x = 0f, float y = 0f, int radius = 0)
@@ -152,8 +130,6 @@ namespace LowPolyLibrary.Animation
 	            currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
 	            currentRenderedFrame = null;
 	        }
-	        
-
 	    }
 
         public void UpdateTriangulationForRandom(Triangulation tri)

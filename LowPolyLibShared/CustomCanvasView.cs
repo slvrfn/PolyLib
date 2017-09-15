@@ -89,7 +89,7 @@ namespace LowPolyLibrary
                 case MotionEventActions.Down:
                     var touch = new SKPoint(e.GetX(), e.GetY());
 
-                    AddEvent(AnimationTypes.Type.Touch, touch);
+                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
                     break;
                 case MotionEventActions.Move:
                     break;
@@ -127,28 +127,12 @@ namespace LowPolyLibrary
 
         public void sweepAnimation()
         {
-            AddEvent(AnimationTypes.Type.Sweep, new SKPoint(0,0));
+            animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
         }
 
         public void growAnimation()
         {
-            AddEvent(AnimationTypes.Type.Grow, new SKPoint(0, 0));
-        }
-
-        private void AddEvent(AnimationTypes.Type anim, SKPoint touch)
-        {
-            switch (anim)
-            {
-                case AnimationTypes.Type.Grow:
-                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
-                    break;
-                case AnimationTypes.Type.Sweep:
-                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
-                    break;
-                case AnimationTypes.Type.Touch:
-                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
-                    break;
-            }
+            animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
         }
     }
 }
