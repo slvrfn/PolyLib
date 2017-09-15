@@ -53,10 +53,10 @@ namespace LowPoly
 
             var metrics = Resources.DisplayMetrics;
 
-			//widthTB.Text = metrics.WidthPixels.ToString();
-			//heightTB.Text = metrics.HeightPixels.ToString();
-			widthTB.Text = "1080";
-			heightTB.Text = "1920";
+			widthTB.Text = metrics.WidthPixels.ToString();
+			heightTB.Text = metrics.HeightPixels.ToString();
+			//widthTB.Text = "1080";
+			//heightTB.Text = "1920";
 		    varTB.Text = ".75";
 		    sizeTB.Text = "150";
             

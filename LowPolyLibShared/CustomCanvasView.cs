@@ -106,14 +106,25 @@ namespace LowPolyLibrary
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
 
-            var parent = ((ViewGroup)Parent);
-            var index = parent.IndexOfChild(this);
-            parent.RemoveView(this);
-            var newCanvasView = new CustomCanvasView(Context);
-            newCanvasView.Variance = variance;
-            newCanvasView.CellSize = cellSize;
-            parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
-            return newCanvasView;
+            if (!boundsWidth.Equals(Width) || !boundsHeight.Equals(Height))
+            {
+                var parent = ((ViewGroup)Parent);
+                var index = parent.IndexOfChild(this);
+                parent.RemoveView(this);
+                var newCanvasView = new CustomCanvasView(Context);
+                newCanvasView.Variance = variance;
+                newCanvasView.CellSize = cellSize;
+                parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
+                return newCanvasView;
+            }
+            else
+            {
+                Variance = variance;
+                CellSize = cellSize;
+                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
+                Invalidate();
+                return this;
+            }
         }
 
         public void sweepAnimation()
