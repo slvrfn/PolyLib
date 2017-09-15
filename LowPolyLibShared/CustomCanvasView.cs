@@ -58,7 +58,7 @@ namespace LowPolyLibrary
             surface.Canvas.Clear();
 
             base.OnDraw(surface, info);
-            if (animationEngine.PostedAnimations > 0)
+            if (animationEngine.WaitingFrameCount > 0)
             {
                 animationEngine.DrawOnMe(surface);
             }

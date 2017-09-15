@@ -23,6 +23,11 @@ namespace LowPolyLibrary.Threading
 
 		Timer tim;
 
+	    public int WaitingFrameCount
+	    {
+	        get { return _target.Count; }
+	    }
+
         #region Constructors
         // Constructs a SlidingWindowBlock object.
         public FrameQueueBlock() : this(new DataflowBlockOptions(), new ExecutionDataflowBlockOptions()) { }
@@ -57,7 +62,7 @@ namespace LowPolyLibrary.Threading
 			_msource = _source;
 
 			//estimated fps
-			tim = new Timer(42, DisplayFrame, false);
+			tim = new Timer(84, DisplayFrame, false);
 			tim.Start();
 		}
 		#endregion
@@ -66,7 +71,6 @@ namespace LowPolyLibrary.Threading
 		{
             tim.Stop();
 			var t = await _target.ReceiveAsync();
-
 			tim.Start();
 			return _source.Post(t);
 		}

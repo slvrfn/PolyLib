@@ -30,11 +30,6 @@ namespace LowPolyLibrary.Threading
 		private List<AnimationBase> animList;
 		private List<AnimationBase> toBeAdded;
 
-	    public int AnimationCount
-	    {
-            get { return CurrentAnimations.Length; }
-	    }
-
 		//bool of whether or not a new anim should be started by various conditions
 		bool NoAnimation = true;
 		
