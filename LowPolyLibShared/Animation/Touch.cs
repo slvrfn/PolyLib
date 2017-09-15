@@ -190,6 +190,7 @@ namespace LowPolyLibrary.Animation
             //Create a canvas to draw touch location on the bitmap
             using (var canvas = surface.Canvas)
             {
+                //canvas not cleared here bc it is done in the base method above
                 using (var paint = new SKPaint())
                 {
                     paint.Style = SKPaintStyle.Stroke;

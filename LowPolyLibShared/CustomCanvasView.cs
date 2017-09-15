@@ -55,8 +55,6 @@ namespace LowPolyLibrary
 
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
-            surface.Canvas.Clear();
-
             base.OnDraw(surface, info);
             if (animationEngine.WaitingFrameCount > 0)
             {

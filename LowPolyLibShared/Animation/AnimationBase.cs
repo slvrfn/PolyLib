@@ -67,7 +67,8 @@ namespace LowPolyLibrary.Animation
 		internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
 		{
 			using (var canvas = surface.Canvas)
-		    {
+			{
+			    canvas.Clear();
 		        using (var paint = new SKPaint())
 		        {
 		            paint.IsAntialias = true;

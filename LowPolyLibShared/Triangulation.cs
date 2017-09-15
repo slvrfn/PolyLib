@@ -50,6 +50,7 @@ namespace LowPolyLibrary
 		{
 		    using (var canvas = surface.Canvas)
 		    {
+		        canvas.Clear();
 		        using (var paint = new SKPaint())
 		        {
 		            paint.Style = SKPaintStyle.StrokeAndFill;

@@ -303,16 +303,17 @@ namespace LowPolyLibrary
 		    dstinf.Height = 1;
 
 		    // create the 1x1 bitmap (auto allocates the pixel buffer)
-		    SKBitmap bitmap = new SKBitmap(dstinf);
+            using (SKBitmap bitmap = new SKBitmap(dstinf))
+		    {
+		        // get the pixel buffer for the bitmap
+		        IntPtr dstpixels = bitmap.GetPixels();
 
-		    // get the pixel buffer for the bitmap
-		    IntPtr dstpixels = bitmap.GetPixels();
+		        // read the surface into the bitmap
+		        gradient.ReadPixels(dstinf, dstpixels, dstinf.RowBytes, (int)center.X, (int)center.Y);
 
-		    // read the surface into the bitmap
-		    gradient.ReadPixels(dstinf, dstpixels, dstinf.RowBytes, (int)center.X, (int)center.Y);
-
-		    // access the color
-		    return bitmap.GetPixel(0, 0);
+		        // access the color
+		        return bitmap.GetPixel(0, 0);
+            }
         }
 
 		internal static SKPath DrawTrianglePath(SKPoint a, SKPoint b, SKPoint c)
