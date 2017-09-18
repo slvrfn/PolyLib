@@ -94,7 +94,6 @@ namespace LowPolyLibrary.Animation
             {
                 currentRenderedFrame = arg;
                 _currentDisplay.Invalidate();
-                System.Console.WriteLine($"frame written {DateTime.Now}");
             }, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
 			_animations.LinkTo(_renderFrame);

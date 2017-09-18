@@ -96,7 +96,6 @@ namespace LowPolyLibrary
                 case MotionEventActions.Up:
                     break;
             }
-            Invalidate();
             return true;
         }
 

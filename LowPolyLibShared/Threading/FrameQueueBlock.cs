@@ -57,17 +57,15 @@ namespace LowPolyLibrary.Threading
 			_msource = _source;
 
 			//estimated fps
-			tim = new Timer(84, DisplayFrame, false);
+			tim = new Timer(42, DisplayFrame, false);
 			tim.Start();
 		}
 		#endregion
 
 		public async Task<bool> DisplayFrame(object sender)
 		{
-            tim.Stop();
 			var t = await _target.ReceiveAsync();
-			tim.Start();
-			return _source.Post(t);
+            return _source.Post(t);
 		}
 
 		#region IReceivableSourceBlock<TOutput> members

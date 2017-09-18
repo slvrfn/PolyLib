@@ -83,7 +83,6 @@ namespace LowPolyLibrary.Animation
                         }
                     }
                 }
-                
             }
 		}
 
@@ -146,7 +145,6 @@ namespace LowPolyLibrary.Animation
                 outPoints.AddRange(tempEdges.ToList());
             }
 			TotalAnimatedPoints.AddRange(outPoints);
-			AnimatedPoints = TotalAnimatedPoints;
 			return TotalAnimatedPoints;
         }
     }

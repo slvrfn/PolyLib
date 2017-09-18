@@ -177,7 +177,6 @@ namespace LowPolyLibrary.Animation
 				var animPoint = new AnimatedPoint(point, xComponent, yComponent);
 				animatedPoints.Add(animPoint);
             }
-			AnimatedPoints = animatedPoints;
 			return animatedPoints;
         }
 

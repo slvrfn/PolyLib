@@ -29,8 +29,6 @@ namespace LowPolyLibrary.Animation
 
 		internal AnimationTypes.Type AnimationType;
 
-		internal List<AnimatedPoint> AnimatedPoints;
-
         internal bool IsSetup = false;
 
 		public int boundsWidth;
