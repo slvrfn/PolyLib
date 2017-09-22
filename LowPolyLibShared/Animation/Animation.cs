@@ -16,7 +16,7 @@ namespace LowPolyLibrary.Animation
 	{
 		private readonly CurrentAnimationsBlock _animations; 
 		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
-		private readonly FrameQueueBlock<RenderedFrame> _frameQueue;
+		private readonly FrameQueueBlock<AnimationBase[]> _frameQueue;
 		private readonly RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<RenderedFrame> _signalFrameRendered;
 
@@ -34,7 +34,7 @@ namespace LowPolyLibrary.Animation
             _currentDisplay = currentDisplay;
             _animations = new CurrentAnimationsBlock();
             _randomAnim = new RandomAnimationBlock(_animations, 5000);
-            _frameQueue = new FrameQueueBlock<RenderedFrame>(new ExecutionDataflowBlockOptions { BoundedCapacity = 5, MaxDegreeOfParallelism = Environment.ProcessorCount });
+            _frameQueue = new FrameQueueBlock<AnimationBase[]>(new ExecutionDataflowBlockOptions { BoundedCapacity = 1, MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
             {
@@ -96,11 +96,10 @@ namespace LowPolyLibrary.Animation
                 _currentDisplay.Invalidate();
             }, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
 
-			_animations.LinkTo(_renderFrame);
-			//_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
-
-            _renderFrame.LinkTo(_frameQueue);
-			_frameQueue.LinkTo(_signalFrameRendered);
+            //_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+            _animations.LinkTo(_frameQueue);
+            _frameQueue.LinkTo(_renderFrame);
+            _renderFrame.LinkTo(_signalFrameRendered);
 		}
 
 		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, float x = 0f, float y = 0f, int radius = 0)
