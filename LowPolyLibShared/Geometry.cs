@@ -6,7 +6,7 @@ using SkiaSharp;
 
 namespace LowPolyLibrary
 {
-	class Geometry
+	public class Geometry
 	{
 		internal static SKPoint KeepInPicBounds(SKPoint center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
 		{
@@ -66,7 +66,7 @@ namespace LowPolyLibrary
 		#endregion
 
 		#region Rectangles
-		internal static List<cRectangleF[]> createRectangleOverlays(int angle, int numFrames, int boundsWidth, int boundsHeight)
+		public static List<cRectangleF[]> createRectangleOverlays(int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
 			//array size numFrames of rectangles. each array entry serves as a rotated cRectangleF
 			cRectangleF[] frames = new cRectangleF[numFrames];

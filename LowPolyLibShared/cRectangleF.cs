@@ -3,16 +3,16 @@ using SkiaSharp;
 
 namespace LowPolyLibrary
 {
-	internal class cRectangleF
+	public class cRectangleF
 	{
 		public SKPoint A;
 		public SKPoint B;
 		public SKPoint C;
 		public SKPoint D;
 
-	    internal cRectangleF(){}
+	    public cRectangleF(){}
 
-	    internal cRectangleF(SKPoint a, SKPoint b, SKPoint c, SKPoint d)
+	    public cRectangleF(SKPoint a, SKPoint b, SKPoint c, SKPoint d)
 	    {
 	        A = new SKPoint(a.X, a.Y);
 	        B = new SKPoint(b.X, b.Y);

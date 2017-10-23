@@ -6,3 +6,5 @@ packages/
 LowPolySkiaLibrary/bin/
 LowPolySkiaLibrary/obj
 .vs/
+RecTest/bin/*
+RecTest/obj/*
