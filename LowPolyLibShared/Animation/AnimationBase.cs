@@ -25,7 +25,7 @@ namespace LowPolyLibrary.Animation
 		internal SKSurface Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
-		internal List<cRectangleF[]> viewRectangles;
+		internal cRectangleF.RectangleContainer viewRectangles;
 
 		internal AnimationTypes.Type AnimationType;
 
@@ -130,10 +130,10 @@ namespace LowPolyLibrary.Animation
 
 				var missing = true;
 
-				for (int i = 0; i < viewRectangles[1].Length; i++)
+				for (int i = 0; i < viewRectangles.WideRecs.Length; i++)
 				{
 					//if the rectangle overlay contains a point
-					if (viewRectangles[0][i].Contains(newPoint))
+					if (viewRectangles.VisibleRecs[i].Contains(newPoint))
 					{
 						missing = false;
 						//if the point has not already been added to the overlay's point list
@@ -142,7 +142,7 @@ namespace LowPolyLibrary.Animation
 							FramedPoints[i].Add(newPoint);
 					}
 					//if overlays[i] does not contain the point, but wideOverlays does, add it. (The point lies outside the visible area and still needs to be maintained).
-					else if (viewRectangles[1][i].Contains(newPoint))
+					else if (viewRectangles.WideRecs[i].Contains(newPoint))
 					{
 						missing = false;
 						//if the point has not already been added to the overlay's point list

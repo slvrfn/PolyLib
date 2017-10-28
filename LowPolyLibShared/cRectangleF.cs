@@ -68,6 +68,21 @@ namespace LowPolyLibrary
 					circleContainsPoints(center, radius, C, D) ||
 					circleContainsPoints(center, radius, D, A);
 		}
+
+        public class RectangleContainer
+        {
+            public cRectangleF[] VisibleRecs, WideRecs;
+
+            public RectangleContainer()
+            {
+            }
+
+            public RectangleContainer(cRectangleF[] visibleRecs, cRectangleF[] wideRecs)
+            {
+                VisibleRecs = visibleRecs;
+                WideRecs = wideRecs;
+            }
+        }
 	}
 }
 

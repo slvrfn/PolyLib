@@ -66,7 +66,7 @@ namespace LowPolyLibrary
 		#endregion
 
 		#region Rectangles
-		public static List<cRectangleF[]> createRectangleOverlays(int angle, int numFrames, int boundsWidth, int boundsHeight)
+		public static cRectangleF.RectangleContainer createRectangleOverlays(int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
 			//array size numFrames of rectangles. each array entry serves as a rotated cRectangleF
 			cRectangleF[] frames = new cRectangleF[numFrames];
@@ -147,10 +147,8 @@ namespace LowPolyLibrary
 				overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
 				frames[i] = overlay;
 			}
-			var returnList = new List<cRectangleF[]>();
-			returnList.Add(frames);
-			returnList.Add(wideOverlays);
-			return returnList;
+
+			return new cRectangleF.RectangleContainer(frames, wideOverlays);
 		}
 
 		internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)

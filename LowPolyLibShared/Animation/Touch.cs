@@ -36,7 +36,7 @@ namespace LowPolyLibrary.Animation
             currentIndex += displacement;
 
             var firstFrame = 0;
-            var lastFrame = viewRectangles[0].Length - 1;
+            var lastFrame = viewRectangles.VisibleRecs.Length - 1;
 
             if (currentIndex < firstFrame)
             {
@@ -52,18 +52,18 @@ namespace LowPolyLibrary.Animation
                 _lowerBound = currentIndex;
                 _upperBound = currentIndex;
                 if (currentIndex != firstFrame &&
-                    viewRectangles[0][currentIndex].circleContainsPoints(TouchLocation,
+                    viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
                                                                          TouchRadius,
-                                                                         viewRectangles[0][currentIndex].A,
-                                                                         viewRectangles[0][currentIndex].D))
+                                                                         viewRectangles.VisibleRecs[currentIndex].A,
+                                                                         viewRectangles.VisibleRecs[currentIndex].D))
                 {
                     touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
                 }
                 if (currentIndex != lastFrame &&
-                    viewRectangles[0][currentIndex].circleContainsPoints(TouchLocation,
+                    viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
                                                                          TouchRadius,
-                                                                         viewRectangles[0][currentIndex].B,
-                                                                         viewRectangles[0][currentIndex].C))
+                                                                         viewRectangles.VisibleRecs[currentIndex].B,
+                                                                         viewRectangles.VisibleRecs[currentIndex].C))
                 {
                     touch.AddRange(getTouchAreaRecPoints(currentIndex, 1));
                 }
@@ -75,10 +75,10 @@ namespace LowPolyLibrary.Animation
                 {
                     _lowerBound = currentIndex;
                     if (currentIndex != firstFrame &&
-                        viewRectangles[0][currentIndex].circleContainsPoints(TouchLocation,
+                        viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
                                                                              TouchRadius,
-                                                                             viewRectangles[0][currentIndex].A,
-                                                                             viewRectangles[0][currentIndex].D))
+                                                                             viewRectangles.VisibleRecs[currentIndex].A,
+                                                                             viewRectangles.VisibleRecs[currentIndex].D))
                     {
                         touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
                     }
@@ -87,10 +87,10 @@ namespace LowPolyLibrary.Animation
                 {
                     _upperBound = currentIndex;
                     if (currentIndex != lastFrame &&
-                             viewRectangles[0][currentIndex].circleContainsPoints(TouchLocation,
+                             viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
                                                                                   TouchRadius,
-                                                                                  viewRectangles[0][currentIndex].B,
-                                                                                  viewRectangles[0][currentIndex].C))
+                                                                                  viewRectangles.VisibleRecs[currentIndex].B,
+                                                                                  viewRectangles.VisibleRecs[currentIndex].C))
                     {
                         touch.AddRange(getTouchAreaRecPoints(currentIndex, 1));
                     }
@@ -107,7 +107,7 @@ namespace LowPolyLibrary.Animation
         {
             //index of the smaller rectangle that contains the touch point
             //var index = Array.FindIndex(viewRectangles[0], rec => rec.isInsideCircle(touch, radius));
-            var index = Array.FindIndex(viewRectangles[0], rec => rec.Contains(TouchLocation));
+            var index = Array.FindIndex(viewRectangles.VisibleRecs, rec => rec.Contains(TouchLocation));
             //get all points in the same rec as the touch area
             InRange = getTouchAreaRecPoints(index);
 

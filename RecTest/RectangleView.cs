@@ -19,7 +19,7 @@ namespace RecTest
 {
     public class RectangleView : View
     {
-        private List<cRectangleF[]> rectangles;
+        private cRectangleF.RectangleContainer rectangles;
         private int angle, numFrames, boundsWidth, boundsHeight;
         private float scale;
         Paint recPaint, screenPaint;
@@ -84,12 +84,14 @@ namespace RecTest
 
             canvas.DrawPath(RecPath(RecScaler(screen, scale)), screenPaint);
 
-            foreach (var rectangleArray in rectangles)
+            foreach (var rec in rectangles.VisibleRecs)
             {
-                foreach (var rec in rectangleArray)
-                {
-                    canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
-                }
+                canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
+            }
+
+            foreach (var rec in rectangles.WideRecs)
+            {
+                canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
             }
         }
 
