@@ -86,14 +86,13 @@ namespace RecTest
 
             canvas.DrawPath(RecPath(RecScaler(screen, scale)), screenPaint);
 
-            
+           // canvas.DrawPath(RecPath(RecScaler(rectangle, scale)), recPaint);
 
             foreach (var recRow in rectangles)
             {
                 foreach (var rec in recRow)
                 {
                     canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
-                    //canvas.DrawPath(RecPath(rec), recPaint);
                 }
             }
 
