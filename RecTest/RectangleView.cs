@@ -19,7 +19,8 @@ namespace RecTest
 {
     public class RectangleView : View
     {
-        private cRectangleF.RectangleContainer rectangles;
+        private cRectangleF rectangle;
+        private cRectangleF[][] rectangles;
         private int angle, numFrames, boundsWidth, boundsHeight;
         private float scale;
         Paint recPaint, screenPaint;
@@ -62,7 +63,8 @@ namespace RecTest
 
         private void UpdateRectangles()
         {
-            rectangles = Geometry.createRectangleOverlays(angle, numFrames, boundsWidth, boundsHeight);
+            //rectangle = Geometry.createContainingRec(angle, numFrames, boundsWidth, boundsHeight);
+            rectangles = Geometry.createContaingGrid(angle, numFrames, boundsWidth, boundsHeight);
         }
 
         public void SetAngle(int ang)
@@ -84,15 +86,21 @@ namespace RecTest
 
             canvas.DrawPath(RecPath(RecScaler(screen, scale)), screenPaint);
 
-            foreach (var rec in rectangles.VisibleRecs)
+            
+
+            foreach (var recRow in rectangles)
             {
-                canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
+                foreach (var rec in recRow)
+                {
+                    canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
+                    //canvas.DrawPath(RecPath(rec), recPaint);
+                }
             }
 
-            foreach (var rec in rectangles.WideRecs)
-            {
-                canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
-            }
+            //foreach (var rec in rectangle.WideRecs)
+            //{
+            //    canvas.DrawPath(RecPath(RecScaler(rec, scale)), recPaint);
+            //}
         }
 
         private Path RecPath(cRectangleF rec)

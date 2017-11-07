@@ -151,7 +151,149 @@ namespace LowPolyLibrary
 			return new cRectangleF.RectangleContainer(frames, wideOverlays);
 		}
 
-		internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)
+        public static cRectangleF createContainingRec(int angle, int numFrames, int boundsWidth, int boundsHeight)
+        {
+
+            //slope of the given angle
+            var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
+            var recipSlope = -1 / slope;
+
+            
+            var drawingAreaA = new SKPoint(0, boundsHeight);
+            var drawingAreaB = new SKPoint(boundsWidth, boundsHeight);
+            var drawingAreaC = new SKPoint(boundsWidth, 0);
+            var drawingAreaD = new SKPoint(0, 0);
+
+            SKPoint cornerA;
+            SKPoint cornerB;
+            SKPoint cornerC;
+            SKPoint cornerD;
+
+            if (angle < 90)
+            {
+                //quad1
+                cornerA = drawingAreaA;
+                cornerB = drawingAreaB;
+                cornerC = drawingAreaC;
+                cornerD = drawingAreaD;
+            }
+            else if (angle < 180)
+            {
+                //quad2
+                cornerA = drawingAreaD;
+                cornerB = drawingAreaA;
+                cornerC = drawingAreaB;
+                cornerD = drawingAreaC;
+            }
+            else if (angle < 270)
+            {
+                //quad3
+                cornerA = drawingAreaC;
+                cornerB = drawingAreaD;
+                cornerC = drawingAreaA;
+                cornerD = drawingAreaB;
+            }
+            else
+            {
+                //quad4
+                cornerA = drawingAreaB;
+                cornerB = drawingAreaC;
+                cornerC = drawingAreaD;
+                cornerD = drawingAreaA;
+            }
+
+            SKPoint ABIntersection, DCIntersection, BCIntersection,  ADIntersection;
+            
+            //A
+            ADIntersection = Geometry.getIntersection(slope, cornerA, cornerD);
+            //B
+            ABIntersection = Geometry.getIntersection(slope, cornerA, cornerB);
+            //C
+            BCIntersection = Geometry.getIntersection(recipSlope, cornerB, cornerC);
+            //D
+            DCIntersection = Geometry.getIntersection(recipSlope, cornerD, cornerC);
+
+            return new cRectangleF(ADIntersection, ABIntersection, BCIntersection, DCIntersection); 
+        }
+
+	    public static cRectangleF[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
+	    {
+            //initialize grid
+	        cRectangleF[][] recs = new cRectangleF[numFrames][];
+	        for (int i = 0; i < numFrames; i++)
+	        {
+	            recs[i] = new cRectangleF[numFrames];
+	        }
+
+	        var containingRec = createContainingRec(angle, numFrames, boundsWidth, boundsHeight);
+
+            //BCD need to be relative to A
+	        var trans = SKMatrix.MakeTranslation(-containingRec.A.X, -containingRec.A.Y);
+	        var mappedC = trans.MapPoint(containingRec.C);
+            var x = mappedC.X > 0 ? 1 : -1;
+            var y = mappedC.Y > 0 ? 1 : -1;
+            containingRec = new cRectangleF(containingRec.A, new SKPoint(x,0), new SKPoint(x, y), new SKPoint(0, y));
+
+            //grid in space
+            SKMatrix basisInSpace = new SKMatrix()
+            {
+                ScaleX = containingRec.B.X,
+                SkewX = containingRec.B.Y,
+                SkewY = containingRec.D.X,
+                ScaleY = containingRec.D.Y,
+                TransX = containingRec.A.X,
+                TransY = containingRec.A.Y,
+                Persp2 = 1
+            };
+
+            //SKMatrix basisAtOrigin = new SKMatrix();
+
+	        //var worked = false;
+	        //worked = basisInSpace.TryInvert(out basisAtOrigin);
+	        //if (!worked)
+	        //{
+	        //    var t = 0;
+	        //}
+
+            cRectangleF[][] grid = new cRectangleF[numFrames][];
+	        for (int i = 0; i < numFrames; i++)
+	        {
+	            grid[i] = new cRectangleF[numFrames];
+	        }
+
+	        float LastX = 0f;
+	        float LastY = 0f;
+
+	        var frameWidth = (float)Geometry.dist(containingRec.A, containingRec.B) / numFrames;
+
+            for (int i = 0; i < grid.Length; i++)
+	        {
+	            for (int j = 0; j < grid[i].Length; j++)
+	            {
+	                var A = new SKPoint(j * frameWidth, i * frameWidth);
+
+	                var B = new SKPoint(A.X, A.Y);
+	                B.Offset(frameWidth, 0);
+
+	                var C = new SKPoint(A.X, A.Y);
+	                C.Offset(frameWidth, frameWidth);
+
+                    var D = new SKPoint(A.X, A.Y);
+	                D.Offset(0, frameWidth);
+
+
+	                //grid[i][j] = new cRectangleF(basisInSpace.MapPoint(A), basisInSpace.MapPoint(B),
+	                //    basisInSpace.MapPoint(C), basisInSpace.MapPoint(D));
+
+                    grid[i][j] = new cRectangleF(A, B, C, D);
+	            }
+	        }
+
+
+	        return grid;
+	    }
+
+        internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
 			//first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
 			//all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
