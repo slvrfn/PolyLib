@@ -7,7 +7,7 @@ using Android.Views;
 namespace RecTest
 {
     [Activity(Label = "RecTest", MainLauncher = true)]
-    public class MainActivity : Activity, SeekBar.IOnSeekBarChangeListener
+    public class MainActivity : Activity, SeekBar.IOnSeekBarChangeListener, View.IOnTouchListener
     {
         RectangleView recView;
 
@@ -22,6 +22,7 @@ namespace RecTest
             var seekbar = (SeekBar) FindViewById(Resource.Id.angleSeekBar);
 
             seekbar.SetOnSeekBarChangeListener(this);
+            recView.SetOnTouchListener(this);
         }
 
         public void OnProgressChanged(SeekBar seekBar, int progress, bool fromUser)
@@ -37,6 +38,13 @@ namespace RecTest
         public void OnStopTrackingTouch(SeekBar seekBar)
         {
             
+        }
+
+        public bool OnTouch(View v, MotionEvent e)
+        {
+            recView.setTouchLocation(e.RawX, e.RawY);
+
+            return true;
         }
     }
 }

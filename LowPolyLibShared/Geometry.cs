@@ -151,7 +151,7 @@ namespace LowPolyLibrary
 			return new cRectangleF.RectangleContainer(frames, wideOverlays);
 		}
 
-        public static cRectangleF createContainingRec(int angle, int numFrames, int boundsWidth, int boundsHeight)
+        public static cRectangleF createContainingRec(int angle, int boundsWidth, int boundsHeight)
         {
 
             //slope of the given angle
@@ -216,39 +216,42 @@ namespace LowPolyLibrary
             return new cRectangleF(ADIntersection, ABIntersection, BCIntersection, DCIntersection); 
         }
 
-	    public static cRectangleF[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
-	    {
-            var containingRec = createContainingRec(angle, numFrames, boundsWidth, boundsHeight);
-
-            //get width and height of grid
-            var frameWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
-            var frameHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
-			
+        public static SKMatrix createBasisMatrix(cRectangleF containingRec, int angle)
+        {
             //creating X basis, so needs to be 1 relative unit away on X plane
 			var newB = walkAngle(angle, 1f, containingRec.A);
 
-            //reciprocal used bc perpendicular from current angle
-            var recipAngle = (angle + 270) % 360;
+			//reciprocal used bc perpendicular from current angle
+			var recipAngle = (angle + 270) % 360;
 			//creating Y basis, so needs to be 1 relative unit away on Y plane
 			var newD = walkAngle(recipAngle, 1f, containingRec.A);
 
-            //find origin shift (negative to shift points to standard origin
-            var trans = SKMatrix.MakeTranslation(-containingRec.A.X, -containingRec.A.Y);
-            //need to translate B&D by origin to make the points relative from their origin (A)
-            newB = trans.MapPoint(newB);
-            newD = trans.MapPoint(newD);
+			//find origin shift (negative to shift points to standard origin
+			var trans = SKMatrix.MakeTranslation(-containingRec.A.X, -containingRec.A.Y);
+			//need to translate B&D by origin to make the points relative from their origin (A)
+			newB = trans.MapPoint(newB);
+			newD = trans.MapPoint(newD);
 
-            //grid in space
-            SKMatrix basisInSpace = new SKMatrix()
-            {
-                ScaleX = newB.X,
-                SkewX = newB.Y,
-                SkewY = newD.X,
-                ScaleY = newD.Y,
-                TransX = containingRec.A.X,
-                TransY = containingRec.A.Y,
-                Persp2 = 1
-            };
+			//grid in space
+			return new SKMatrix()
+			{
+				ScaleX = newB.X,
+				SkewX = newB.Y,
+				SkewY = newD.X,
+				ScaleY = newD.Y,
+				TransX = containingRec.A.X,
+				TransY = containingRec.A.Y,
+				Persp2 = 1
+			};
+        }
+
+	    public static cRectangleF[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
+	    {
+            var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
+			//get width and height of grid
+			var frameWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
+			var frameHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
+            var basisInSpace = createBasisMatrix(containingRec, angle);
 
             //SKMatrix basisAtOrigin = new SKMatrix();
 
@@ -288,6 +291,43 @@ namespace LowPolyLibrary
 
 	        return grid;
 	    }
+
+		public static cRectangleF gridRecAroundTouch(SKPoint touch, int angle, int numFrames, int boundsWidth, int boundsHeight)
+		{
+			var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
+			//get width and height of grid
+			var frameWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
+			var frameHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
+			var basisInSpace = createBasisMatrix(containingRec, angle);
+
+			SKMatrix basisAtOrigin = new SKMatrix();
+
+			var worked = false;
+			worked = basisInSpace.TryInvert(out basisAtOrigin);
+			if (!worked)
+			{
+			    var t = 0;
+			}
+
+            var pointInBasisCoords = basisAtOrigin.MapPoint(touch);
+
+            var y = (int)(pointInBasisCoords.Y / frameHeight);
+            var x = (int)(pointInBasisCoords.X / frameWidth);
+
+			var A = new SKPoint(x * frameWidth, y * frameHeight);
+
+			var B = new SKPoint(A.X, A.Y);
+			B.Offset(frameWidth, 0);
+
+			var C = new SKPoint(A.X, A.Y);
+			C.Offset(frameWidth, frameHeight);
+
+			var D = new SKPoint(A.X, A.Y);
+			D.Offset(0, frameHeight);
+
+			return new cRectangleF(basisInSpace.MapPoint(A), basisInSpace.MapPoint(B),
+										 basisInSpace.MapPoint(C), basisInSpace.MapPoint(D));
+		}
 
         internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
