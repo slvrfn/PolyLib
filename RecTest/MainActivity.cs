@@ -42,7 +42,7 @@ namespace RecTest
 
         public bool OnTouch(View v, MotionEvent e)
         {
-            recView.setTouchLocation(e.RawX, e.RawY);
+            recView.setTouchLocation(e.GetX(), e.GetY());
 
             return true;
         }

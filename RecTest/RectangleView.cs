@@ -54,10 +54,6 @@ namespace RecTest
             screenPaint = new Paint(recPaint);
             screenPaint.Color = Color.Red;
 
-            var m = Resources.DisplayMetrics;
-            boundsHeight = m.HeightPixels;
-            boundsWidth = m.WidthPixels;
-
             UpdateRectangles();
         }
 
@@ -69,7 +65,6 @@ namespace RecTest
 
         private void UpdateRectangles()
         {
-            //rectangle = Geometry.createContainingRec(angle, numFrames, boundsWidth, boundsHeight);
             rectangles = Geometry.createContaingGrid(angle, numFrames, boundsWidth, boundsHeight);
         }
 
@@ -83,6 +78,10 @@ namespace RecTest
         protected override void OnDraw(Canvas canvas)
         {
             base.OnDraw(canvas);
+
+            boundsWidth = canvas.Width;
+            boundsHeight = canvas.Height;
+
 
             var screen = new cRectangleF();
             screen.A = new SKPoint(0, 0);
@@ -98,6 +97,7 @@ namespace RecTest
                 //canvas.DrawPath(RecPath(RecScaler(rectangle, scale)), recPaint);
                 canvas.DrawPath(RecPath(rectangle), recPaint);
             }
+
             recPaint.SetStyle(Paint.Style.Stroke);
 
             foreach (var recRow in rectangles)
@@ -129,8 +129,8 @@ namespace RecTest
 
         private cRectangleF RecScaler(cRectangleF rec, float scal)
         {
-            var xShift = boundsWidth / 4;
-            var yShift = boundsHeight / 4;
+            var xShift = boundsWidth / 4f;
+            var yShift = boundsHeight / 4f;
             var A = new SKPoint(rec.A.X * scal + xShift, rec.A.Y * scal + yShift);
             var B = new SKPoint(rec.B.X * scal + xShift, rec.B.Y * scal + yShift);
             var C = new SKPoint(rec.C.X * scal + xShift, rec.C.Y * scal + yShift);
