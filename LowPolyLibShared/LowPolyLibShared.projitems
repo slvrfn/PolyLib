@@ -27,10 +27,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Threading\RandomAnimationBlock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\Timer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangulation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Hull.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Set.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Triad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Triangulator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Triangulator\Vertex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Hull.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Set.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Triad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Triangulator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Vertex.cs" />
   </ItemGroup>
 </Project>

@@ -6,13 +6,11 @@ namespace DelaunayTriangulator
 {
     class Set<T> : IEnumerable<T>
     {
-        SortedDictionary<T, int> list;
-
-
+        SortedList<T, int> list;
 
         public Set()
         {
-            list = new SortedDictionary<T, int>();
+            list = new SortedList<T, int>();
         }
 
         public void Add(T k)
