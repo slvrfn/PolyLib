@@ -216,7 +216,7 @@ namespace LowPolyLibrary
             return new cRectangleF(ADIntersection, ABIntersection, BCIntersection, DCIntersection); 
         }
 
-        public static SKMatrix createBasisMatrix(cRectangleF containingRec, int angle)
+        public static RotatedGrid createGridTransformation(cRectangleF containingRec, int angle, int numFrames)
         {
             //creating X basis, so needs to be 1 relative unit away on X plane
 			var newB = walkAngle(angle, 1f, containingRec.A);
@@ -233,7 +233,7 @@ namespace LowPolyLibrary
 			newD = trans.MapPoint(newD);
 
 			//grid in space
-			return new SKMatrix()
+			var basisMatrix = new SKMatrix()
 			{
 				ScaleX = newB.X,
 				SkewX = newB.Y,
@@ -243,6 +243,8 @@ namespace LowPolyLibrary
 				TransY = containingRec.A.Y,
 				Persp2 = 1
 			};
+
+            return new RotatedGrid(basisMatrix, containingRec, numFrames);
         }
 
 	    public static cRectangleF[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
@@ -251,16 +253,9 @@ namespace LowPolyLibrary
 			//get width and height of grid
 			var frameWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
 			var frameHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
-            var basisInSpace = createBasisMatrix(containingRec, angle);
+            //var basisInSpace = createBasisMatrix(containingRec, angle);
 
-            //SKMatrix basisAtOrigin = new SKMatrix();
-
-	        //var worked = false;
-	        //worked = basisInSpace.TryInvert(out basisAtOrigin);
-	        //if (!worked)
-	        //{
-	        //    var t = 0;
-	        //}
+            var rotGrid = createGridTransformation(containingRec, angle, numFrames);
 
             cRectangleF[][] grid = new cRectangleF[numFrames][];
 	        for (int i = 0; i < numFrames; i++)
@@ -283,8 +278,8 @@ namespace LowPolyLibrary
                     var D = new SKPoint(A.X, A.Y);
 	                D.Offset(0, frameHeight);
 
-                    grid[i][j] = new cRectangleF(basisInSpace.MapPoint(A), basisInSpace.MapPoint(B), 
-                                                 basisInSpace.MapPoint(C), basisInSpace.MapPoint(D));
+                    grid[i][j] = new cRectangleF(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B), 
+                                                 rotGrid.ToOriginCoords(C), rotGrid.ToOriginCoords(D));
 	            }
 	        }
 
@@ -295,38 +290,24 @@ namespace LowPolyLibrary
 		public static cRectangleF gridRecAroundTouch(SKPoint touch, int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
 			var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
-			//get width and height of grid
-			var frameWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
-			var frameHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
-			var basisInSpace = createBasisMatrix(containingRec, angle);
 
-			SKMatrix basisAtOrigin = new SKMatrix();
+            var rotGrid = createGridTransformation(containingRec, angle, numFrames);
 
-			var worked = false;
-			worked = basisInSpace.TryInvert(out basisAtOrigin);
-			if (!worked)
-			{
-			    var t = 0;
-			}
+            var gridCoords = rotGrid.CellCoordsFromOriginPoint(touch);
 
-            var pointInBasisCoords = basisAtOrigin.MapPoint(touch);
-
-            var y = (int)(pointInBasisCoords.Y / frameHeight);
-            var x = (int)(pointInBasisCoords.X / frameWidth);
-
-			var A = new SKPoint(x * frameWidth, y * frameHeight);
+            var A = new SKPoint(gridCoords.X * rotGrid.CellWidth, gridCoords.Y * rotGrid.CellHeight);
 
 			var B = new SKPoint(A.X, A.Y);
-			B.Offset(frameWidth, 0);
+			B.Offset(rotGrid.CellWidth, 0);
 
 			var C = new SKPoint(A.X, A.Y);
-			C.Offset(frameWidth, frameHeight);
+			C.Offset(rotGrid.CellWidth, rotGrid.CellHeight);
 
 			var D = new SKPoint(A.X, A.Y);
-			D.Offset(0, frameHeight);
+			D.Offset(0, rotGrid.CellHeight);
 
-			return new cRectangleF(basisInSpace.MapPoint(A), basisInSpace.MapPoint(B),
-										 basisInSpace.MapPoint(C), basisInSpace.MapPoint(D));
+            return new cRectangleF(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B),
+                                   rotGrid.ToOriginCoords(C), rotGrid.ToOriginCoords(D));
 		}
 
         internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)
@@ -336,7 +317,6 @@ namespace LowPolyLibrary
 
 			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
 			cRectangleF[] frames = new cRectangleF[numFrames];
-
 
 			//represents the corner A of the regular overlays
 			var overlayA = new SKPoint(A.X, A.Y);
@@ -378,7 +358,57 @@ namespace LowPolyLibrary
 
 			return frames;
 		}
-		#endregion
+		
+        public class RotatedGrid
+        {
+
+            public SKMatrix FromGrid { get; private set; }
+            //made since properties cane be passed with out identifier
+            private SKMatrix toGrid;
+            public SKMatrix ToGrid { get { return toGrid; } }
+
+            public cRectangleF GridContainer { get; private set; }
+
+            public float CellWidth { get; private set; }
+            public float CellHeight { get; private set; }
+
+            public RotatedGrid(SKMatrix matrix, cRectangleF containingRec, int numFrames)
+            {
+                GridContainer = containingRec;
+                CellWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
+                CellHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
+                FromGrid = matrix;
+                //try to invert, if unsucessful ToGrid will be all 0's
+                if (!FromGrid.TryInvert(out toGrid))
+                {
+                    toGrid = new SKMatrix();
+                }
+            }
+
+            public SKPoint ToGridCoords(SKPoint originPoint)
+            {
+                return ToGrid.MapPoint(originPoint);
+            }
+
+            public SKPoint ToOriginCoords(SKPoint gridPoint)
+            {
+                return FromGrid.MapPoint(gridPoint);
+            }
+
+            public SKPointI CellCoordsFromOriginPoint(SKPoint originPoint)
+            {
+                var pInGridCoords = ToGridCoords(originPoint);
+                return CellCoordsFromGridPoint(pInGridCoords);
+            }
+
+            public SKPointI CellCoordsFromGridPoint(SKPoint gridPoint)
+            {
+                var y = (int)(gridPoint.Y / CellHeight);
+                var x = (int)(gridPoint.X / CellWidth);
+                return new SKPointI(x, y);
+            }
+        }
+        #endregion
 
 		#region Lines
 		internal static SKPoint getIntersection(float slope, SKPoint linePoint, SKPoint perpendicularLinePoint)
