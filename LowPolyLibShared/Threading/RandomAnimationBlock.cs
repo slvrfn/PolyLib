@@ -72,7 +72,7 @@ namespace LowPolyLibrary.Threading
             }
 
             tim.Start();
-			return _source.Post(newAnim);
+			return await _source.SendAsync(newAnim);
 		}
 
         public void UpdateTriangulation(Triangulation _tri)
