@@ -19,8 +19,8 @@ namespace RecTest
 {
     public class RectangleView : View
     {
-        private cRectangleF rectangle;
-        private cRectangleF[][] rectangles;
+        private Geometry.Rectangle rectangle;
+        private Geometry.Rectangle[][] rectangles;
         private int angle, numFrames, boundsWidth, boundsHeight;
         private float scale;
         Paint recPaint, screenPaint;
@@ -83,7 +83,7 @@ namespace RecTest
             boundsHeight = canvas.Height;
 
 
-            var screen = new cRectangleF();
+            var screen = new Geometry.Rectangle();
             screen.A = new SKPoint(0, 0);
             screen.B = new SKPoint(boundsWidth, 0);
             screen.C = new SKPoint(boundsWidth, boundsHeight);
@@ -115,7 +115,7 @@ namespace RecTest
             //}
         }
 
-        private Path RecPath(cRectangleF rec)
+        private Path RecPath(Geometry.Rectangle rec)
         {
             var path = new Path();
             path.SetFillType(Path.FillType.EvenOdd);
@@ -127,7 +127,7 @@ namespace RecTest
             return path;
         }
 
-        private cRectangleF RecScaler(cRectangleF rec, float scal)
+        private Geometry.Rectangle RecScaler(Geometry.Rectangle rec, float scal)
         {
             var xShift = boundsWidth / 4f;
             var yShift = boundsHeight / 4f;
@@ -135,7 +135,7 @@ namespace RecTest
             var B = new SKPoint(rec.B.X * scal + xShift, rec.B.Y * scal + yShift);
             var C = new SKPoint(rec.C.X * scal + xShift, rec.C.Y * scal + yShift);
             var D = new SKPoint(rec.D.X * scal + xShift, rec.D.Y * scal + yShift);
-            return new cRectangleF(A, B, C, D);
+            return new Geometry.Rectangle(A, B, C, D);
         }
     }
 }

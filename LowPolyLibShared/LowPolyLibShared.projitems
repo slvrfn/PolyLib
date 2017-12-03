@@ -18,7 +18,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Sweep.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Touch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ColorBru.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)cRectangleF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CustomCanvasView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Geometry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GlobalLayoutListener.cs" />

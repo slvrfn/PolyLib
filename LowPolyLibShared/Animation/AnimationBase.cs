@@ -178,7 +178,7 @@ namespace LowPolyLibrary.Animation
 			}
 		}
 
-		internal void divyTris(List<DelaunayTriangulator.Vertex> points)
+		internal void divyTris(List<Vertex> points)
 		{
 			for (int i = 0; i < triangulatedPoints.Count; i++)
 			{

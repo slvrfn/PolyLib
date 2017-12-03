@@ -67,7 +67,7 @@ namespace LowPolyLibrary
 
 		#region Rectangles
         // create rotated rectangle that perfectly fits around the rectangle specified by h&w
-        public static cRectangleF createContainingRec(int angle, int boundsWidth, int boundsHeight)
+        public static Rectangle createContainingRec(int angle, int boundsWidth, int boundsHeight)
         {
             //slope of the given angle
             var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
@@ -128,7 +128,7 @@ namespace LowPolyLibrary
             //D
             DCIntersection = Geometry.getIntersection(recipSlope, cornerD, cornerC);
 
-            return new cRectangleF(ADIntersection, ABIntersection, BCIntersection, DCIntersection); 
+            return new Rectangle(ADIntersection, ABIntersection, BCIntersection, DCIntersection); 
         }
 
         // create the RotatedGrid numFrames*numFrames transformation for the given angle and bounds w&h
@@ -165,14 +165,14 @@ namespace LowPolyLibrary
             return new RotatedGrid(basisMatrix, containingRec, numFrames);
         }
 
-	    public static cRectangleF[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
+	    public static Rectangle[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
 	    {
             var rotGrid = createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
-            cRectangleF[][] grid = new cRectangleF[numFrames][];
+            Rectangle[][] grid = new Rectangle[numFrames][];
 	        for (int i = 0; i < numFrames; i++)
 	        {
-	            grid[i] = new cRectangleF[numFrames];
+	            grid[i] = new Rectangle[numFrames];
 	        }
 
             for (int i = 0; i < grid.Length; i++)
@@ -190,7 +190,7 @@ namespace LowPolyLibrary
                     var D = new SKPoint(A.X, A.Y);
 	                D.Offset(0, rotGrid.CellHeight);
 
-                    grid[i][j] = new cRectangleF(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B), 
+                    grid[i][j] = new Rectangle(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B), 
                                                  rotGrid.ToOriginCoords(C), rotGrid.ToOriginCoords(D));
 	            }
 	        }
@@ -199,7 +199,7 @@ namespace LowPolyLibrary
 	        return grid;
 	    }
 
-		public static cRectangleF gridRecAroundTouch(SKPoint touch, int angle, int numFrames, int boundsWidth, int boundsHeight)
+		public static Rectangle gridRecAroundTouch(SKPoint touch, int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
 			var rotGrid = createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
@@ -216,9 +216,76 @@ namespace LowPolyLibrary
 			var D = new SKPoint(A.X, A.Y);
 			D.Offset(0, rotGrid.CellHeight);
 
-            return new cRectangleF(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B),
+            return new Rectangle(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B),
                                    rotGrid.ToOriginCoords(C), rotGrid.ToOriginCoords(D));
 		}
+
+        public class Rectangle
+        {
+            public SKPoint A;
+            public SKPoint B;
+            public SKPoint C;
+            public SKPoint D;
+
+            public Rectangle() { }
+
+            public Rectangle(SKPoint a, SKPoint b, SKPoint c, SKPoint d)
+            {
+                A = new SKPoint(a.X, a.Y);
+                B = new SKPoint(b.X, b.Y);
+                C = new SKPoint(c.X, c.Y);
+                D = new SKPoint(d.X, d.Y);
+            }
+
+            private SKPoint vector(SKPoint p1, SKPoint p2)
+            {
+                var point = new SKPoint();
+                point.X = p2.X - p1.X;
+                point.Y = p2.Y - p1.Y;
+                return point;
+            }
+
+            private float dot(SKPoint u, SKPoint v)
+            {
+                return u.X * v.X + u.Y * v.Y;
+            }
+
+            public bool Contains(SKPoint m)
+            {
+                //all contains logic from
+                //http://math.stackexchange.com/a/190373
+                //http://stackoverflow.com/a/37865332/3344317
+                var AB = vector(A, B);
+                var AM = vector(A, m);
+                var BC = vector(B, C);
+                var BM = vector(B, m);
+                var dotABAM = dot(AB, AM);
+                var dotABAB = dot(AB, AB);
+                var dotBCBM = dot(BC, BM);
+                var dotBCBC = dot(BC, BC);
+                return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
+            }
+
+            //internal bool circleContainsPoints(SKPoint circle, int radius, SKPoint point1, SKPoint point2)
+            //{
+            //  //http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
+
+            //  var abs = (point2.X - point1.X)*(point1.Y - circle.Y) - (point1.X-circle.X)*(point2.Y-point1.Y);
+            //  var top = Math.Abs(abs);
+            //  var sqrt = (point2.X - point1.X) * (point2.X - point1.X) + (point2.Y - point1.Y) * (point2.Y - point1.Y);
+            //  var bottom = Math.Sqrt(sqrt);
+            //  var distance = top / bottom;
+            //  return distance <= radius;
+            //}
+
+            //public bool isInsideCircle(SKPoint center, int radius)
+            //{
+            //  return  circleContainsPoints(center, radius, A, B) ||
+            //          circleContainsPoints(center, radius, B, C) ||
+            //          circleContainsPoints(center, radius, C, D) ||
+            //          circleContainsPoints(center, radius, D, A);
+            //}
+        }
 		
         public class RotatedGrid
         {
@@ -227,12 +294,12 @@ namespace LowPolyLibrary
             private SKMatrix toGrid;
             public SKMatrix ToGrid { get { return toGrid; } }
 
-            public cRectangleF GridContainer { get; private set; }
+            public Rectangle GridContainer { get; private set; }
 
             public float CellWidth { get; private set; }
             public float CellHeight { get; private set; }
 
-            public RotatedGrid(SKMatrix matrix, cRectangleF containingRec, int numFrames)
+            public RotatedGrid(SKMatrix matrix, Rectangle containingRec, int numFrames)
             {
                 GridContainer = containingRec;
                 CellWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
