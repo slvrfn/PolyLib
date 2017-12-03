@@ -9,12 +9,7 @@ namespace LowPolyLibrary.Animation
 {
     class Touch : AnimationBase
     {
-        private int _lowerBound;
-        private int _upperBound;
-
         public List<SKPoint> InRange;
-        public List<SKPoint> InRangOfRecs;
-        public List<SKPoint> OutOfRange;
         public SKPoint TouchLocation;
         public int TouchRadius;
 
@@ -23,101 +18,45 @@ namespace LowPolyLibrary.Animation
 			AnimationType = AnimationTypes.Type.Touch;
 
             InRange = new List<SKPoint>();
-            InRangOfRecs = new List<SKPoint>();
-            OutOfRange = new List<SKPoint>();
             TouchLocation = new SKPoint(x, y);
             TouchRadius = radius;
         }
 
-        internal List<SKPoint> getTouchAreaRecPoints(int currentIndex, int displacement = 0)
+        //saves 
+        internal List<SKPoint> getTouchAreaRecPoints()
         {
             var touch = new List<SKPoint>();
 
-            currentIndex += displacement;
+            var BL = new SKPoint(TouchLocation.X - TouchRadius, TouchLocation.Y - TouchRadius);
+            var TR = new SKPoint(TouchLocation.X + TouchRadius, TouchLocation.Y + TouchRadius);
 
-            var firstFrame = 0;
-            var lastFrame = viewRectangles.VisibleRecs.Length - 1;
+            var BLindex = GridRotation.CellCoordsFromOriginPoint(BL);
+            var TRindex = GridRotation.CellCoordsFromOriginPoint(TR);
 
-            if (currentIndex < firstFrame)
-            {
-                currentIndex++;
-            }
-            if (currentIndex > lastFrame)
-            {
-                currentIndex--;
-            }
+            var upperX = TRindex.X > BLindex.X ? TRindex.X : BLindex.X;
+            var lowerX = TRindex.X < BLindex.X ? TRindex.X : BLindex.X;
 
-            if (displacement == 0)
-            {
-                _lowerBound = currentIndex;
-                _upperBound = currentIndex;
-                if (currentIndex != firstFrame &&
-                    viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
-                                                                         TouchRadius,
-                                                                         viewRectangles.VisibleRecs[currentIndex].A,
-                                                                         viewRectangles.VisibleRecs[currentIndex].D))
-                {
-                    touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
-                }
-                if (currentIndex != lastFrame &&
-                    viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
-                                                                         TouchRadius,
-                                                                         viewRectangles.VisibleRecs[currentIndex].B,
-                                                                         viewRectangles.VisibleRecs[currentIndex].C))
-                {
-                    touch.AddRange(getTouchAreaRecPoints(currentIndex, 1));
-                }
-            }
-            else
-            {
+            var upperY = TRindex.Y > BLindex.Y ? TRindex.Y : BLindex.Y;
+            var lowerY = TRindex.Y < BLindex.Y ? TRindex.Y : BLindex.Y;
 
-                if (displacement < 0)
+            for (int i = lowerX; i <= upperX; i++)
+            {
+                for (int j = lowerY; j <= upperY; j++)
                 {
-                    _lowerBound = currentIndex;
-                    if (currentIndex != firstFrame &&
-                        viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
-                                                                             TouchRadius,
-                                                                             viewRectangles.VisibleRecs[currentIndex].A,
-                                                                             viewRectangles.VisibleRecs[currentIndex].D))
-                    {
-                        touch.AddRange(getTouchAreaRecPoints(currentIndex, -1));
-                    }
-                }
-                else if (displacement > 0)
-                {
-                    _upperBound = currentIndex;
-                    if (currentIndex != lastFrame &&
-                             viewRectangles.VisibleRecs[currentIndex].circleContainsPoints(TouchLocation,
-                                                                                  TouchRadius,
-                                                                                  viewRectangles.VisibleRecs[currentIndex].B,
-                                                                                  viewRectangles.VisibleRecs[currentIndex].C))
-                    {
-                        touch.AddRange(getTouchAreaRecPoints(currentIndex, 1));
-                    }
+                    var p = new SKPointI(i, j);
+
+                    if (SeperatedPoints.ContainsKey(p))
+                        touch.AddRange(SeperatedPoints[p]);
                 }
             }
 
-
-
-            touch.AddRange(FramedPoints[currentIndex]);
             return touch;
         }
 
         internal void setPointsAroundTouch()
         {
-            //index of the smaller rectangle that contains the touch point
-            //var index = Array.FindIndex(viewRectangles[0], rec => rec.isInsideCircle(touch, radius));
-            var index = Array.FindIndex(viewRectangles.VisibleRecs, rec => rec.Contains(TouchLocation));
             //get all points in the same rec as the touch area
-            InRange = getTouchAreaRecPoints(index);
-
-            //add the points from recs outside of the touch area to a place we can handle them later
-            for (int i = 0; i < FramedPoints.Length; i++)
-            {
-                if (!(_lowerBound < i && i < _upperBound))
-                    OutOfRange.AddRange(FramedPoints[i]);
-                OutOfRange.AddRange(WideFramedPoints[i]);
-            }
+            InRange = getTouchAreaRecPoints();
 
             //actually ween down the points in the touch area to the points inside the "circle" touch area
             var removeFromTouchPoints = new List<SKPoint>();
@@ -126,9 +65,7 @@ namespace LowPolyLibrary.Animation
 
                 if (!Geometry.pointInsideCircle(point, TouchLocation, TouchRadius))
                 {
-                    //touchPointLists.inRange.Remove(point);
                     removeFromTouchPoints.Add(point);
-                    InRangOfRecs.Add(point);
                 }
             }
             foreach (var point in removeFromTouchPoints)

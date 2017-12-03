@@ -28,7 +28,18 @@ namespace LowPolyLibrary.Animation
             //all the points will move within 15 degrees of the same direction
             var localDirection = Geometry.getAngleInRange(Direction, 15);
 
-            foreach (var point in FramedPoints[CurrentFrame])
+            //accumulate all points in the current column represented by frame index
+            List<SkiaSharp.SKPoint> framePoints = new List<SkiaSharp.SKPoint>();
+            for (int i = 0; i < numFrames; i++)
+            {
+                var p = new SkiaSharp.SKPointI(CurrentFrame, i);
+                if (SeperatedPoints.ContainsKey(p))
+                {
+                    framePoints.AddRange(SeperatedPoints[p]);
+                }
+            }
+
+            foreach (var point in framePoints)
             {
                 var distCanMove = shortestDistanceFromPoints(point);
                 var xComponent = Geometry.getXComponent(localDirection, distCanMove);

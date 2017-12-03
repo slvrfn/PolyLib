@@ -16,16 +16,15 @@ namespace LowPolyLibrary.Animation
 		#region Global Variables
 		internal int numFrames = 12;
 		internal int CurrentFrame = 0;
-		internal List<SKPoint>[] FramedPoints;
-		internal List<SKPoint>[] WideFramedPoints;
+        internal Dictionary<SKPointI,List<SKPoint>> SeperatedPoints;
 		internal Dictionary<SKPoint, List<Triad>> poTriDic = new Dictionary<SKPoint, List<Triad>>();
 		internal double bleed_x, bleed_y;
+
+        internal Geometry.RotatedGrid GridRotation;
 
 		internal List<Triad> triangulatedPoints;
 		internal SKSurface Gradient;
 		internal List<DelaunayTriangulator.Vertex> InternalPoints;
-
-		internal cRectangleF.RectangleContainer viewRectangles;
 
 		internal AnimationTypes.Type AnimationType;
 
@@ -46,8 +45,7 @@ namespace LowPolyLibrary.Animation
 			boundsHeight = triangulation.BoundsHeight;
 			boundsWidth = triangulation.BoundsWidth;
 
-			FramedPoints = new List<SKPoint>[numFrames];
-			WideFramedPoints = new List<SKPoint>[numFrames];
+            SeperatedPoints = new Dictionary<SKPointI, List<SKPoint>>();
 		}
         #endregion
 
@@ -56,7 +54,7 @@ namespace LowPolyLibrary.Animation
         internal virtual void SetupAnimation()
         {
 			var direction = Geometry.get360Direction();
-			seperatePointsIntoRectangleFrames(InternalPoints, direction);
+			seperatePointsIntoGridCells(InternalPoints, direction);
 			divyTris(InternalPoints);
         }
 
@@ -106,21 +104,13 @@ namespace LowPolyLibrary.Animation
 		#endregion
 
 		#region Animation Helper Functions
-		internal void seperatePointsIntoRectangleFrames(List<DelaunayTriangulator.Vertex> points, int angle)
+
+        // seperates the internal points into a logical grid of cells
+        internal void seperatePointsIntoGridCells(List<DelaunayTriangulator.Vertex> points, int angle)
 		{
-			viewRectangles = Geometry.createRectangleOverlays(angle, numFrames, boundsWidth, boundsHeight);
-			FramedPoints = new List<SKPoint>[numFrames];
-			WideFramedPoints = new List<SKPoint>[numFrames];
+            GridRotation = Geometry.createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
-			//if this number is above zero it means a point is not being captured in a rectangle
-			//should break(debug) if greater than 0
-			var missingPoints = 0;
-
-			for (int i = 0; i < FramedPoints.Length; i++)
-			{
-				FramedPoints[i] = new List<SKPoint>();
-				WideFramedPoints[i] = new List<SKPoint>();
-			}
+            SeperatedPoints = new Dictionary<SKPointI, List<SKPoint>>();
 
 			foreach (var point in points)
 			{
@@ -128,31 +118,12 @@ namespace LowPolyLibrary.Animation
 				newPoint.X = point.x;
 				newPoint.Y = point.y;
 
-				var missing = true;
+                var gridIndex = GridRotation.CellCoordsFromOriginPoint(newPoint);
 
-				for (int i = 0; i < viewRectangles.WideRecs.Length; i++)
-				{
-					//if the rectangle overlay contains a point
-					if (viewRectangles.VisibleRecs[i].Contains(newPoint))
-					{
-						missing = false;
-						//if the point has not already been added to the overlay's point list
-						if (!FramedPoints[i].Contains(newPoint))
-							//add it
-							FramedPoints[i].Add(newPoint);
-					}
-					//if overlays[i] does not contain the point, but wideOverlays does, add it. (The point lies outside the visible area and still needs to be maintained).
-					else if (viewRectangles.WideRecs[i].Contains(newPoint))
-					{
-						missing = false;
-						//if the point has not already been added to the overlay's point list
-						if (!WideFramedPoints[i].Contains(newPoint))
-							//add it
-							WideFramedPoints[i].Add(newPoint);
-					}
-				}
-				if (missing)
-					++missingPoints;
+                //if the SeperatedPoints distionary does not have a point already, initialize the list at that key
+                if (!SeperatedPoints.ContainsKey(gridIndex))
+                    SeperatedPoints[gridIndex] = new List<SKPoint>();
+                SeperatedPoints[gridIndex].Add(newPoint);
 			}
 		}
 

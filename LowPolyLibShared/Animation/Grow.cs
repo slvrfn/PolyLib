@@ -33,11 +33,23 @@ namespace LowPolyLibrary.Animation
 
             var rand = new Random();
 			//visible rec so that the start of the anim is from a point visible on screen
-			var visibleRecIndex = rand.Next(FramedPoints.Length);
-			//index of a randoom point on the random visible rec
-			var index = rand.Next(FramedPoints[visibleRecIndex].Count);
+			var visibleRecX = rand.Next(numFrames);
+            var visibleRecY = rand.Next(numFrames);
+
+            var recIndex = new SKPointI(visibleRecX, visibleRecY);
+
+            //keep geting a random index until one exists
+            while (!SeperatedPoints.ContainsKey(recIndex))
+            {
+                visibleRecX = rand.Next(numFrames);
+                visibleRecY = rand.Next(numFrames);
+                recIndex = new SKPointI(visibleRecX, visibleRecY);
+            }
+
+            //index of a randoom point on the random visible rec
+            var index = rand.Next(SeperatedPoints[recIndex].Count);
 			//pointF version of the point
-			var pointT = FramedPoints[visibleRecIndex][index];
+            var pointT = SeperatedPoints[recIndex][index];
 			//vertex version of the point
 			var point = new Vertex(pointT.X, pointT.Y);
 			//index of the chosen point in the overall points list

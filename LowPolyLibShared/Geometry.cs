@@ -66,94 +66,9 @@ namespace LowPolyLibrary
 		#endregion
 
 		#region Rectangles
-		public static cRectangleF.RectangleContainer createRectangleOverlays(int angle, int numFrames, int boundsWidth, int boundsHeight)
-		{
-			//array size numFrames of rectangles. each array entry serves as a rotated cRectangleF
-			cRectangleF[] frames = new cRectangleF[numFrames];
-
-			//slope of the given angle
-			var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
-			var recipSlope = -1 / slope;
-
-			SKPoint ADIntersection;
-			SKPoint DCIntersection;
-			var drawingAreaA = new SKPoint(0, boundsHeight);
-			var drawingAreaB = new SKPoint(boundsWidth, boundsHeight);
-			var drawingAreaC = new SKPoint(boundsWidth, 0);
-			var drawingAreaD = new SKPoint(0, 0);
-
-			SKPoint cornerA;
-			SKPoint cornerB;
-			SKPoint cornerC;
-			SKPoint cornerD;
-
-			if (angle < 90)
-			{
-				//quad1
-				cornerA = drawingAreaA;
-				cornerB = drawingAreaB;
-				cornerC = drawingAreaC;
-				cornerD = drawingAreaD;
-			}
-			else if (angle < 180)
-			{
-				//quad2
-				cornerA = drawingAreaD;
-				cornerB = drawingAreaA;
-				cornerC = drawingAreaB;
-				cornerD = drawingAreaC;
-			}
-			else if (angle < 270)
-			{
-				//quad3
-				cornerA = drawingAreaC;
-				cornerB = drawingAreaD;
-				cornerC = drawingAreaA;
-				cornerD = drawingAreaB;
-			}
-			else
-			{
-				//quad4
-				cornerA = drawingAreaB;
-				cornerB = drawingAreaC;
-				cornerC = drawingAreaD;
-				cornerD = drawingAreaA;
-			}
-
-			ADIntersection = Geometry.getIntersection(slope, cornerA, cornerD);
-			DCIntersection = Geometry.getIntersection(recipSlope, cornerD, cornerC);
-			//ABIntersection used to calculate framewidth
-			var ABIntersection = Geometry.getIntersection(slope, cornerA, cornerB);
-			var frameWidth = (float)Geometry.dist(ADIntersection, ABIntersection) / numFrames;
-			var wideOverlays = createWideRectangleOverlays(frameWidth, ADIntersection, DCIntersection, angle, numFrames, boundsWidth, boundsHeight);
-
-			var walkedB = Geometry.walkAngle(angle, frameWidth, ADIntersection);
-			var walkedC = Geometry.walkAngle(angle, frameWidth, DCIntersection);
-			frames[0] = new cRectangleF
-			{
-				A = new SKPoint(ADIntersection.X, ADIntersection.Y),
-				B = new SKPoint(walkedB.X, walkedB.Y),
-				C = new SKPoint(walkedC.X, walkedC.Y),
-				D = new SKPoint(DCIntersection.X, DCIntersection.Y)
-			};
-
-			//starts from second array entry because first entry is assigned above
-			for (int i = 1; i < numFrames; i++)
-			{
-				var overlay = new cRectangleF();
-				overlay.A = frames[i - 1].B;
-				overlay.D = frames[i - 1].C;
-				overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
-				overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
-				frames[i] = overlay;
-			}
-
-			return new cRectangleF.RectangleContainer(frames, wideOverlays);
-		}
-
+        // create rotated rectangle that perfectly fits around the rectangle specified by h&w
         public static cRectangleF createContainingRec(int angle, int boundsWidth, int boundsHeight)
         {
-
             //slope of the given angle
             var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
             var recipSlope = -1 / slope;
@@ -216,8 +131,11 @@ namespace LowPolyLibrary
             return new cRectangleF(ADIntersection, ABIntersection, BCIntersection, DCIntersection); 
         }
 
-        public static RotatedGrid createGridTransformation(cRectangleF containingRec, int angle, int numFrames)
+        // create the RotatedGrid numFrames*numFrames transformation for the given angle and bounds w&h
+        public static RotatedGrid createGridTransformation(int angle, int boundsWidth, int boundsHeight, int numFrames)
         {
+            var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
+
             //creating X basis, so needs to be 1 relative unit away on X plane
 			var newB = walkAngle(angle, 1f, containingRec.A);
 
@@ -249,13 +167,7 @@ namespace LowPolyLibrary
 
 	    public static cRectangleF[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
 	    {
-            var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
-			//get width and height of grid
-			var frameWidth = (float)dist(containingRec.A, containingRec.B) / numFrames;
-			var frameHeight = (float)dist(containingRec.A, containingRec.D) / numFrames;
-            //var basisInSpace = createBasisMatrix(containingRec, angle);
-
-            var rotGrid = createGridTransformation(containingRec, angle, numFrames);
+            var rotGrid = createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
             cRectangleF[][] grid = new cRectangleF[numFrames][];
 	        for (int i = 0; i < numFrames; i++)
@@ -267,16 +179,16 @@ namespace LowPolyLibrary
 	        {
 	            for (int j = 0; j < grid[i].Length; j++)
 	            {
-	                var A = new SKPoint(j * frameWidth, i * frameHeight);
+	                var A = new SKPoint(j * rotGrid.CellWidth, i * rotGrid.CellHeight);
 
 	                var B = new SKPoint(A.X, A.Y);
-	                B.Offset(frameWidth, 0);
+	                B.Offset(rotGrid.CellWidth, 0);
 
 	                var C = new SKPoint(A.X, A.Y);
-	                C.Offset(frameWidth, frameHeight);
+	                C.Offset(rotGrid.CellWidth, rotGrid.CellHeight);
 
                     var D = new SKPoint(A.X, A.Y);
-	                D.Offset(0, frameHeight);
+	                D.Offset(0, rotGrid.CellHeight);
 
                     grid[i][j] = new cRectangleF(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B), 
                                                  rotGrid.ToOriginCoords(C), rotGrid.ToOriginCoords(D));
@@ -289,9 +201,7 @@ namespace LowPolyLibrary
 
 		public static cRectangleF gridRecAroundTouch(SKPoint touch, int angle, int numFrames, int boundsWidth, int boundsHeight)
 		{
-			var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
-
-            var rotGrid = createGridTransformation(containingRec, angle, numFrames);
+			var rotGrid = createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
             var gridCoords = rotGrid.CellCoordsFromOriginPoint(touch);
 
@@ -309,59 +219,9 @@ namespace LowPolyLibrary
             return new cRectangleF(rotGrid.ToOriginCoords(A), rotGrid.ToOriginCoords(B),
                                    rotGrid.ToOriginCoords(C), rotGrid.ToOriginCoords(D));
 		}
-
-        internal static cRectangleF[] createWideRectangleOverlays(float frameWidth, SKPoint A, SKPoint D, int angle, int numFrames, int boundsWidth, int boundsHeight)
-		{
-			//first and last rectangles need to be wider to cover points that are outside to the left and right of the pic bounds
-			//all rectangles need to be higher and lower than the pic bounds to cover points above and below the pic bounds
-
-			//array size numFrames of rectangles. each array entry serves as a rectangle(i) starting from the left
-			cRectangleF[] frames = new cRectangleF[numFrames];
-
-			//represents the corner A of the regular overlays
-			var overlayA = new SKPoint(A.X, A.Y);
-			var overlayD = new SKPoint(D.X, D.Y);
-
-			var tempWidth = boundsWidth / 2;
-			var tempHeight = boundsHeight / 2;
-
-			frames[0] = new cRectangleF();
-			frames[0].A = Geometry.walkAngle(angle + 90, tempHeight, overlayA);
-			frames[0].B = Geometry.walkAngle(angle, frameWidth, frames[0].A);
-			frames[0].A = Geometry.walkAngle(angle + 180, tempWidth, frames[0].A);
-			frames[0].D = Geometry.walkAngle(angle + 270, tempHeight, overlayD);
-			frames[0].C = Geometry.walkAngle(angle, frameWidth, frames[0].D);
-			frames[0].D = Geometry.walkAngle(angle + 180, tempWidth, frames[0].D);
-
-
-			//this logic is for grabbing all points (even those outside the visible drawing area)
-			//starts at 1 cause first array spot handled above
-			for (int i = 1; i < numFrames; i++)
-			{
-				cRectangleF overlay = new cRectangleF();
-				if (i == numFrames - 1)
-				{
-					overlay.A = new SKPoint(frames[i - 1].B.X, frames[i - 1].B.Y);
-					overlay.D = new SKPoint(frames[i - 1].C.X, frames[i - 1].C.Y);
-					overlay.B = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.A);
-					overlay.C = Geometry.walkAngle(angle, frameWidth + tempWidth, overlay.D);
-				}
-				else
-				{
-					overlay.A = new SKPoint(frames[i - 1].B.X, frames[i - 1].B.Y);
-					overlay.D = new SKPoint(frames[i - 1].C.X, frames[i - 1].C.Y);
-					overlay.B = Geometry.walkAngle(angle, frameWidth, overlay.A);
-					overlay.C = Geometry.walkAngle(angle, frameWidth, overlay.D);
-				}
-				frames[i] = overlay;
-			}
-
-			return frames;
-		}
 		
         public class RotatedGrid
         {
-
             public SKMatrix FromGrid { get; private set; }
             //made since properties cane be passed with out identifier
             private SKMatrix toGrid;
