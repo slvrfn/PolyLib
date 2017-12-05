@@ -82,21 +82,28 @@ namespace LowPolyLibrary
 
         public bool OnTouch(View v, MotionEvent e)
         {
+            var touch = new SKPoint(e.GetX(), e.GetY());
+            bool startAnim = false;
             switch (e.Action)
             {
                 case MotionEventActions.Cancel:
                     break;
                 case MotionEventActions.Down:
-                    var touch = new SKPoint(e.GetX(), e.GetY());
-                    var touchAnimation = new Touch(_lowPoly, touch.X, touch.Y, 500);
-                    _animationFlowEngine.AddAnimation(touchAnimation);
-                    
+                    startAnim = true;
                     break;
                 case MotionEventActions.Move:
+                    startAnim = true;
                     break;
                 case MotionEventActions.Up:
                     break;
             }
+
+            if (startAnim)
+            {
+                var touchAnimation = new Touch(_lowPoly, touch.X, touch.Y, 500);
+                _animationFlowEngine.AddAnimation(touchAnimation);
+            }
+
             return true;
         }
 

@@ -44,8 +44,8 @@ namespace LowPolyLibrary.Animation
                 }
                 
                 //allows any derived draw function
-                //oldest animation determines how all current animations will be drawn
-                var rend = new RenderedFrame(arg[0].DrawPointFrame);
+                //newest animation determines how all current animations will be drawn
+                var rend = new RenderedFrame(arg[arg.Length-1].DrawPointFrame);
             
                 //no use in "combining" animations unless there is more than 1 anim for this frame
                 if (animFrame.Count > 1)
