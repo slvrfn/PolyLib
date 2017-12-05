@@ -10,7 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimatedPoint.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Animation\Animation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationEngine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationFlow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Grow.cs" />

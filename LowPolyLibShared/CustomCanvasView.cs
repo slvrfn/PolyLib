@@ -20,7 +20,7 @@ namespace LowPolyLibrary
 {
     public class CustomCanvasView : SKCanvasView, View.IOnTouchListener
     {
-        private LowPolyLibrary.Animation.Animation animationEngine;
+        private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
         private LowPolyLibrary.Triangulation _lowPoly;
 
         float Variance = .75f;
@@ -43,7 +43,7 @@ namespace LowPolyLibrary
 
         private void Initialize()
         {
-            animationEngine = new LowPolyLibrary.Animation.Animation(this);
+            _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
             SetOnTouchListener(this);
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
@@ -56,9 +56,9 @@ namespace LowPolyLibrary
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
             base.OnDraw(surface, info);
-            if (animationEngine.HasFrameToDraw)
+            if (_animationFlowEngine.HasFrameToDraw)
             {
-                animationEngine.DrawOnMe(surface);
+                _animationFlowEngine.DrawOnMe(surface);
             }
             else
             {
@@ -82,20 +82,28 @@ namespace LowPolyLibrary
 
         public bool OnTouch(View v, MotionEvent e)
         {
+            var touch = new SKPoint(e.GetX(), e.GetY());
+            bool startAnim = false;
             switch (e.Action)
             {
                 case MotionEventActions.Cancel:
                     break;
                 case MotionEventActions.Down:
-                    var touch = new SKPoint(e.GetX(), e.GetY());
-
-                    animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Touch, touch.X, touch.Y, 500);
+                    startAnim = true;
                     break;
                 case MotionEventActions.Move:
+                    startAnim = true;
                     break;
                 case MotionEventActions.Up:
                     break;
             }
+
+            if (startAnim)
+            {
+                var touchAnimation = new Touch(_lowPoly, touch.X, touch.Y, 500);
+                _animationFlowEngine.AddAnimation(touchAnimation);
+            }
+
             return true;
         }
 
@@ -126,12 +134,14 @@ namespace LowPolyLibrary
 
         public void sweepAnimation()
         {
-            animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Sweep);
+            var sweepAnim = new Sweep(_lowPoly);
+            _animationFlowEngine.AddAnimation(sweepAnim);
         }
 
         public void growAnimation()
         {
-            animationEngine.AddEvent(_lowPoly, AnimationTypes.Type.Grow);
+            var growAnim = new Grow(_lowPoly);
+            _animationFlowEngine.AddAnimation(growAnim);
         }
     }
 }

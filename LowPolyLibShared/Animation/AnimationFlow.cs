@@ -6,39 +6,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
-using LowPolyLibrary.Threading;
+  using Gridsum.DataflowEx;
+  using Java.Lang;
+  using LowPolyLibrary.Threading;
 using LowPolyLibrary.Animation;
 using SkiaSharp;
+  using Exception = System.Exception;
 
 namespace LowPolyLibrary.Animation
 {
-	public class Animation
+	public class AnimationFlow : Dataflow<AnimationBase>
 	{
 		private readonly CurrentAnimationsBlock _animations; 
 		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
 		private readonly FrameQueueBlock<AnimationBase[]> _frameQueue;
-		private readonly RandomAnimationBlock _randomAnim;
+		private RandomAnimationBlock _randomAnim;
 		private readonly ActionBlock<RenderedFrame> _signalFrameRendered;
 
-	    private CustomCanvasView _currentDisplay;
-
-	    private RenderedFrame currentRenderedFrame;
-
-	    public bool HasFrameToDraw
+        public AnimationFlow(Action<RenderedFrame> notifyFrameReady, TaskScheduler uiScheduler) : base(DataflowOptions.Default)
         {
-	        get { return currentRenderedFrame != null; }
-	    }
-
-        public Animation(CustomCanvasView currentDisplay)
-        {
-            _currentDisplay = currentDisplay;
+            
             _animations = new CurrentAnimationsBlock();
-            _randomAnim = new RandomAnimationBlock(_animations, 5000);
-            _frameQueue = new FrameQueueBlock<AnimationBase[]>(new ExecutionDataflowBlockOptions { BoundedCapacity = 1, MaxDegreeOfParallelism = Environment.ProcessorCount });
+            _frameQueue = new FrameQueueBlock<AnimationBase[]>(new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
             {
-
                 var animFrame = new List<List<AnimatedPoint>>();
                 foreach (var anim in arg)
                 {
@@ -51,10 +43,11 @@ namespace LowPolyLibrary.Animation
                     animFrame.Add(x);
                 }
                 
-                //storage to be more generic in future, allows any derived draw function
-                var rend = new RenderedFrame(arg[0].DrawPointFrame);
+                //allows any derived draw function
+                //newest animation determines how all current animations will be drawn
+                var rend = new RenderedFrame(arg[arg.Length-1].DrawPointFrame);
             
-                    //no use in "combining" animations unless there is more than 1 anim for this frame
+                //no use in "combining" animations unless there is more than 1 anim for this frame
                 if (animFrame.Count > 1)
                 {
                     var dict = new Dictionary<SKPoint, AnimatedPoint>();
@@ -90,49 +83,36 @@ namespace LowPolyLibrary.Animation
                 return rend;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
 
-            _signalFrameRendered = new ActionBlock<RenderedFrame>((arg) =>
-            {
-                currentRenderedFrame = arg;
-                _currentDisplay.Invalidate();
-            }, new ExecutionDataflowBlockOptions { TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext() });
+            //limit parallelism so that only one redraw update can occur
+            _signalFrameRendered = new ActionBlock<RenderedFrame>(notifyFrameReady, new ExecutionDataflowBlockOptions {MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
 
-            //_randomAnim.LinkTo(_animations, new DataflowLinkOptions());
             _animations.LinkTo(_frameQueue);
             _frameQueue.LinkTo(_renderFrame);
             _renderFrame.LinkTo(_signalFrameRendered);
+
+            RegisterChild(_animations);
+            RegisterChild(_frameQueue);
+            RegisterChild(_renderFrame);
+            RegisterChild(_signalFrameRendered);
 		}
 
-		public void AddEvent(Triangulation tri, AnimationTypes.Type animName, float x = 0f, float y = 0f, int radius = 0)
-		{
-			AnimationBase temp = null;
-			switch (animName)
-			{
-				case AnimationTypes.Type.Grow:
-					temp = new Grow(tri);
-					break;
-				case AnimationTypes.Type.Touch:
-			        temp = new Touch(tri, x, y, radius);
-					break;
-				case AnimationTypes.Type.Sweep:
-					temp = new Sweep(tri);
-					break;
-			}
-
-			_animations.Post(temp);
-		}
-
-	    public void DrawOnMe(SKSurface surface)
+	    public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
 	    {
-	        if (currentRenderedFrame!= null)
-	        {
-	            currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
-	            currentRenderedFrame = null;
-	        }
+	        _randomAnim = new RandomAnimationBlock(_animations, msBetweenRandomAnim);
+	        _randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+	        RegisterChild(_randomAnim);
+        }
+
+	    public void StopRandomAnimationsLoop()
+	    {
+            //force completion of the flow, which will make the flow get recreated
+	        //engine determines if a new animation should be added
+            _animations.Complete();
 	    }
 
-        public void UpdateTriangulationForRandom(Triangulation tri)
-        {
-            _randomAnim.UpdateTriangulation(tri);
-        }
+	    public override ITargetBlock<AnimationBase> InputBlock
+	    {
+	        get { return _animations; }
+	    }
 	}
 }
