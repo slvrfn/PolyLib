@@ -52,7 +52,7 @@ namespace LowPolyLibrary
 			return degrees;
 		}
 
-		internal static double degreesToRadians(int angle)
+		internal static double degreesToRadians(float angle)
 		{
 			var toRad = Math.PI / 180;
 			return angle * toRad;
@@ -69,10 +69,18 @@ namespace LowPolyLibrary
         // create rotated rectangle that perfectly fits around the rectangle specified by h&w
         public static Rectangle createContainingRec(int angle, int boundsWidth, int boundsHeight)
         {
-            //slope of the given angle
-            var slope = (float)Math.Tan(Geometry.degreesToRadians(angle));
-            var recipSlope = -1 / slope;
+            var radians = Geometry.degreesToRadians(angle);
 
+            //used to avoid undefined tan evaluation
+            //this makes the angle off by +~.057 degrees at these angles
+            if (angle == 90 || angle == 270)
+            {
+                radians += .001f;
+            }
+
+            //slope of the given angle
+            var slope = (float)Math.Tan(radians);
+            var recipSlope = -1 / slope;
             
             var drawingAreaA = new SKPoint(0, boundsHeight);
             var drawingAreaB = new SKPoint(boundsWidth, boundsHeight);
@@ -264,6 +272,11 @@ namespace LowPolyLibrary
                 var dotBCBM = dot(BC, BM);
                 var dotBCBC = dot(BC, BC);
                 return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
+            }
+
+            public override string ToString()
+            {
+                return $"{nameof(A)}: {A}, {nameof(B)}: {B}, {nameof(C)}: {C}, {nameof(D)}: {D}";
             }
 
             //internal bool circleContainsPoints(SKPoint circle, int radius, SKPoint point1, SKPoint point2)
