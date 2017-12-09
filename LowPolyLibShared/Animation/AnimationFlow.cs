@@ -12,6 +12,7 @@ using System.Threading.Tasks.Dataflow;
 using LowPolyLibrary.Animation;
 using SkiaSharp;
   using Exception = System.Exception;
+  using Math = System.Math;
 
 namespace LowPolyLibrary.Animation
 {
@@ -67,6 +68,28 @@ namespace LowPolyLibrary.Animation
                             else
                             {
                                 dict[pointChange.Point] = pointChange;
+                            }
+
+                            var p = dict[pointChange.Point];
+
+                            //only want to limit to max displacement if it has been specified
+                            if (p.LimitDisplacement)
+                            {
+                                if (Math.Abs(p.XDisplacement) > p.MaxXDisplacement)
+                                {
+                                    var oldDisp = p.XDisplacement;
+                                    p.XDisplacement = p.MaxXDisplacement;
+                                    if (oldDisp < 0)
+                                        p.XDisplacement *= -1;
+                                }
+
+                                if (Math.Abs(p.YDisplacement) > p.MaxYDisplacement)
+                                {
+                                    var oldDisp = p.YDisplacement;
+                                    p.YDisplacement = p.MaxYDisplacement;
+                                    if (oldDisp < 0)
+                                        p.YDisplacement *= -1;
+                                }
                             }
                         }
 

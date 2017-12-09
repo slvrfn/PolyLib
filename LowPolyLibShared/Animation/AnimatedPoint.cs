@@ -8,7 +8,25 @@ namespace LowPolyLibrary.Animation
 		public float XDisplacement;
 		public float YDisplacement;
 
-		public AnimatedPoint()
+        //used to set an optional max displacement available for this point
+	    public bool LimitDisplacement
+	    {
+	        get;
+	        private set;
+	    }
+
+        public float MaxXDisplacement
+	    {
+	        get;
+	        private set;
+	    }
+        public float MaxYDisplacement
+	    {
+            get;
+            private set;
+        }
+
+	    public AnimatedPoint()
 		{
 			Point = new SKPoint();
 			XDisplacement = 0.0f;
@@ -35,5 +53,12 @@ namespace LowPolyLibrary.Animation
 			XDisplacement = 0.0f;
 			YDisplacement = 0.0f;
 		}
+
+	    public void SetMaxDisplacement(float x, float y)
+	    {
+	        LimitDisplacement = true;
+	        MaxXDisplacement = x;
+	        MaxYDisplacement = y;
+	    }
 	}
 }

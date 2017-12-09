@@ -32,24 +32,20 @@ namespace LowPolyLibrary
 			return (point.X - center.X) * (point.X - center.X) + (point.Y - center.Y) * (point.Y - center.Y) < radius * radius;
 		}
 
-		internal static double GetPolarCoordinates(SKPoint center, SKPoint point)
+		internal static float GetPolarCoordinates(SKPoint center, SKPoint point)
 		{
 			//http://stackoverflow.com/questions/2676719/calculating-the-angle-between-the-line-defined-by-two-points
 			var x = point.X - center.X;
-			var y = center.Y - point.Y;
-			var radians = Math.Atan(y / x);
+			var y = -(point.Y - center.Y);
 
-			var degrees = radiansToDegrees(radians);
+		    var radians = Math.Atan2(y, x);
 
-			if (point.X < center.X)
-				degrees += 180;
+		    if (radians < 0)
+		        radians = Math.Abs(radians);
+		    else
+		        radians = 2 * Math.PI - radians;
 
-			if (degrees < 0)
-			{
-				degrees = 360 + degrees;
-			}
-
-			return degrees;
+            return (float)radiansToDegrees(radians);
 		}
 
 		internal static double degreesToRadians(float angle)
@@ -385,28 +381,28 @@ namespace LowPolyLibrary
 			return endPoint;
 		}
 
-		internal static double dist(SKPoint workingPoint, DelaunayTriangulator.Vertex vertex)
+		internal static float dist(SKPoint workingPoint, DelaunayTriangulator.Vertex vertex)
 		{
 			var xSquare = (workingPoint.X - vertex.x) * (workingPoint.X - vertex.x);
 			var ySquare = (workingPoint.Y - vertex.y) * (workingPoint.Y - vertex.y);
-			return Math.Sqrt(xSquare + ySquare);
+			return (float)Math.Sqrt(xSquare + ySquare);
 		}
 
-		internal static double dist(SKPoint workingPoint, SKPoint vertex)
+		internal static float dist(SKPoint workingPoint, SKPoint vertex)
 		{
 			var xSquare = (workingPoint.X - vertex.X) * (workingPoint.X - vertex.X);
 			var ySquare = (workingPoint.Y - vertex.Y) * (workingPoint.Y - vertex.Y);
-			return Math.Sqrt(xSquare + ySquare);
+			return (float)Math.Sqrt(xSquare + ySquare);
 		}
 
-		internal static double getXComponent(int angle, double length)
+		internal static float getXComponent(int angle, float length)
 		{
-			return length * Math.Cos(degreesToRadians(angle));
+			return (float)(length * Math.Cos(degreesToRadians(angle)));
 		}
 
-		internal static double getYComponent(int angle, double length)
+		internal static float getYComponent(int angle, float length)
 		{
-			return length * Math.Sin(degreesToRadians(angle));
+			return (float)(length * Math.Sin(degreesToRadians(angle)));
 		}
 
 		internal static int getAngleInRange(int angle, int range)

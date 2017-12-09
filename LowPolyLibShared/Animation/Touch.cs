@@ -75,10 +75,10 @@ namespace LowPolyLibrary.Animation
         }
 
 		//helper for "push away from touch"
-		internal double frameLocation(int frame, int totalFrames, Double distanceToCcover)
+		private float frameLocation(int frame, int totalFrames, float distanceToCcover)
 		{
 			//method to be used when a final destination is known, and you want to get a proportional distance to have moved up to that point at this point in time
-			var ratioToFinalMovement = frame / (Double)totalFrames;
+			var ratioToFinalMovement = frame / (float)totalFrames;
 			var thisCoord = ratioToFinalMovement * distanceToCcover;
 			return thisCoord;
 		}
@@ -95,24 +95,30 @@ namespace LowPolyLibrary.Animation
         internal override List<AnimatedPoint> RenderFrame()
         {
 			var animatedPoints = new List<AnimatedPoint>();
-            //var pointsForMeasure = new List<SKPoint>();
-            //pointsForMeasure.AddRange(InRange);
-            //pointsForMeasure.AddRange(InRangOfRecs);
-            var rand = new Random();
+
+            //var rand = new Random();
             foreach (var point in InRange)
             {
-                //var direction = (int)getPolarCoordinates(touch, wPoint);
+                var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point);
 
-                //var distCanMove = shortestDistanceFromPoints(point, pointsForMeasure, direction);
+                var distCanMove = shortestDistanceFromPoints(point);
                 //var distCanMove = 20;
-                //var xComponent = getXComponent(direction, distCanMove);
-                //var yComponent = getYComponent(direction, distCanMove);
+                var frameDistCanMove = frameLocation(CurrentFrame, numFrames, distCanMove);
+                
+                var xComponent = Geometry.getXComponent(direction, frameDistCanMove);
+                var yComponent = Geometry.getYComponent(direction, frameDistCanMove);
 
-                var xComponent = rand.Next(-10, 10);
-                var yComponent = rand.Next(-10, 10);
+                //var xComponent = rand.Next(-10, 10);
+                //var yComponent = rand.Next(-10, 10);
+                
+                var animPoint = new AnimatedPoint(point, xComponent, yComponent);
 
-				var animPoint = new AnimatedPoint(point, xComponent, yComponent);
-				animatedPoints.Add(animPoint);
+                //limiting the total dist this point can travel
+                var maxXComponent = Geometry.getXComponent(direction, distCanMove);
+                var maxYComponent = Geometry.getYComponent(direction, distCanMove);
+                animPoint.SetMaxDisplacement(maxXComponent, maxYComponent);
+
+                animatedPoints.Add(animPoint);
             }
 			return animatedPoints;
         }

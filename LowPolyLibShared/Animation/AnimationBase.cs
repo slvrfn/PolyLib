@@ -127,17 +127,17 @@ namespace LowPolyLibrary.Animation
 			}
 		}
 
-		internal double shortestDistanceFromPoints(SKPoint workingPoint)
+		internal float shortestDistanceFromPoints(SKPoint workingPoint)
 		{
 			//this list consists of all the triangles containing the point.
 			var tris = poTriDic[workingPoint];
 
 			//shortest distance between a workingPoint and all vertices of the given triangle list
-			double shortest = -1;
+			float shortest = -1;
 			foreach (var tri in tris)
 			{
 				//get distances between a workingPoint and the close triangle vertices
-				double vertDistance = double.MinValue;
+				float vertDistance = float.MinValue;
 
 				var vertDistance1 = Geometry.dist(workingPoint, InternalPoints[tri.a]);
 				var vertDistance2 = Geometry.dist(workingPoint, InternalPoints[tri.b]);
