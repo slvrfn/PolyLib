@@ -47,7 +47,7 @@ namespace LowPolyLibrary.Animation
             //index of a randoom point on the random visible rec
             var index = rand.Next(SeperatedPoints[recIndex].Count);
 			//pointF version of the point
-            var pointT = SeperatedPoints[recIndex][index];
+            var pointT = SeperatedPoints[recIndex].ToArray()[index];
 			//vertex version of the point
 			var point = new Vertex(pointT.X, pointT.Y);
 			//index of the chosen point in the overall points list
@@ -84,7 +84,7 @@ namespace LowPolyLibrary.Animation
                             var center = Geometry.centroid(tri, InternalPoints);
 
                             var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-                            paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+                            paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
 
                             using (SKPath trianglePath = Geometry.DrawTrianglePath(a, b, c))
                             {
@@ -109,8 +109,8 @@ namespace LowPolyLibrary.Animation
 				//save the first point
 				outPoints.Add(new AnimatedPoint(currentPoint));
 
-                var drawList = new List<Triad>();
-                drawList = poTriDic[new SKPoint(currentPoint.x, currentPoint.y)];
+                var drawList = new HashSet<Triad>();
+                drawList = poTriDic[currentPoint];
                 foreach (var tri in drawList)
                 {
                     //if the point is not used

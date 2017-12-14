@@ -30,8 +30,11 @@ namespace LowPolyLibrary.Animation
             var BL = new SKPoint(TouchLocation.X - TouchRadius, TouchLocation.Y - TouchRadius);
             var TR = new SKPoint(TouchLocation.X + TouchRadius, TouchLocation.Y + TouchRadius);
 
-            var BLindex = GridRotation.CellCoordsFromOriginPoint(BL);
-            var TRindex = GridRotation.CellCoordsFromOriginPoint(TR);
+            var BLindex = new SKPointI();
+            var TRindex = new SKPointI();
+
+            GridRotation.CellCoordsFromOriginPoint(ref BLindex, BL);
+            GridRotation.CellCoordsFromOriginPoint(ref TRindex, TR);
 
             var upperX = TRindex.X > BLindex.X ? TRindex.X : BLindex.X;
             var lowerX = TRindex.X < BLindex.X ? TRindex.X : BLindex.X;

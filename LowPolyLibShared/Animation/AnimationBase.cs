@@ -15,37 +15,35 @@ namespace LowPolyLibrary.Animation
 	{
 		#region Global Variables
 		internal int numFrames = 12;
-		internal int CurrentFrame = 0;
-        internal Dictionary<SKPointI,List<SKPoint>> SeperatedPoints;
-		internal Dictionary<SKPoint, List<Triad>> poTriDic = new Dictionary<SKPoint, List<Triad>>();
-		internal double bleed_x, bleed_y;
+
+	    internal int CurrentFrame = 0;
+        internal Dictionary<SKPointI,HashSet<SKPoint>> SeperatedPoints;
+		internal Dictionary<Vertex, HashSet<Triad>> poTriDic => CurrentTriangulation.pointToTriangleDic;
+	    internal double bleed_x => CurrentTriangulation.bleed_x;
+	    internal double bleed_y => CurrentTriangulation.bleed_y;
+
+	    protected Triangulation CurrentTriangulation;
 
         internal Geometry.RotatedGrid GridRotation;
 
-		internal List<Triad> triangulatedPoints;
-		internal SKSurface Gradient;
-		internal List<DelaunayTriangulator.Vertex> InternalPoints;
+	    internal List<Triad> triangulatedPoints => CurrentTriangulation.TriangulatedPoints;
 
-		internal AnimationTypes.Type AnimationType;
+        internal SKSurface Gradient => CurrentTriangulation.Gradient;
+		internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
+
+	    internal AnimationTypes.Type AnimationType;
 
         internal bool IsSetup = false;
 
-		public int boundsWidth;
-		public int boundsHeight;
+	    protected int boundsWidth => CurrentTriangulation.BoundsWidth;
+	    protected int boundsHeight => CurrentTriangulation.BoundsHeight;
         #endregion
 
 		#region Constructor
-		protected AnimationBase(Triangulation triangulation)
+		protected AnimationBase(Triangulation _triangulation)
 		{
-            bleed_x = triangulation.bleed_x;
-			bleed_y = triangulation.bleed_y;
-			InternalPoints = triangulation.InternalPoints;
-			Gradient = triangulation.Gradient;
-			triangulatedPoints = triangulation.TriangulatedPoints;
-			boundsHeight = triangulation.BoundsHeight;
-			boundsWidth = triangulation.BoundsWidth;
-
-            SeperatedPoints = new Dictionary<SKPointI, List<SKPoint>>();
+            CurrentTriangulation = _triangulation;
+            SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 		}
         #endregion
 
@@ -55,7 +53,10 @@ namespace LowPolyLibrary.Animation
         {
 			var direction = Geometry.get360Direction();
 			seperatePointsIntoGridCells(InternalPoints, direction);
-			divyTris(InternalPoints);
+            if (!CurrentTriangulation.HasPointsToTrianglesSetup())
+            {
+                CurrentTriangulation.SetupPointsToTriangles();
+            }
         }
 
 		internal abstract List<AnimatedPoint> RenderFrame();
@@ -91,7 +92,7 @@ namespace LowPolyLibrary.Animation
 		                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
 
 		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-		                paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+		                paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
 		                using (SKPath trianglePath = Geometry.DrawTrianglePath(a, b, c))
 		                {
 		                    canvas.DrawPath(trianglePath, paint);
@@ -110,19 +111,21 @@ namespace LowPolyLibrary.Animation
 		{
             GridRotation = Geometry.createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
-            SeperatedPoints = new Dictionary<SKPointI, List<SKPoint>>();
+            SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 
+		    SKPointI gridIndex = new SKPointI();
+
+            var newPoint = new SKPoint();
 			foreach (var point in points)
 			{
-				var newPoint = new SKPoint();
 				newPoint.X = point.x;
 				newPoint.Y = point.y;
 
-                var gridIndex = GridRotation.CellCoordsFromOriginPoint(newPoint);
+                GridRotation.CellCoordsFromOriginPoint(ref gridIndex, newPoint);
 
                 //if the SeperatedPoints distionary does not have a point already, initialize the list at that key
                 if (!SeperatedPoints.ContainsKey(gridIndex))
-                    SeperatedPoints[gridIndex] = new List<SKPoint>();
+                    SeperatedPoints[gridIndex] = new HashSet<SKPoint>();
                 SeperatedPoints[gridIndex].Add(newPoint);
 			}
 		}
@@ -130,7 +133,8 @@ namespace LowPolyLibrary.Animation
 		internal float shortestDistanceFromPoints(SKPoint workingPoint)
 		{
 			//this list consists of all the triangles containing the point.
-			var tris = poTriDic[workingPoint];
+            var v = new Vertex(workingPoint.X, workingPoint.Y);
+			var tris = poTriDic[v];
 
 			//shortest distance between a workingPoint and all vertices of the given triangle list
 			float shortest = -1;
@@ -165,33 +169,7 @@ namespace LowPolyLibrary.Animation
 			return shortest;
 		}
 
-		private void divyTris(SKPoint point, int arrayLoc)
-		{
-			//if the point/triList distionary has a point already, add that triangle to the list at that key(point)
-			if (poTriDic.ContainsKey(point))
-				poTriDic[point].Add(triangulatedPoints[arrayLoc]);
-			//if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
-			else
-			{
-				poTriDic[point] = new List<Triad>();
-				poTriDic[point].Add(triangulatedPoints[arrayLoc]);
-			}
-		}
-
-		internal void divyTris(List<Vertex> points)
-		{
-			for (int i = 0; i < triangulatedPoints.Count; i++)
-			{
-				var a = new SKPoint(points[triangulatedPoints[i].a].x, points[triangulatedPoints[i].a].y);
-				var b = new SKPoint(points[triangulatedPoints[i].b].x, points[triangulatedPoints[i].b].y);
-				var c = new SKPoint(points[triangulatedPoints[i].c].x, points[triangulatedPoints[i].c].y);
-
-				//animation logic
-				divyTris(a, i);
-				divyTris(b, i);
-				divyTris(c, i);
-			}
-		}
+		
 
 		#endregion
 	}

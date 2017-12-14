@@ -5,6 +5,8 @@ using Double = System.Double;
 using Enum = System.Enum;
 using Math = System.Math;
 using System;
+using DelaunayTriangulator;
+using Java.Util;
 using SkiaSharp;
 
 namespace LowPolyLibrary
@@ -18,9 +20,16 @@ namespace LowPolyLibrary
 		private double calcVariance, cells_x, cells_y;
 		internal double bleed_x, bleed_y;
         internal SKSurface Gradient;
-		internal List<DelaunayTriangulator.Vertex> InternalPoints;
+		internal readonly List<DelaunayTriangulator.Vertex> InternalPoints;
+        
+	    internal Dictionary<Vertex, HashSet<Triad>> pointToTriangleDic = null;
 
-	    public List<Triad> TriangulatedPoints;
+        public List<Triad> TriangulatedPoints;
+
+        //used to speed up color access time from gradient
+	    SKImageInfo readColorImageInfo;
+	    SKBitmap readColorBitmap;
+	    IntPtr pixelBuffer;
 
         public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
         {
@@ -33,15 +42,32 @@ namespace LowPolyLibrary
 			InternalPoints = GeneratePoints();
 		    var angulator = new Triangulator();
 		    TriangulatedPoints = angulator.Triangulation(InternalPoints);
-		}
 
-        //~Triangulation()
-        //{
-        //    Gradient.Recycle();
-        //    Gradient.Dispose();
-        //}
+            //https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
+            
+            readColorImageInfo = new SKImageInfo();
+            readColorImageInfo.ColorType = SKColorType.Argb4444;
+            readColorImageInfo.AlphaType = SKAlphaType.Premul;
 
-	    public void GeneratedBitmap(SKSurface surface)
+            readColorImageInfo.Width = 1;
+            readColorImageInfo.Height = 1;
+
+            // create the 1x1 bitmap (auto allocates the pixel buffer)
+            readColorBitmap = new SKBitmap(readColorImageInfo);
+            readColorBitmap.LockPixels();
+            // get the pixel buffer for the bitmap
+            
+            pixelBuffer = readColorBitmap.GetPixels();
+        }
+
+        ~Triangulation()
+        {
+            //need to release bitmap
+            readColorBitmap.Dispose();
+            Gradient.Dispose();
+        }
+
+        public void GeneratedBitmap(SKSurface surface)
 	    {
 	        DrawFrame(surface);
         }
@@ -65,7 +91,7 @@ namespace LowPolyLibrary
 		                var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
 
 		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-		                paint.Color = Geometry.GetTriangleColor(Gradient, triAngleColorCenter);
+		                paint.Color = GetTriangleColor(triAngleColorCenter);
 
 		                using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
 		                {
@@ -86,7 +112,52 @@ namespace LowPolyLibrary
             Gradient = GetGradient(info);
 		}
 
-		private SKColor[] getGradientColors()
+	    internal bool HasPointsToTrianglesSetup()
+	    {
+	        return pointToTriangleDic != null;
+	    }
+
+	    internal void SetupPointsToTriangles()
+	    {
+	        pointToTriangleDic = new Dictionary<Vertex, HashSet<Triad>>();
+            divyTris(InternalPoints);
+        }
+
+	    private void divyTris(Vertex point, int arrayLoc)
+	    {
+	        //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
+	        if (pointToTriangleDic.ContainsKey(point))
+	            pointToTriangleDic[point].Add(TriangulatedPoints[arrayLoc]);
+	        //if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
+	        else
+	        {
+	            pointToTriangleDic[point] = new HashSet<Triad> {TriangulatedPoints[arrayLoc]};
+	        }
+	    }
+
+	    internal void divyTris(List<Vertex> points)
+	    {
+	        for (int i = 0; i < TriangulatedPoints.Count; i++)
+	        {
+	            //animation logic
+	            divyTris(points[TriangulatedPoints[i].a], i);
+	            divyTris(points[TriangulatedPoints[i].b], i);
+	            divyTris(points[TriangulatedPoints[i].c], i);
+	        }
+	    }
+
+	    internal SKColor GetTriangleColor(SKPoint center)
+	    {
+            //center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+
+            // read the surface into the bitmap
+	        Gradient.ReadPixels(readColorImageInfo, pixelBuffer, readColorImageInfo.RowBytes, (int)center.X, (int)center.Y);
+
+	        // access the color
+	        return readColorBitmap.GetPixel(0, 0);
+        }
+
+        private SKColor[] getGradientColors()
 		{
             var rand = new System.Random();
             //get all gradient codes

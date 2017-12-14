@@ -207,7 +207,9 @@ namespace LowPolyLibrary
 		{
 			var rotGrid = createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
 
-            var gridCoords = rotGrid.CellCoordsFromOriginPoint(touch);
+            var gridCoords = new SKPointI();
+
+            rotGrid.CellCoordsFromOriginPoint(ref gridCoords, touch);
 
             var A = new SKPoint(gridCoords.X * rotGrid.CellWidth, gridCoords.Y * rotGrid.CellHeight);
 
@@ -331,17 +333,16 @@ namespace LowPolyLibrary
                 return FromGrid.MapPoint(gridPoint);
             }
 
-            public SKPointI CellCoordsFromOriginPoint(SKPoint originPoint)
+            public void CellCoordsFromOriginPoint(ref SKPointI index, SKPoint originPoint)
             {
                 var pInGridCoords = ToGridCoords(originPoint);
-                return CellCoordsFromGridPoint(pInGridCoords);
+                CellCoordsFromGridPoint(ref index, pInGridCoords);
             }
 
-            public SKPointI CellCoordsFromGridPoint(SKPoint gridPoint)
+            public void CellCoordsFromGridPoint(ref SKPointI indexPoint, SKPoint gridPoint)
             {
-                var y = (int)(gridPoint.Y / CellHeight);
-                var x = (int)(gridPoint.X / CellWidth);
-                return new SKPointI(x, y);
+                indexPoint.Y = (int)(gridPoint.Y / CellHeight);
+                indexPoint.X = (int)(gridPoint.X / CellWidth);
             }
         }
         #endregion
@@ -431,32 +432,6 @@ namespace LowPolyLibrary
 
 			return new SKPoint(x, y);
 		}
-
-		internal static SKColor GetTriangleColor(SKSurface gradient, SKPoint center)
-		{
-            //center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-            
-		    //https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
-            SKImageInfo dstinf = new SKImageInfo();
-		    dstinf.ColorType = SKColorType.Argb4444;
-		    dstinf.AlphaType = SKAlphaType.Premul;
-
-            dstinf.Width = 1;
-		    dstinf.Height = 1;
-
-		    // create the 1x1 bitmap (auto allocates the pixel buffer)
-            using (SKBitmap bitmap = new SKBitmap(dstinf))
-		    {
-		        // get the pixel buffer for the bitmap
-		        IntPtr dstpixels = bitmap.GetPixels();
-
-		        // read the surface into the bitmap
-		        gradient.ReadPixels(dstinf, dstpixels, dstinf.RowBytes, (int)center.X, (int)center.Y);
-
-		        // access the color
-		        return bitmap.GetPixel(0, 0);
-            }
-        }
 
 		internal static SKPath DrawTrianglePath(SKPoint a, SKPoint b, SKPoint c)
 		{
