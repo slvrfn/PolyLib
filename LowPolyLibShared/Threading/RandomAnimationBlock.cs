@@ -24,7 +24,6 @@ namespace LowPolyLibrary.Threading
 	    private int numFrames = 12;
 
 		Timer tim;
-        Random rand;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
@@ -35,8 +34,6 @@ namespace LowPolyLibrary.Threading
             _msource = _source;
 
 			//LinkTo(animBlock, new DataflowLinkOptions());
-
-			rand = new System.Random();
 
 
 			animBlock.AnimationAdded += AnimBlock_AnimationAdded;
@@ -50,7 +47,7 @@ namespace LowPolyLibrary.Threading
 		public async Task<bool> AddRandomAnimation(object sender)
 		{
             var values = Enum.GetValues(typeof(AnimationTypes.Type));
-            var t = values.GetValue(rand.Next(values.Length));
+            var t = values.GetValue(Random.Rand.Next(values.Length));
             ColorBru.Code randomAnimType = (ColorBru.Code)t;
             var conv = (AnimationTypes.Type)t;
 
@@ -63,8 +60,8 @@ namespace LowPolyLibrary.Threading
                     newAnim = new Sweep(tri, numFrames);
                     break;
                 case AnimationTypes.Type.Touch:
-                    var x = rand.Next(0, tri.BoundsWidth);
-                    var y = rand.Next(0, tri.BoundsHeight);
+                    var x = Random.Rand.Next(0, tri.BoundsWidth);
+                    var y = Random.Rand.Next(0, tri.BoundsHeight);
                     newAnim = new Touch(tri, numFrames, x, y, 200);
                     break;
                 case AnimationTypes.Type.Grow:

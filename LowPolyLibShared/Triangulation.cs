@@ -159,10 +159,9 @@ namespace LowPolyLibrary
 
         private SKColor[] getGradientColors()
 		{
-            var rand = new System.Random();
             //get all gradient codes
             var values = Enum.GetValues(typeof(ColorBru.Code));
-			ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(rand.Next(values.Length));
+			ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(Random.Rand.Next(values.Length));
 			//gets specified colors in gradient length: #
 			var brewColors = ColorBru.GetHtmlCodes (randomCode, 6);
 			//array of ints converted from brewColors
@@ -175,12 +174,11 @@ namespace LowPolyLibrary
 
 		private SKSurface GetGradient(SKImageInfo info)
 		{
-            var rand = new System.Random();
             var colorArray = getGradientColors ();
 
 			SKShader gradientShader;
             //set to 2, bc want to temporarily not make sweep gradient
-			switch (rand.Next(2)) {
+			switch (Random.Rand.Next(2)) {
 			    case 0:
 				    gradientShader = SKShader.CreateLinearGradient (
 					                          new SKPoint(0,0),
@@ -245,14 +243,13 @@ namespace LowPolyLibrary
 
 		private List<DelaunayTriangulator.Vertex> GeneratePoints()
 		{
-            var rand = new System.Random();
             var points = new List<DelaunayTriangulator.Vertex>();
 			for (var i = - bleed_x; i < BoundsWidth + bleed_x; i += CellSize) 
 			{
 				for (var j = - bleed_y; j < BoundsHeight + bleed_y; j += CellSize) 
 				{
-					var x = i + CellSize/2 + _map(rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
-					var y = j + CellSize/2 + _map(rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
+					var x = i + CellSize/2 + _map(Random.Rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
+					var y = j + CellSize/2 + _map(Random.Rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
 					points.Add(new DelaunayTriangulator.Vertex((float)Math.Floor(x),(float)Math.Floor(y)));
 				}
 			}

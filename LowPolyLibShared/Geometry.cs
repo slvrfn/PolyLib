@@ -408,19 +408,17 @@ namespace LowPolyLibrary
 
 		internal static int getAngleInRange(int angle, int range)
 		{
-			var rand = new System.Random();
 			var range_lower = angle - range;
 			var range_upper = angle + range;
 			//return a int from range_lower to range_upper that represents the direction a point will move
 			//this is done to add an amount of 'variability'. Each point will travel in the same general direction, but with a little bit of 'wiggle room'
-			return rand.Next(range_lower, range_upper);
+			return Random.Rand.Next(range_lower, range_upper);
 		}
 
 		internal static int get360Direction()
 		{
-			var rand = new System.Random();
 			//return a int from 0 to 359 that represents the direction a point will move
-			return rand.Next(360);
+			return Random.Rand.Next(360);
 		}
 		#endregion
 
