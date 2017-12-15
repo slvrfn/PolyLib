@@ -99,7 +99,6 @@ namespace LowPolyLibrary.Animation
         {
 			var animatedPoints = new List<AnimatedPoint>();
 
-            //var rand = new Random();
             foreach (var point in InRange)
             {
                 var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point);

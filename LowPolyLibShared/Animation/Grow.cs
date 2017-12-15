@@ -28,24 +28,22 @@ namespace LowPolyLibrary.Animation
         internal override void SetupAnimation()
         {
             base.SetupAnimation();
-
-            var rand = new Random();
 			//visible rec so that the start of the anim is from a point visible on screen
-			var visibleRecX = rand.Next(numFrames);
-            var visibleRecY = rand.Next(numFrames);
+			var visibleRecX = Random.Rand.Next(numFrames);
+            var visibleRecY = Random.Rand.Next(numFrames);
 
             var recIndex = new SKPointI(visibleRecX, visibleRecY);
 
             //keep geting a random index until one exists
             while (!SeperatedPoints.ContainsKey(recIndex))
             {
-                visibleRecX = rand.Next(numFrames);
-                visibleRecY = rand.Next(numFrames);
+                visibleRecX = Random.Rand.Next(numFrames);
+                visibleRecY = Random.Rand.Next(numFrames);
                 recIndex = new SKPointI(visibleRecX, visibleRecY);
             }
 
             //index of a randoom point on the random visible rec
-            var index = rand.Next(SeperatedPoints[recIndex].Count);
+            var index = Random.Rand.Next(SeperatedPoints[recIndex].Count);
 			//pointF version of the point
             var pointT = SeperatedPoints[recIndex].ToArray()[index];
 			//vertex version of the point
