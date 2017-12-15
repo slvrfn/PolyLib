@@ -13,7 +13,7 @@ namespace LowPolyLibrary.Animation
 		Queue<Vertex> animateList;
 		List<AnimatedPoint> TotalAnimatedPoints;
 
-        internal Grow(Triangulation triangulation): base(triangulation) 
+        internal Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
 			AnimationType = AnimationTypes.Type.Grow;
 

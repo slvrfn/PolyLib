@@ -20,6 +20,9 @@ namespace LowPolyLibrary.Threading
 
         private Triangulation tri;
 
+        //TODO Make user specify what animations could randomly show up, and how long they occur for
+	    private int numFrames = 12;
+
 		Timer tim;
         Random rand;
 
@@ -57,15 +60,15 @@ namespace LowPolyLibrary.Threading
             switch (conv)
             {
                 case AnimationTypes.Type.Sweep:
-                    newAnim = new Sweep(tri);
+                    newAnim = new Sweep(tri, numFrames);
                     break;
                 case AnimationTypes.Type.Touch:
                     var x = rand.Next(0, tri.BoundsWidth);
                     var y = rand.Next(0, tri.BoundsHeight);
-                    newAnim = new Touch(tri, x, y, 200);
+                    newAnim = new Touch(tri, numFrames, x, y, 200);
                     break;
                 case AnimationTypes.Type.Grow:
-                    newAnim = new Grow(tri);
+                    newAnim = new Grow(tri, numFrames);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

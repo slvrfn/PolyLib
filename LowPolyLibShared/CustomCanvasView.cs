@@ -22,6 +22,7 @@ namespace LowPolyLibrary
     {
         private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
         private LowPolyLibrary.Triangulation _lowPoly;
+        public int numAnimFrames = 12;
 
         float Variance = .75f;
         int CellSize = 150;
@@ -100,7 +101,7 @@ namespace LowPolyLibrary
 
             if (startAnim)
             {
-                var touchAnimation = new Touch(_lowPoly, touch.X, touch.Y, 500);
+                var touchAnimation = new Touch(_lowPoly, 6, touch.X, touch.Y, 250);
                 _animationFlowEngine.AddAnimation(touchAnimation);
             }
 
@@ -134,13 +135,13 @@ namespace LowPolyLibrary
 
         public void sweepAnimation()
         {
-            var sweepAnim = new Sweep(_lowPoly);
+            var sweepAnim = new Sweep(_lowPoly, numAnimFrames);
             _animationFlowEngine.AddAnimation(sweepAnim);
         }
 
         public void growAnimation()
         {
-            var growAnim = new Grow(_lowPoly);
+            var growAnim = new Grow(_lowPoly, numAnimFrames);
             _animationFlowEngine.AddAnimation(growAnim);
         }
     }

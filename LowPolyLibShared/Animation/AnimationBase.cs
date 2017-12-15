@@ -14,8 +14,7 @@ namespace LowPolyLibrary.Animation
 	public abstract class AnimationBase
 	{
 		#region Global Variables
-		internal int numFrames = 12;
-
+		internal readonly int numFrames;
 	    internal int CurrentFrame = 0;
         internal Dictionary<SKPointI,HashSet<SKPoint>> SeperatedPoints;
 		internal Dictionary<Vertex, HashSet<Triad>> poTriDic => CurrentTriangulation.pointToTriangleDic;
@@ -40,8 +39,9 @@ namespace LowPolyLibrary.Animation
         #endregion
 
 		#region Constructor
-		protected AnimationBase(Triangulation _triangulation)
+		protected AnimationBase(Triangulation _triangulation, int frames)
 		{
+		    numFrames = frames;
             CurrentTriangulation = _triangulation;
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 		}

@@ -10,7 +10,7 @@ namespace LowPolyLibrary.Animation
     {
 		private int Direction = -1;
 
-        internal Sweep(Triangulation triangulation): base(triangulation) 
+        internal Sweep(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
 			AnimationType = AnimationTypes.Type.Sweep;
 		}

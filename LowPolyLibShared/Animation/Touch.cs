@@ -13,7 +13,7 @@ namespace LowPolyLibrary.Animation
         public SKPoint TouchLocation;
         public int TouchRadius;
 
-        internal Touch(Triangulation triangulation, float x, float y, int radius) : base(triangulation)
+        internal Touch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames)
         {
 			AnimationType = AnimationTypes.Type.Touch;
 
