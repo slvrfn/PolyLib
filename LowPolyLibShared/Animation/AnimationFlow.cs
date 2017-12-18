@@ -69,32 +69,36 @@ namespace LowPolyLibrary.Animation
                             {
                                 dict[pointChange.Point] = pointChange;
                             }
-
-                            var p = dict[pointChange.Point];
-
-                            //only want to limit to max displacement if it has been specified
-                            if (p.LimitDisplacement)
-                            {
-                                if (Math.Abs(p.XDisplacement) > p.MaxXDisplacement)
-                                {
-                                    var oldDisp = p.XDisplacement;
-                                    p.XDisplacement = p.MaxXDisplacement;
-                                    if (oldDisp < 0)
-                                        p.XDisplacement *= -1;
-                                }
-
-                                if (Math.Abs(p.YDisplacement) > p.MaxYDisplacement)
-                                {
-                                    var oldDisp = p.YDisplacement;
-                                    p.YDisplacement = p.MaxYDisplacement;
-                                    if (oldDisp < 0)
-                                        p.YDisplacement *= -1;
-                                }
-                            }
                         }
 
                     }
-                        rend.FramePoints = dict.Values.ToList();
+                    //check each point after its duplicates have been accumulated
+                    foreach (var point in dict.Values)
+                    {
+                        var p = dict[point.Point];
+
+                        //only want to limit to max displacement if it has been specified
+                        if (p.LimitDisplacement)
+                        {
+                            if (Math.Abs(p.XDisplacement) > p.MaxXDisplacement)
+                            {
+                                var oldDisp = p.XDisplacement;
+                                p.XDisplacement = p.MaxXDisplacement;
+                                if (oldDisp < 0)
+                                    p.XDisplacement *= -1;
+                            }
+
+                            if (Math.Abs(p.YDisplacement) > p.MaxYDisplacement)
+                            {
+                                var oldDisp = p.YDisplacement;
+                                p.YDisplacement = p.MaxYDisplacement;
+                                if (oldDisp < 0)
+                                    p.YDisplacement *= -1;
+                            }
+                        }
+                    }
+
+                    rend.FramePoints = dict.Values.ToList();
                 }
                 else
                 {
