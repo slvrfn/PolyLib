@@ -15,7 +15,7 @@ namespace LowPolyLibrary.Animation
 
         internal Touch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames)
         {
-			AnimationType = AnimationTypes.Type.Touch;
+            AnimationType = AnimationTypes.Type.Touch;
 
             InRange = new List<SKPoint>();
             TouchLocation = new SKPoint(x, y);
@@ -77,14 +77,14 @@ namespace LowPolyLibrary.Animation
             }
         }
 
-		//helper for "push away from touch"
-		private float frameLocation(int frame, int totalFrames, float distanceToCcover)
-		{
-			//method to be used when a final destination is known, and you want to get a proportional distance to have moved up to that point at this point in time
-			var ratioToFinalMovement = frame / (float)totalFrames;
-			var thisCoord = ratioToFinalMovement * distanceToCcover;
-			return thisCoord;
-		}
+        //helper for "push away from touch"
+        private float frameLocation(int frame, int totalFrames, float distanceToCcover)
+        {
+            //method to be used when a final destination is known, and you want to get a proportional distance to have moved up to that point at this point in time
+            var ratioToFinalMovement = frame / (float)totalFrames;
+            var thisCoord = ratioToFinalMovement * distanceToCcover;
+            return thisCoord;
+        }
 
         internal override void SetupAnimation()
         {
@@ -97,7 +97,7 @@ namespace LowPolyLibrary.Animation
 
         internal override List<AnimatedPoint> RenderFrame()
         {
-			var animatedPoints = new List<AnimatedPoint>();
+            var animatedPoints = new List<AnimatedPoint>();
 
             foreach (var point in InRange)
             {
@@ -121,11 +121,37 @@ namespace LowPolyLibrary.Animation
                 animPoint.SetMaxDisplacement(maxXComponent, maxYComponent);
 
                 animatedPoints.Add(animPoint);
+
+
+                //todo change to using Hashset structure to simplify this code
+
+                //this section is for including the points that were not animated, but are part of triangles that are being animated
+                //get duplicate vertex to search in poTriDic
+                var v = new Vertex(point.X, point.Y);
+                //get points v is connected to
+                var triadsContaingV = poTriDic[v];
+
+                foreach (var triad in triadsContaingV)
+                {
+                    //convert each vertex to a skPoint for animation
+                    var a = new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y);
+                    var b = new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y);
+                    var c = new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y);
+                    if (!animatedPoints.Contains(a))
+                    {
+                        animatedPoints.Add();
+                    }
+                }
             }
-			return animatedPoints;
+            return animatedPoints;
         }
 
-		//only overriding to force display of red ring of current touch area
+        private void test()
+        {
+            
+        }
+
+        //only overriding to force display of red ring of current touch area
         internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
         {
             //base DrawSKPointrame will render the animation correctly, get the bitmap

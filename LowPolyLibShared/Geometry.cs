@@ -431,15 +431,14 @@ namespace LowPolyLibrary
 			return new SKPoint(x, y);
 		}
 
-		internal static SKPath DrawTrianglePath(SKPoint a, SKPoint b, SKPoint c)
+		internal static void DrawTrianglePath(ref SKPath path, SKPoint a, SKPoint b, SKPoint c)
 		{
-			var path = new SKPath();
-            path.FillType = SKPathFillType.EvenOdd;
+			//var path = new SKPath();
+            path.Reset();
 			path.MoveTo(b.X, b.Y);
 			path.LineTo(c.X, c.Y);
 			path.LineTo(a.X, a.Y);
 			path.Close();
-			return path;
 		}
 		#endregion
 

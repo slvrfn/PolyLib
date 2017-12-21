@@ -77,8 +77,11 @@ namespace LowPolyLibrary
 		    using (var canvas = surface.Canvas)
 		    {
 		        canvas.Clear();
+                var trianglePath = new SKPath();
+                using (trianglePath)
 		        using (var paint = new SKPaint())
 		        {
+                    trianglePath.FillType = SKPathFillType.EvenOdd;
 		            paint.Style = SKPaintStyle.StrokeAndFill;
 		            paint.IsAntialias = true;
 
@@ -92,11 +95,8 @@ namespace LowPolyLibrary
 
 		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
 		                paint.Color = GetTriangleColor(triAngleColorCenter);
-
-		                using (var trianglePath = Geometry.DrawTrianglePath(a, b, c))
-		                {
-		                    canvas.DrawPath(trianglePath, paint);
-		                }
+                        Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+                        canvas.DrawPath(trianglePath, paint);
 		            }
 		        }
             }

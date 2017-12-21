@@ -65,24 +65,35 @@ namespace LowPolyLibrary.Animation
 		{
 			using (var canvas = surface.Canvas)
 			{
-			    canvas.Clear();
-		        using (var paint = new SKPaint())
+                var watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
+			    //canvas.Clear();
+
+                WatchMeasure(watch, $"Canvas clear");
+                var trianglePath = new SKPath();
+                using (var paint = new SKPaint())
+                using (trianglePath)
 		        {
+                    trianglePath.FillType = SKPathFillType.EvenOdd;
 		            paint.IsAntialias = true;
                     paint.Style = SKPaintStyle.StrokeAndFill;
+                    //ensure copy of internal points because it will be modified
+                    //var convertedPoints = InternalPoints.ToList();
+                    var convertedPoints = new List<Vertex>();
 
-		            //ensure copy of internal points because it will be modified
-		            var convertedPoints = InternalPoints.ToList();
+                    WatchMeasure(watch, $"InternalPoints.ToList");
 		            //can we just stay in PointF's?
 		            foreach (var animatedPoint in pointChanges)
 		            {
 		                var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
 		                var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
-		                convertedPoints.Remove(oldPoint);
+		                //convertedPoints.Remove(oldPoint);
 		                convertedPoints.Add(newPoint);
 		            }
+                    WatchMeasure(watch, $"Converted points update");
 		            var angulator = new Triangulator();
 		            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
+                    WatchMeasure(watch, $"new triangulation");
 		            for (int i = 0; i < newTriangulatedPoints.Count; i++)
 		            {
 		                var a = new SKPoint(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
@@ -93,15 +104,21 @@ namespace LowPolyLibrary.Animation
 
 		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
 		                paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-		                using (SKPath trianglePath = Geometry.DrawTrianglePath(a, b, c))
-		                {
-		                    canvas.DrawPath(trianglePath, paint);
-		                }
+                        Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+                        canvas.DrawPath(trianglePath, paint);
 
 		            }
+                    WatchMeasure(watch, $"path drawing");
                 }
             }
 		}
+
+        private void WatchMeasure(System.Diagnostics.Stopwatch watch, string s)
+        {
+            //watch.Stop();
+            Console.WriteLine(s + $" took: {watch.ElapsedTicks} ticks");
+            watch.Restart();
+        }
 		#endregion
 
 		#region Animation Helper Functions

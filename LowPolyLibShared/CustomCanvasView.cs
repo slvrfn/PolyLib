@@ -57,6 +57,8 @@ namespace LowPolyLibrary
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
             base.OnDraw(surface, info);
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
             if (_animationFlowEngine.HasFrameToDraw)
             {
                 _animationFlowEngine.DrawOnMe(surface);
@@ -68,6 +70,8 @@ namespace LowPolyLibrary
                     _lowPoly.GeneratedBitmap(surface);
                 }
             }
+            watch.Stop();
+            Console.WriteLine("Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
         }
         //necessary?
         protected override void OnSizeChanged(int w, int h, int oldw, int oldh)

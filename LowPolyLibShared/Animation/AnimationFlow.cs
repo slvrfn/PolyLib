@@ -32,6 +32,8 @@ namespace LowPolyLibrary.Animation
 
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
             {
+                var watch = new Stopwatch();
+                watch.Start();
                 var animFrame = new List<List<AnimatedPoint>>();
                 foreach (var anim in arg)
                 {
@@ -106,7 +108,8 @@ namespace LowPolyLibrary.Animation
                 }
 
                 _animations.FrameRendered();
-
+                watch.Stop();
+                Console.WriteLine("Frame rendered in: " + watch.ElapsedTicks + " ticks");
                 return rend;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
 

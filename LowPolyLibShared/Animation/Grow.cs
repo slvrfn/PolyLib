@@ -64,8 +64,12 @@ namespace LowPolyLibrary.Animation
             using (var canvas = surface.Canvas)
             {
                 canvas.Clear();
+                var trianglePath = new SKPath();
+
+                using(trianglePath)
                 using (var paint = new SKPaint())
                 {
+                    trianglePath.FillType = SKPathFillType.EvenOdd;
                     paint.Style = SKPaintStyle.StrokeAndFill;
                     paint.IsAntialias = true;
 
@@ -83,11 +87,8 @@ namespace LowPolyLibrary.Animation
 
                             var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
                             paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-
-                            using (SKPath trianglePath = Geometry.DrawTrianglePath(a, b, c))
-                            {
-                                canvas.DrawPath(trianglePath, paint);
-                            }
+                            Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+                            canvas.DrawPath(trianglePath, paint);
                         }
                     }
                 }
