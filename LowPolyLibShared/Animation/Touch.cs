@@ -152,10 +152,10 @@ namespace LowPolyLibrary.Animation
         }
 
         //only overriding to force display of red ring of current touch area
-        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
+        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges, bool ignorePointChanges = false)
         {
             //base DrawSKPointrame will render the animation correctly, get the bitmap
-            base.DrawPointFrame(surface, pointChanges);
+            base.DrawPointFrame(surface, pointChanges, ignorePointChanges);
 
             //Create a canvas to draw touch location on the bitmap
             using (var canvas = surface.Canvas)

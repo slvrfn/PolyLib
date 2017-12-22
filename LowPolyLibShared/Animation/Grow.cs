@@ -59,7 +59,7 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> edgeFrameList)
+        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> edgeFrameList, bool ignorePointChanges = false)
         {
             using (var canvas = surface.Canvas)
             {

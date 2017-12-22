@@ -30,6 +30,8 @@ namespace LowPolyLibrary.Animation
             _animations = new CurrentAnimationsBlock();
             _frameQueue = new FrameQueueBlock<AnimationBase[]>(new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
+            List<AnimatedPoint> prevFramePoints = null;
+
             _renderFrame = new TransformBlock<AnimationBase[], RenderedFrame>((arg) =>
             {
                 var watch = new Stopwatch();
@@ -100,12 +102,19 @@ namespace LowPolyLibrary.Animation
                         }
                     }
 
-                    rend.FramePoints = dict.Values.ToList();
+                    rend.CurrentFramePoints = dict.Values.ToList();
                 }
                 else
                 {
-                    rend.FramePoints = animFrame[0].ToList();
+                    rend.CurrentFramePoints = animFrame[0].ToList();
                 }
+
+                if (prevFramePoints != null)
+                {
+                    rend.PreviousFramePoints = prevFramePoints;
+                }
+
+                prevFramePoints = rend.CurrentFramePoints;
 
                 _animations.FrameRendered();
                 watch.Stop();

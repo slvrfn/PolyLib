@@ -104,7 +104,12 @@ namespace LowPolyLibrary.Animation
         {
             if (currentRenderedFrame != null)
             {
-                currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
+                if (currentRenderedFrame.PreviousFramePoints != null)
+                {
+                    currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.PreviousFramePoints, true);
+                }
+                
+                currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.CurrentFramePoints, false);
                 currentRenderedFrame = null;
             }
         }
