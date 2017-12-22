@@ -61,7 +61,7 @@ namespace LowPolyLibrary.Animation
 
 		internal abstract HashSet<AnimatedPoint> RenderFrame();
 
-		internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
+		internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges, bool ignorePointChanges = false)
 		{
 			using (var canvas = surface.Canvas)
 			{
@@ -77,18 +77,23 @@ namespace LowPolyLibrary.Animation
                     trianglePath.FillType = SKPathFillType.EvenOdd;
 		            paint.IsAntialias = true;
                     paint.Style = SKPaintStyle.StrokeAndFill;
-                    //ensure copy of internal points because it will be modified
-                    //var convertedPoints = InternalPoints.ToList();
+
                     var convertedPoints = new List<Vertex>();
 
                     WatchMeasure(watch, $"InternalPoints.ToList");
 		            //can we just stay in PointF's?
 		            foreach (var animatedPoint in pointChanges)
 		            {
-		                var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
-		                var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
-		                //convertedPoints.Remove(oldPoint);
-		                convertedPoints.Add(newPoint);
+		                var point = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
+
+                        //only modify point if not ignoring point changes
+		                if (!ignorePointChanges)
+		                {
+		                    point.x += animatedPoint.XDisplacement;
+		                    point.y += animatedPoint.YDisplacement;
+		                }
+
+		                convertedPoints.Add(point);
 		            }
 
                     //dont need to draw anything if there are not enough points to triangulate
@@ -97,22 +102,51 @@ namespace LowPolyLibrary.Animation
 
                     WatchMeasure(watch, $"Converted points update");
 		            var angulator = new Triangulator();
-		            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
-                    WatchMeasure(watch, $"new triangulation");
-		            for (int i = 0; i < newTriangulatedPoints.Count; i++)
+
+		            List<Triad> newTriangulatedPoints;
+
+		            if (ignorePointChanges)
 		            {
-		                var a = new SKPoint(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
-		                var b = new SKPoint(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
-		                var c = new SKPoint(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
+		                newTriangulatedPoints = triangulatedPoints;
 
-		                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
+		                foreach (var convertedPoint in convertedPoints)
+		                {
+		                    var i = InternalPoints.IndexOf(convertedPoint);
 
-		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-		                paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-                        Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-                        canvas.DrawPath(trianglePath, paint);
+		                    var a = new SKPoint(InternalPoints[newTriangulatedPoints[i].a].x, InternalPoints[newTriangulatedPoints[i].a].y);
+		                    var b = new SKPoint(InternalPoints[newTriangulatedPoints[i].b].x, InternalPoints[newTriangulatedPoints[i].b].y);
+		                    var c = new SKPoint(InternalPoints[newTriangulatedPoints[i].c].x, InternalPoints[newTriangulatedPoints[i].c].y);
 
-		            }
+		                    var center = Geometry.centroid(newTriangulatedPoints[i], InternalPoints);
+
+		                    var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+		                    paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
+		                    Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+		                    canvas.DrawPath(trianglePath, paint);
+		                }
+		                WatchMeasure(watch, $"new triangulation");
+                    }
+		            else
+		            {
+		                newTriangulatedPoints = angulator.Triangulation(convertedPoints);
+
+		                for (int i = 0; i < newTriangulatedPoints.Count; i++)
+		                {
+		                    var a = new SKPoint(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
+		                    var b = new SKPoint(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
+		                    var c = new SKPoint(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
+
+		                    var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
+
+		                    var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+		                    paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
+		                    Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+		                    canvas.DrawPath(trianglePath, paint);
+
+		                }
+                        WatchMeasure(watch, $"new triangulation");
+                    }
+                    
                     WatchMeasure(watch, $"path drawing");
                 }
             }
