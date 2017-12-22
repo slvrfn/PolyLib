@@ -11,13 +11,13 @@ namespace LowPolyLibrary.Animation
     {
 		bool[] pointUsed;
 		Queue<Vertex> animateList;
-		List<AnimatedPoint> TotalAnimatedPoints;
+		HashSet<AnimatedPoint> TotalAnimatedPoints;
 
         internal Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
 			AnimationType = AnimationTypes.Type.Grow;
 
-			TotalAnimatedPoints = new List<AnimatedPoint>();
+			TotalAnimatedPoints = new HashSet<AnimatedPoint>();
 			pointUsed = new bool[InternalPoints.Count];
 			for (int i = 0; i < pointUsed.Length; i++)
 			{
@@ -95,13 +95,13 @@ namespace LowPolyLibrary.Animation
             }
 		}
 
-        internal override List<AnimatedPoint> RenderFrame()
+        internal override HashSet<AnimatedPoint> RenderFrame()
         {
-			var outPoints = new List<AnimatedPoint>();
+			var outPoints = new HashSet<AnimatedPoint>();
 
 			for (int i = 0; i < InternalPoints.Count / numFrames; i++)
 			{
-                var tempEdges = new List<AnimatedPoint>();
+                var tempEdges = new HashSet<AnimatedPoint>();
 
                 var currentPoint = animateList.Dequeue();
 
@@ -151,9 +151,9 @@ namespace LowPolyLibrary.Animation
                 }
                 //add the points from this iteration to the animation frame's list
                 //tolist to ensure list copy
-                outPoints.AddRange(tempEdges.ToList());
+                outPoints.UnionWith(tempEdges.ToList());
             }
-			TotalAnimatedPoints.AddRange(outPoints);
+			TotalAnimatedPoints.UnionWith(outPoints);
 			return TotalAnimatedPoints;
         }
     }

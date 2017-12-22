@@ -59,7 +59,7 @@ namespace LowPolyLibrary.Animation
             }
         }
 
-		internal abstract List<AnimatedPoint> RenderFrame();
+		internal abstract HashSet<AnimatedPoint> RenderFrame();
 
 		internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
 		{

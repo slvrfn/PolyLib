@@ -22,9 +22,9 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        internal override List<AnimatedPoint> RenderFrame()
+        internal override HashSet<AnimatedPoint> RenderFrame()
         {
-			var animatedPoints = new List<AnimatedPoint>();
+			var animatedPoints = new HashSet<AnimatedPoint>();
             //all the points will move within 15 degrees of the same direction
             var localDirection = Geometry.getAngleInRange(Direction, 15);
 

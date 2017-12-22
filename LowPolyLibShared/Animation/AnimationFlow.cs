@@ -34,7 +34,7 @@ namespace LowPolyLibrary.Animation
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                var animFrame = new List<List<AnimatedPoint>>();
+                var animFrame = new List<HashSet<AnimatedPoint>>();
                 foreach (var anim in arg)
                 {
                         if (!anim.IsSetup)

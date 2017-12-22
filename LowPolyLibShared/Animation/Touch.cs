@@ -9,7 +9,7 @@ namespace LowPolyLibrary.Animation
 {
     class Touch : AnimationBase
     {
-        public List<SKPoint> InRange;
+        public HashSet<SKPoint> InRange;
         public SKPoint TouchLocation;
         public int TouchRadius;
 
@@ -17,15 +17,15 @@ namespace LowPolyLibrary.Animation
         {
             AnimationType = AnimationTypes.Type.Touch;
 
-            InRange = new List<SKPoint>();
+            InRange = new HashSet<SKPoint>();
             TouchLocation = new SKPoint(x, y);
             TouchRadius = radius;
         }
 
         //saves 
-        internal List<SKPoint> getTouchAreaRecPoints()
+        internal HashSet<SKPoint> getTouchAreaRecPoints()
         {
-            var touch = new List<SKPoint>();
+            var touch = new HashSet<SKPoint>();
 
             var BL = new SKPoint(TouchLocation.X - TouchRadius, TouchLocation.Y - TouchRadius);
             var TR = new SKPoint(TouchLocation.X + TouchRadius, TouchLocation.Y + TouchRadius);
@@ -49,7 +49,7 @@ namespace LowPolyLibrary.Animation
                     var p = new SKPointI(i, j);
 
                     if (SeperatedPoints.ContainsKey(p))
-                        touch.AddRange(SeperatedPoints[p]);
+                        touch.UnionWith(SeperatedPoints[p]);
                 }
             }
 
@@ -95,9 +95,9 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        internal override List<AnimatedPoint> RenderFrame()
+        internal override HashSet<AnimatedPoint> RenderFrame()
         {
-            var animatedPoints = new List<AnimatedPoint>();
+            var animatedPoints = new HashSet<AnimatedPoint>();
 
             foreach (var point in InRange)
             {
@@ -121,43 +121,33 @@ namespace LowPolyLibrary.Animation
                 animPoint.SetMaxDisplacement(maxXComponent, maxYComponent);
 
                 animatedPoints.Add(animPoint);
-            }
-
-            var toAdd = new HashSet<AnimatedPoint>();
-
-            //iterate points that are going to be animated this frame
-            foreach (var animatedPoint in animatedPoints)
-            {
-                //todo change to using Hashset structure to simplify this code
 
                 //this section is for including the points that were not animated, but are part of triangles that are being animated
 
-                var v = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
+                var v = new Vertex(point.X, point.Y);
                 //get points v is connected to
                 var triadsContaingV = poTriDic[v];
 
                 foreach (var triad in triadsContaingV)
                 {
-                    //convert each vertex to a skPoint for animation
-                    //no need to create SKPoint until it will actually added to the animated point
-                    if (!animatedPoints.Exists(point => point.Point.X.Equals(InternalPoints[triad.a].x) &&
-                                                        point.Point.Y.Equals(InternalPoints[triad.a].y)))
+                    //no need to create SKPoint until actually added to the animated point
+                    if (!InRange.Any(p => p.X.Equals(InternalPoints[triad.a].x) &&
+                                          p.Y.Equals(InternalPoints[triad.a].y)))
                     {
-                        toAdd.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y)));
+                        animatedPoints.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y), limitDisplacement: true));
                     }
-                    if (!animatedPoints.Exists(point => point.Point.X.Equals(InternalPoints[triad.b].x) &&
-                                                        point.Point.Y.Equals(InternalPoints[triad.b].y)))
+                    if (!InRange.Any(p => p.X.Equals(InternalPoints[triad.b].x) &&
+                                          p.Y.Equals(InternalPoints[triad.b].y)))
                     {
-                        toAdd.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y)));
+                        animatedPoints.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y), limitDisplacement: true));
                     }
-                    if (!animatedPoints.Exists(point => point.Point.X.Equals(InternalPoints[triad.c].x) &&
-                                                        point.Point.Y.Equals(InternalPoints[triad.c].y)))
+                    if (!InRange.Any(p => p.X.Equals(InternalPoints[triad.c].x) &&
+                                          p.Y.Equals(InternalPoints[triad.c].y)))
                     {
-                        toAdd.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y)));
+                        animatedPoints.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y), limitDisplacement: true));
                     }
                 }
             }
-            animatedPoints.AddRange(toAdd);
             return animatedPoints;
         }
 

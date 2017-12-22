@@ -26,33 +26,15 @@ namespace LowPolyLibrary.Animation
             private set;
         }
 
-	    public AnimatedPoint()
-		{
-			Point = new SKPoint();
-			XDisplacement = 0.0f;
-			YDisplacement = 0.0f;
-		}
-
-		public AnimatedPoint(SKPoint point, float xDisplacement, float yDisplacement)
+		public AnimatedPoint(SKPoint point, float xDisplacement = 0f, float yDisplacement = 0f, bool limitDisplacement = false)
 		{
 			Point = point;
 			XDisplacement = xDisplacement;
 			YDisplacement = yDisplacement;
+		    LimitDisplacement = limitDisplacement;
 		}
 
-		public AnimatedPoint(SKPoint point)
-		{
-			Point = point;
-			XDisplacement = 0.0f;
-			YDisplacement = 0.0f;
-		}
-
-		public AnimatedPoint(DelaunayTriangulator.Vertex vertex)
-		{
-			Point = new SKPoint(vertex.x, vertex.y);
-			XDisplacement = 0.0f;
-			YDisplacement = 0.0f;
-		}
+	    public AnimatedPoint(DelaunayTriangulator.Vertex vertex, float xDisplacement = 0f, float yDisplacement = 0f, bool limitDisplacement = false) : this(new SKPoint(vertex.x, vertex.y), xDisplacement, yDisplacement, limitDisplacement) { }
 
 	    public void SetMaxDisplacement(float x, float y)
 	    {
