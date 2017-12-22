@@ -90,6 +90,11 @@ namespace LowPolyLibrary.Animation
 		                //convertedPoints.Remove(oldPoint);
 		                convertedPoints.Add(newPoint);
 		            }
+
+                    //dont need to draw anything if there are not enough points to triangulate
+		            if (convertedPoints.Count < 3)
+		                return;
+
                     WatchMeasure(watch, $"Converted points update");
 		            var angulator = new Triangulator();
 		            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);

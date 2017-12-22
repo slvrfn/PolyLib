@@ -121,34 +121,44 @@ namespace LowPolyLibrary.Animation
                 animPoint.SetMaxDisplacement(maxXComponent, maxYComponent);
 
                 animatedPoints.Add(animPoint);
+            }
 
+            var toAdd = new HashSet<AnimatedPoint>();
 
+            //iterate points that are going to be animated this frame
+            foreach (var animatedPoint in animatedPoints)
+            {
                 //todo change to using Hashset structure to simplify this code
 
                 //this section is for including the points that were not animated, but are part of triangles that are being animated
-                //get duplicate vertex to search in poTriDic
-                var v = new Vertex(point.X, point.Y);
+
+                var v = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
                 //get points v is connected to
                 var triadsContaingV = poTriDic[v];
 
                 foreach (var triad in triadsContaingV)
                 {
                     //convert each vertex to a skPoint for animation
-                    var a = new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y);
-                    var b = new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y);
-                    var c = new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y);
-                    if (!animatedPoints.Contains(a))
+                    //no need to create SKPoint until it will actually added to the animated point
+                    if (!animatedPoints.Exists(point => point.Point.X.Equals(InternalPoints[triad.a].x) &&
+                                                        point.Point.Y.Equals(InternalPoints[triad.a].y)))
                     {
-                        animatedPoints.Add();
+                        toAdd.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y)));
+                    }
+                    if (!animatedPoints.Exists(point => point.Point.X.Equals(InternalPoints[triad.b].x) &&
+                                                        point.Point.Y.Equals(InternalPoints[triad.b].y)))
+                    {
+                        toAdd.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y)));
+                    }
+                    if (!animatedPoints.Exists(point => point.Point.X.Equals(InternalPoints[triad.c].x) &&
+                                                        point.Point.Y.Equals(InternalPoints[triad.c].y)))
+                    {
+                        toAdd.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y)));
                     }
                 }
             }
+            animatedPoints.AddRange(toAdd);
             return animatedPoints;
-        }
-
-        private void test()
-        {
-            
         }
 
         //only overriding to force display of red ring of current touch area

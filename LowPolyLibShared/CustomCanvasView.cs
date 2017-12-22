@@ -62,16 +62,18 @@ namespace LowPolyLibrary
             if (_animationFlowEngine.HasFrameToDraw)
             {
                 _animationFlowEngine.DrawOnMe(surface);
+                Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
             }
             else
             {
                 if (_lowPoly != null)
                 {
                     _lowPoly.GeneratedBitmap(surface);
+                    Console.WriteLine("Triangulation Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
                 }
             }
             watch.Stop();
-            Console.WriteLine("Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
+            
         }
         //necessary?
         protected override void OnSizeChanged(int w, int h, int oldw, int oldh)
