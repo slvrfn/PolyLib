@@ -10,7 +10,7 @@ namespace LowPolyLibrary.Animation
 {
     class AnimationEngine
     {
-        private CustomCanvasView _currentDisplay;
+        private TriangulationView _currentDisplay;
         private RenderedFrame currentRenderedFrame;
 
         //for now keep look alive as long as the animation engine exists
@@ -30,7 +30,7 @@ namespace LowPolyLibrary.Animation
             get { return currentRenderedFrame != null; }
         }
 
-        public AnimationEngine(CustomCanvasView display)
+        public AnimationEngine(TriangulationView display)
         {
             //start the thread that will keep the animation flow alive
             Task.Run(RestartActionBlock);

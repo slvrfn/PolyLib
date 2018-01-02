@@ -1,24 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO.MemoryMappedFiles;
-using System.Linq;
-using System.Text;
-
-using Android.App;
 using Android.Content;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using LowPolyLibrary.Animation;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
-using LowPolyLibrary.Animation;
 
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Views
 {
-    public class CustomCanvasView : SKCanvasView, View.IOnTouchListener
+    public class AnimationUpdateView : SKCanvasView, View.IOnTouchListener
     {
         private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
         private LowPolyLibrary.Triangulation _lowPoly;
@@ -27,17 +18,17 @@ namespace LowPolyLibrary
         float Variance = .75f;
         int CellSize = 150;
 
-        public CustomCanvasView(Context context) : base(context)
+        public AnimationUpdateView(Context context) : base(context)
         {
             Initialize();
         }
 
-        public CustomCanvasView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public AnimationUpdateView(Context context, IAttributeSet attrs) : base(context, attrs)
         {
             Initialize();
         }
 
-        public CustomCanvasView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public AnimationUpdateView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             Initialize();
         }
@@ -114,7 +105,7 @@ namespace LowPolyLibrary
             return true;
         }
 
-        public CustomCanvasView Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
+        public AnimationUpdateView Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
 
@@ -123,7 +114,7 @@ namespace LowPolyLibrary
                 var parent = ((ViewGroup)Parent);
                 var index = parent.IndexOfChild(this);
                 parent.RemoveView(this);
-                var newCanvasView = new CustomCanvasView(Context);
+                var newCanvasView = new AnimationUpdateView(Context);
                 newCanvasView.Variance = variance;
                 newCanvasView.CellSize = cellSize;
                 parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));

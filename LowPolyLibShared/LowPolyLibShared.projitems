@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Sweep.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Touch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ColorBru.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CustomCanvasView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Geometry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GlobalLayoutListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Random.cs" />
@@ -33,5 +32,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Triad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Triangulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DelaunayTriangulator\Vertex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\AnimationUpdateView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\TriangulationView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\LowPolyView.cs" />
   </ItemGroup>
 </Project>

@@ -21,7 +21,7 @@ namespace LowPoly
 	public class MainActivity : Activity
 	{
         Button button, animSButton, animGButton;
-	    CustomCanvasView imagePanel;
+	    TriangulationView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB;
 
 		protected override void OnCreate (Bundle savedInstanceState)
@@ -40,7 +40,7 @@ namespace LowPoly
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
 		    
-			imagePanel = FindViewById<CustomCanvasView> (Resource.Id.imageView1);
+			imagePanel = FindViewById<TriangulationView> (Resource.Id.imageView1);
 			//imagePanel.SetOnTouchListener(this);
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
