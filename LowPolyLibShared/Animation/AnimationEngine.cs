@@ -4,13 +4,14 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using LowPolyLibrary.Views;
 using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
     class AnimationEngine
     {
-        private TriangulationView _currentDisplay;
+        private AnimationUpdateView _currentDisplay;
         private RenderedFrame currentRenderedFrame;
 
         //for now keep look alive as long as the animation engine exists
@@ -30,7 +31,7 @@ namespace LowPolyLibrary.Animation
             get { return currentRenderedFrame != null; }
         }
 
-        public AnimationEngine(TriangulationView display)
+        public AnimationEngine(AnimationUpdateView display)
         {
             //start the thread that will keep the animation flow alive
             Task.Run(RestartActionBlock);

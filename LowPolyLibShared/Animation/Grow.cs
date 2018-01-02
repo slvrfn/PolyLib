@@ -63,7 +63,7 @@ namespace LowPolyLibrary.Animation
         {
             using (var canvas = surface.Canvas)
             {
-                canvas.Clear();
+                canvas.Clear(SKColors.Black);
                 var trianglePath = new SKPath();
 
                 using(trianglePath)

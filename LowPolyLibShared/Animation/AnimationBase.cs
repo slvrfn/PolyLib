@@ -67,7 +67,7 @@ namespace LowPolyLibrary.Animation
 			{
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
-			    //canvas.Clear();
+			    canvas.Clear();
 
                 WatchMeasure(watch, $"Canvas clear");
                 var trianglePath = new SKPath();
@@ -85,9 +85,7 @@ namespace LowPolyLibrary.Animation
 		            //can we just stay in PointF's?
 		            foreach (var animatedPoint in pointChanges)
 		            {
-		                var oldPoint = new Vertex(animatedPoint.Point.X, animatedPoint.Point.Y);
-		                var newPoint = new Vertex(oldPoint.x + animatedPoint.XDisplacement, oldPoint.y + animatedPoint.YDisplacement);
-		                //convertedPoints.Remove(oldPoint);
+		                var newPoint = new Vertex(animatedPoint.Point.X + animatedPoint.XDisplacement, animatedPoint.Point.Y + animatedPoint.YDisplacement);
 		                convertedPoints.Add(newPoint);
 		            }
 

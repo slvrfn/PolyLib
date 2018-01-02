@@ -12,6 +12,7 @@ using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
 using LowPolyLibrary;
+using LowPolyLibrary.Views;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
 
@@ -21,7 +22,7 @@ namespace LowPoly
 	public class MainActivity : Activity
 	{
         Button button, animSButton, animGButton;
-	    TriangulationView imagePanel;
+	    LowPolyView imagePanel;
 		TextView widthTB, heightTB, varTB, sizeTB;
 
 		protected override void OnCreate (Bundle savedInstanceState)
@@ -40,7 +41,7 @@ namespace LowPoly
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
 		    
-			imagePanel = FindViewById<TriangulationView> (Resource.Id.imageView1);
+			imagePanel = FindViewById<LowPolyView> (Resource.Id.imageView1);
 			//imagePanel.SetOnTouchListener(this);
 
 			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);

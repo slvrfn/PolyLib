@@ -9,14 +9,14 @@ using LowPolyLibrary.Animation;
 
 namespace LowPolyLibrary
 {
-    public class TriangulationView : SKCanvasView, View.IOnTouchListener
+    public class TriangulationView : SKCanvasView
     {
-        private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
-        private LowPolyLibrary.Triangulation _lowPoly;
-        public int numAnimFrames = 12;
+        public LowPolyLibrary.Triangulation Triangulation { get; private set; }
 
         float Variance = .75f;
         int CellSize = 150;
+
+        #region Constructors
 
         public TriangulationView(Context context) : base(context)
         {
@@ -33,14 +33,14 @@ namespace LowPolyLibrary
             Initialize();
         }
 
+#endregion
+
         private void Initialize()
         {
-            _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
-            SetOnTouchListener(this);
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
+                Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
                 Invalidate();
             }));
         }
@@ -50,18 +50,10 @@ namespace LowPolyLibrary
             base.OnDraw(surface, info);
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            if (_animationFlowEngine.HasFrameToDraw)
+            if(Triangulation != null)
             {
-                _animationFlowEngine.DrawOnMe(surface);
-                Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
-            }
-            else
-            {
-                if (_lowPoly != null)
-                {
-                    _lowPoly.GeneratedBitmap(surface);
-                    Console.WriteLine("Triangulation Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
-                }
+                Triangulation.GeneratedBitmap(surface);
+                Console.WriteLine("Triangulation drawn in: " + watch.ElapsedTicks + " ticks\n");
             }
             watch.Stop();
             
@@ -73,73 +65,18 @@ namespace LowPolyLibrary
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
+                Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
                 Invalidate();
             }));
         }
 
-        public bool OnTouch(View v, MotionEvent e)
+        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
-            var touch = new SKPoint(e.GetX(), e.GetY());
-            bool startAnim = false;
-            switch (e.Action)
-            {
-                case MotionEventActions.Cancel:
-                    break;
-                case MotionEventActions.Down:
-                    startAnim = true;
-                    break;
-                case MotionEventActions.Move:
-                    startAnim = true;
-                    break;
-                case MotionEventActions.Up:
-                    break;
-            }
+            Variance = variance;
+            CellSize = cellSize;
 
-            if (startAnim)
-            {
-                var touchAnimation = new Touch(_lowPoly, 6, touch.X, touch.Y, 250);
-                _animationFlowEngine.AddAnimation(touchAnimation);
-            }
-
-            return true;
-        }
-
-        public TriangulationView Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
-        {
-            //SKCanvasView cannot change size. Instead, generate a new one in this views place
-
-            if (!boundsWidth.Equals(Width) || !boundsHeight.Equals(Height))
-            {
-                var parent = ((ViewGroup)Parent);
-                var index = parent.IndexOfChild(this);
-                parent.RemoveView(this);
-                var newCanvasView = new TriangulationView(Context);
-                newCanvasView.Variance = variance;
-                newCanvasView.CellSize = cellSize;
-                parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
-                return newCanvasView;
-            }
-            else
-            {
-                Variance = variance;
-                CellSize = cellSize;
-                _lowPoly = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
-                Invalidate();
-                return this;
-            }
-        }
-
-        public void sweepAnimation()
-        {
-            var sweepAnim = new Sweep(_lowPoly, numAnimFrames);
-            _animationFlowEngine.AddAnimation(sweepAnim);
-        }
-
-        public void growAnimation()
-        {
-            var growAnim = new Grow(_lowPoly, numAnimFrames);
-            _animationFlowEngine.AddAnimation(growAnim);
+            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, Variance, CellSize);
+            Invalidate();
         }
     }
 }
