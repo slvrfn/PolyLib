@@ -56,18 +56,6 @@ namespace LowPolyLibrary
                 Console.WriteLine("Triangulation drawn in: " + watch.ElapsedTicks + " ticks\n");
             }
             watch.Stop();
-            
-        }
-        //necessary?
-        protected override void OnSizeChanged(int w, int h, int oldw, int oldh)
-        {
-            base.OnSizeChanged(w, h, oldw, oldh);
-            ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
-            {
-                ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
-                Invalidate();
-            }));
         }
 
         public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)

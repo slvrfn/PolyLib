@@ -19,13 +19,15 @@ using SkiaSharp.Views.Android;
 namespace LowPoly
 {
 	[Activity (Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
-	public class MainActivity : Activity
+	public class MainActivity : Activity, View.IOnTouchListener
 	{
         Button button, animSButton, animGButton;
-	    LowPolyView imagePanel;
+	    LowPolyView polyView;
 		TextView widthTB, heightTB, varTB, sizeTB;
 
-		protected override void OnCreate (Bundle savedInstanceState)
+	    int numAnimFrames = 12;
+
+        protected override void OnCreate (Bundle savedInstanceState)
 		{
             base.OnCreate (savedInstanceState);
 
@@ -41,10 +43,10 @@ namespace LowPoly
 		    animGButton = FindViewById<Button>(Resource.Id.animGButton);
 		    animGButton.Click += growAnimation;
 		    
-			imagePanel = FindViewById<LowPolyView> (Resource.Id.imageView1);
-			//imagePanel.SetOnTouchListener(this);
+			polyView = FindViewById<LowPolyView> (Resource.Id.imageView1);
+		    polyView.SetOnTouchListener(this);
 
-			widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
+            widthTB = FindViewById<TextView> (Resource.Id.widthTextBox);
 			heightTB = FindViewById<TextView> (Resource.Id.heightTextBox);
 			varTB = FindViewById<TextView> (Resource.Id.varTextBox);
 			sizeTB = FindViewById<TextView> (Resource.Id.sizeTextBox);
@@ -58,27 +60,17 @@ namespace LowPoly
 		    sizeTB.Text = "150";
 		}
 
-        private void growAnimation(object sender, EventArgs e)
-        {
-            imagePanel.growAnimation();
-        }
-
-        private void sweepAnimation(object sender, EventArgs e)
-        {
-            imagePanel.sweepAnimation();
-        }
-
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            imagePanel = null;
+            polyView = null;
             widthTB = null;
             heightTB = null;
             varTB = null;
             sizeTB = null;
         }
 
-		private void UpdatePolyLib(object sender, EventArgs e)
+        private void UpdatePolyLib(object sender, EventArgs e)
         {
             var boundsWidth = Int32.Parse(widthTB.Text);
 			var boundsHeight = Int32.Parse(heightTB.Text);
@@ -86,7 +78,46 @@ namespace LowPoly
             var variance = float.Parse(varTB.Text);
 			var cellSize = int.Parse(sizeTB.Text);
 			
-		    imagePanel = imagePanel.Generate(boundsWidth, boundsHeight, variance, cellSize);
+		    polyView = polyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize);
+        }
+
+        public bool OnTouch(View v, MotionEvent e)
+        {
+            var touch = new SKPoint(e.GetX(), e.GetY());
+            bool startAnim = false;
+            switch (e.Action)
+            {
+                case MotionEventActions.Cancel:
+                    break;
+                case MotionEventActions.Down:
+                    startAnim = true;
+                    break;
+                case MotionEventActions.Move:
+                    startAnim = true;
+                    break;
+                case MotionEventActions.Up:
+                    break;
+            }
+
+            if (startAnim)
+            {
+                var touchAnimation = new Touch(polyView.CurrentTriangulation, 6, touch.X, touch.Y, 250);
+                polyView.AddAnimation(touchAnimation);
+            }
+
+            return true;
+        }
+
+        private void growAnimation(object sender, EventArgs e)
+        {
+            var growAnim = new Grow(polyView.CurrentTriangulation, numAnimFrames);
+            polyView.AddAnimation(growAnim);
+        }
+
+        private void sweepAnimation(object sender, EventArgs e)
+        {
+            var sweepAnim = new Sweep(polyView.CurrentTriangulation, numAnimFrames);
+            polyView.AddAnimation(sweepAnim);
         }
 	}
 }
