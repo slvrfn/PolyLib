@@ -32,6 +32,8 @@ namespace LowPolyLibrary.Animation
 
 	    internal AnimationTypes.Type AnimationType;
 
+	    protected readonly SKPaint strokePaint, fillPaint;
+
         internal bool IsSetup = false;
 
 	    protected int boundsWidth => CurrentTriangulation.BoundsWidth;
@@ -44,7 +46,27 @@ namespace LowPolyLibrary.Animation
 		    numFrames = frames;
             CurrentTriangulation = _triangulation;
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
-		}
+
+		    strokePaint = new SKPaint
+		    {
+		        Style = SKPaintStyle.Stroke,
+		        Color = SKColors.Black,
+		        IsAntialias = true
+		    };
+
+            //color set later
+            fillPaint = new SKPaint
+            {
+                IsAntialias = true,
+                Style = SKPaintStyle.StrokeAndFill
+            };
+        }
+
+	    ~AnimationBase()
+	    {
+	        strokePaint.Dispose();
+            fillPaint.Dispose();
+	    }
         #endregion
 
         #region Animation Methods
@@ -61,9 +83,9 @@ namespace LowPolyLibrary.Animation
 
 		internal abstract HashSet<AnimatedPoint> RenderFrame();
 
-		internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
+        internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
 		{
-			using (var canvas = surface.Canvas)
+            using (var canvas = surface.Canvas)
 			{
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
@@ -71,50 +93,76 @@ namespace LowPolyLibrary.Animation
 
                 WatchMeasure(watch, $"Canvas clear");
                 var trianglePath = new SKPath();
-                using (var paint = new SKPaint())
                 using (trianglePath)
 		        {
                     trianglePath.FillType = SKPathFillType.EvenOdd;
-		            paint.IsAntialias = true;
-                    paint.Style = SKPaintStyle.StrokeAndFill;
-                    //ensure copy of internal points because it will be modified
-                    //var convertedPoints = InternalPoints.ToList();
-                    var convertedPoints = new List<Vertex>();
 
-                    WatchMeasure(watch, $"InternalPoints.ToList");
-		            //can we just stay in PointF's?
-		            foreach (var animatedPoint in pointChanges)
+                    //vertex and its original vertex in InternalPoints
+                    var updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
+                    //for quick lookup to check if a specified point index has been modified
+                    var updatedIndices = new int[pointChanges.Count];
+
+		            for (var i = 0; i < pointChanges.Count; i++)
 		            {
-		                var newPoint = new Vertex(animatedPoint.Point.X + animatedPoint.XDisplacement, animatedPoint.Point.Y + animatedPoint.YDisplacement);
-		                convertedPoints.Add(newPoint);
+		                var animatedPoint = pointChanges[i];
+                        
+                        //find index of animated point in InternalPoints
+		                var index = InternalPoints.FindIndex(v =>
+		                    v.x.Equals(animatedPoint.Point.X) && v.y.Equals(animatedPoint.Point.Y));
+
+		                updatedPoints[index] = new Tuple<Vertex, Vertex>(
+		                    new Vertex(animatedPoint.Point.X + animatedPoint.XDisplacement,
+		                        animatedPoint.Point.Y + animatedPoint.YDisplacement), InternalPoints[index]);
+		                //mark this point's index as used
+		                updatedIndices[i] = index;
 		            }
 
-                    //dont need to draw anything if there are not enough points to triangulate
-		            if (convertedPoints.Count < 3)
-		                return;
-
-                    WatchMeasure(watch, $"Converted points update");
-		            var angulator = new Triangulator();
-		            var newTriangulatedPoints = angulator.Triangulation(convertedPoints);
-                    WatchMeasure(watch, $"new triangulation");
-		            for (int i = 0; i < newTriangulatedPoints.Count; i++)
+		            WatchMeasure(watch, $"Frame points updated");
+                    //increment updated points
+		            foreach (var updatedPoint in updatedPoints)
 		            {
-		                var a = new SKPoint(convertedPoints[newTriangulatedPoints[i].a].x, convertedPoints[newTriangulatedPoints[i].a].y);
-		                var b = new SKPoint(convertedPoints[newTriangulatedPoints[i].b].x, convertedPoints[newTriangulatedPoints[i].b].y);
-		                var c = new SKPoint(convertedPoints[newTriangulatedPoints[i].c].x, convertedPoints[newTriangulatedPoints[i].c].y);
+                        //non-updated points will be null
+		                if (updatedPoint == null)
+		                    continue;
 
-		                var center = Geometry.centroid(newTriangulatedPoints[i], convertedPoints);
+		                //increment each triad that contains this updatedPoint
+		                foreach (var tri in poTriDic[updatedPoint.Item2])
+                        {
+                            var a = new SKPoint();
+                            GetCorrectPoint(updatedPoints, updatedIndices, tri.a, ref a);
+                            var b = new SKPoint();
+                            GetCorrectPoint(updatedPoints, updatedIndices, tri.b, ref b);
+                            var c = new SKPoint();
+                            GetCorrectPoint(updatedPoints, updatedIndices, tri.c, ref c);
 
-		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-		                paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-                        Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-                        canvas.DrawPath(trianglePath, paint);
+                            var center = Geometry.centroid(tri, InternalPoints);
 
-		            }
+                            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
+                            fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
+                            Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+                            canvas.DrawPath(trianglePath, fillPaint);
+                            canvas.DrawPath(trianglePath, strokePaint);
+                        }
+                    }
                     WatchMeasure(watch, $"path drawing");
                 }
             }
 		}
+
+        //gets the correct point to draw. Either a point updated this frame, or the original point in InternalPoints
+        private void GetCorrectPoint(Tuple<Vertex, Vertex>[] updatedPoints, int[] updatedIndices, int internalPointIndex, ref SKPoint p)
+        {
+            if (updatedIndices.Contains(internalPointIndex))
+            {
+                p.X = updatedPoints[internalPointIndex].Item1.x;
+                p.Y = updatedPoints[internalPointIndex].Item1.y;
+            }
+            else
+            {
+                p.X = InternalPoints[internalPointIndex].x;
+                p.Y = InternalPoints[internalPointIndex].y;
+            }
+        }
 
         private void WatchMeasure(System.Diagnostics.Stopwatch watch, string s)
         {

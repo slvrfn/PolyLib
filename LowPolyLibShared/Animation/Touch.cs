@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Reflection;
 using DelaunayTriangulator;
 using SkiaSharp;
 
@@ -103,16 +104,16 @@ namespace LowPolyLibrary.Animation
             {
                 var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point);
 
-                var distCanMove = shortestDistanceFromPoints(point);
-                //var distCanMove = 20;
-                var frameDistCanMove = frameLocation(CurrentFrame, numFrames, distCanMove);
-                
-                var xComponent = Geometry.getXComponent(direction, frameDistCanMove);
-                var yComponent = Geometry.getYComponent(direction, frameDistCanMove);
+                //var distCanMove = shortestDistanceFromPoints(point);
+                var distCanMove = 20;
+                //var frameDistCanMove = frameLocation(CurrentFrame, numFrames, distCanMove);
 
-                //var xComponent = rand.Next(-10, 10);
-                //var yComponent = rand.Next(-10, 10);
-                
+                //var xComponent = Geometry.getXComponent(direction, frameDistCanMove);
+                //var yComponent = Geometry.getYComponent(direction, frameDistCanMove);
+
+                var xComponent = Random.Rand.Next(-10, 10);
+                var yComponent = Random.Rand.Next(-10, 10);
+
                 var animPoint = new AnimatedPoint(point, xComponent, yComponent);
 
                 //limiting the total dist this point can travel
@@ -122,7 +123,7 @@ namespace LowPolyLibrary.Animation
 
                 animatedPoints.Add(animPoint);
 
-                //this section is for including the points that were not animated, but are part of triangles that are being animated
+                ////this section is for including the points that were not animated, but are part of triangles that are being animated
 
                 var v = new Vertex(point.X, point.Y);
                 //get points v is connected to
@@ -160,14 +161,14 @@ namespace LowPolyLibrary.Animation
             //Create a canvas to draw touch location on the bitmap
             using (var canvas = surface.Canvas)
             {
-                //canvas not cleared here bc it is done in the base method above
-                using (var paint = new SKPaint())
-                {
-                    paint.Style = SKPaintStyle.Stroke;
-                    paint.Color = new SKColor(247, 77, 77);
+                //used to temp change stroke color
+                var c = strokePaint.Color;
+                strokePaint.Color = new SKColor(247, 77, 77);
 
-                    canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, paint);
-                }
+                //canvas not cleared here bc it is done in the base method above
+                canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, strokePaint);
+
+                strokePaint.Color = c;
             }
         }
     }

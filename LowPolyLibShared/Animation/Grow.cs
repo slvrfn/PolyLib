@@ -67,11 +67,8 @@ namespace LowPolyLibrary.Animation
                 var trianglePath = new SKPath();
 
                 using(trianglePath)
-                using (var paint = new SKPaint())
                 {
                     trianglePath.FillType = SKPathFillType.EvenOdd;
-                    paint.Style = SKPaintStyle.StrokeAndFill;
-                    paint.IsAntialias = true;
 
                     var thisFrame = edgeFrameList.Select((input) => { return new Vertex(input.Point.X, input.Point.Y); });
 
@@ -86,9 +83,9 @@ namespace LowPolyLibrary.Animation
                             var center = Geometry.centroid(tri, InternalPoints);
 
                             var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-                            paint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
+                            fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
                             Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-                            canvas.DrawPath(trianglePath, paint);
+                            canvas.DrawPath(trianglePath, fillPaint);
                         }
                     }
                 }
