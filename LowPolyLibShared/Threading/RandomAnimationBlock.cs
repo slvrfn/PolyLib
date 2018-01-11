@@ -59,10 +59,15 @@ namespace LowPolyLibrary.Threading
                 case AnimationTypes.Type.Sweep:
                     newAnim = new Sweep(tri, numFrames);
                     break;
-                case AnimationTypes.Type.Touch:
+                case AnimationTypes.Type.RandomTouch:
                     var x = Random.Rand.Next(0, tri.BoundsWidth);
                     var y = Random.Rand.Next(0, tri.BoundsHeight);
-                    newAnim = new Touch(tri, numFrames, x, y, 200);
+                    newAnim = new RandomTouch(tri, numFrames, x, y, 200);
+                    break;
+                case AnimationTypes.Type.PushTouch:
+                    var xx = Random.Rand.Next(0, tri.BoundsWidth);
+                    var yy = Random.Rand.Next(0, tri.BoundsHeight);
+                    newAnim = new PushTouch(tri, numFrames, xx, yy, 200);
                     break;
                 case AnimationTypes.Type.Grow:
                     newAnim = new Grow(tri, numFrames);

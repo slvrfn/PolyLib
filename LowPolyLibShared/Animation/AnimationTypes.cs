@@ -5,7 +5,7 @@ namespace LowPolyLibrary.Animation
 	{
 		public enum Type
 		{
-			Sweep, Touch, Grow
+			Sweep, RandomTouch, PushTouch, Grow
 		}
 	}
 }

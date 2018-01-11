@@ -8,15 +8,15 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
-    class Touch : AnimationBase
+    class PushTouch : AnimationBase
     {
         public HashSet<SKPoint> InRange;
         public SKPoint TouchLocation;
         public int TouchRadius;
 
-        internal Touch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames)
+        internal PushTouch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames)
         {
-            AnimationType = AnimationTypes.Type.Touch;
+            AnimationType = AnimationTypes.Type.PushTouch;
 
             InRange = new HashSet<SKPoint>();
             TouchLocation = new SKPoint(x, y);
@@ -107,15 +107,11 @@ namespace LowPolyLibrary.Animation
             {
                 var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point);
 
-                //var distCanMove = shortestDistanceFromPoints(point);
-                var distCanMove = 20;
-                //var frameDistCanMove = frameLocation(CurrentFrame, numFrames, distCanMove);
+                var distCanMove = shortestDistanceFromPoints(point);
+                var frameDistCanMove = frameLocation(CurrentFrame, numFrames, distCanMove);
 
-                //var xComponent = Geometry.getXComponent(direction, frameDistCanMove);
-                //var yComponent = Geometry.getYComponent(direction, frameDistCanMove);
-
-                var xComponent = Random.Rand.Next(-10, 10);
-                var yComponent = Random.Rand.Next(-10, 10);
+                var xComponent = Geometry.getXComponent(direction, frameDistCanMove);
+                var yComponent = Geometry.getYComponent(direction, frameDistCanMove);
 
                 var animPoint = new AnimatedPoint(point, xComponent, yComponent);
 

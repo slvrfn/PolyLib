@@ -101,7 +101,7 @@ namespace LowPoly
 
             if (startAnim)
             {
-                var touchAnimation = new Touch(polyView.CurrentTriangulation, 6, touch.X, touch.Y, 250);
+                var touchAnimation = new RandomTouch(polyView.CurrentTriangulation, 6, touch.X, touch.Y, 250);
                 polyView.AddAnimation(touchAnimation);
             }
 
