@@ -95,7 +95,7 @@ namespace LowPolyLibrary.Threading
                     continue;
                 //increment the animations current frame
                 ++anim.CurrentFrame;
-                if (anim.CurrentFrame > anim.numFrames)
+                if (anim.CurrentFrame > anim.NumFrames)
                 {
                     removeList.Add(t);
                 }

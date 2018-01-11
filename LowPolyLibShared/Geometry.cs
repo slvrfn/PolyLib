@@ -8,7 +8,7 @@ namespace LowPolyLibrary
 {
 	public class Geometry
 	{
-		internal static SKPoint KeepInPicBounds(SKPoint center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
+		internal static void KeepInPicBounds(ref SKPoint center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
 		{
 			if (center.X < 0)
 				center.X += (int)bleed_x;
@@ -22,7 +22,6 @@ namespace LowPolyLibrary
 				center.Y -= (int)bleed_y + 1;
 			else if (center.Y.Equals(BoundsHeight))
 				center.Y -= (int)bleed_y - 1;
-			return center;
 		}
 
 		#region Circles
@@ -423,12 +422,10 @@ namespace LowPolyLibrary
 		#endregion
 
 		#region Triangles
-		internal static SKPoint centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points)
+		internal static void centroid(Triad triangle, List<DelaunayTriangulator.Vertex> points, ref SKPoint p)
 		{
-			var x = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
-			var y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);
-
-			return new SKPoint(x, y);
+			p.X = (int)((points[triangle.a].x + points[triangle.b].x + points[triangle.c].x) / 3);
+			p.Y = (int)((points[triangle.a].y + points[triangle.b].y + points[triangle.c].y) / 3);
 		}
 
 		internal static void DrawTrianglePath(ref SKPath path, SKPoint a, SKPoint b, SKPoint c)

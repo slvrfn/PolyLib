@@ -31,7 +31,7 @@ namespace LowPolyLibrary.Animation
 
             //accumulate all points in the current column represented by frame index
             List<SkiaSharp.SKPoint> framePoints = new List<SkiaSharp.SKPoint>();
-            for (int i = 0; i < numFrames; i++)
+            for (int i = 0; i < NumFrames; i++)
             {
                 var p = new SkiaSharp.SKPointI(CurrentFrame, i);
                 if (SeperatedPoints.ContainsKey(p))

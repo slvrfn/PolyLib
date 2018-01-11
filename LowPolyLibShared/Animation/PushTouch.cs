@@ -108,7 +108,7 @@ namespace LowPolyLibrary.Animation
                 var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point);
 
                 var distCanMove = shortestDistanceFromPoints(point);
-                var frameDistCanMove = frameLocation(CurrentFrame, numFrames, distCanMove);
+                var frameDistCanMove = frameLocation(CurrentFrame, NumFrames, distCanMove);
 
                 var xComponent = Geometry.getXComponent(direction, frameDistCanMove);
                 var yComponent = Geometry.getYComponent(direction, frameDistCanMove);
@@ -126,7 +126,7 @@ namespace LowPolyLibrary.Animation
 
                 var v = new Vertex(point.X, point.Y);
                 //get points v is connected to
-                var triadsContaingV = poTriDic[v];
+                var triadsContaingV = PoTriDic[v];
 
                 foreach (var triad in triadsContaingV)
                 {

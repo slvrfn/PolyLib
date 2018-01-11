@@ -14,20 +14,16 @@ namespace LowPolyLibrary.Animation
 	public abstract class AnimationBase
 	{
 		#region Global Variables
-		internal readonly int numFrames;
+		internal readonly int NumFrames;
 	    internal int CurrentFrame = 0;
         internal Dictionary<SKPointI,HashSet<SKPoint>> SeperatedPoints;
-		internal Dictionary<Vertex, HashSet<Triad>> poTriDic => CurrentTriangulation.pointToTriangleDic;
-	    internal double bleed_x => CurrentTriangulation.bleed_x;
-	    internal double bleed_y => CurrentTriangulation.bleed_y;
+		internal Dictionary<Vertex, HashSet<Triad>> PoTriDic => CurrentTriangulation.pointToTriangleDic;
+	    internal double BleedX => CurrentTriangulation.bleed_x;
+	    internal double BleedY => CurrentTriangulation.bleed_y;
 
-	    protected Triangulation CurrentTriangulation;
+	    protected readonly Triangulation CurrentTriangulation;
 
         internal Geometry.RotatedGrid GridRotation;
-
-	    internal List<Triad> triangulatedPoints => CurrentTriangulation.TriangulatedPoints;
-
-        internal SKSurface Gradient => CurrentTriangulation.Gradient;
 		internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
 
 	    internal AnimationTypes.Type AnimationType;
@@ -36,15 +32,24 @@ namespace LowPolyLibrary.Animation
 
         internal bool IsSetup = false;
 
-	    protected int boundsWidth => CurrentTriangulation.BoundsWidth;
-	    protected int boundsHeight => CurrentTriangulation.BoundsHeight;
+	    //pull out variables that can be reused to prevent excessive mallocs
+	    protected SKPoint PathPointA;
+	    protected SKPoint PathPointB;
+	    protected SKPoint PathPointC;
+	    protected SKPoint Center;
+	    //vertex and its original vertex in InternalPoints
+	    private Tuple<Vertex, Vertex>[] _updatedPoints;
+	    protected SKPath TrianglePath;
+
+        protected int BoundsWidth => CurrentTriangulation.BoundsWidth;
+	    protected int BoundsHeight => CurrentTriangulation.BoundsHeight;
         #endregion
 
 		#region Constructor
-		protected AnimationBase(Triangulation _triangulation, int frames)
+		protected AnimationBase(Triangulation triangulation, int frames)
 		{
-		    numFrames = frames;
-            CurrentTriangulation = _triangulation;
+		    NumFrames = frames;
+            CurrentTriangulation = triangulation;
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 
 		    strokePaint = new SKPaint
@@ -66,6 +71,7 @@ namespace LowPolyLibrary.Animation
 	    {
 	        strokePaint.Dispose();
             fillPaint.Dispose();
+            TrianglePath.Dispose();
 	    }
         #endregion
 
@@ -79,6 +85,13 @@ namespace LowPolyLibrary.Animation
             {
                 CurrentTriangulation.SetupPointsToTriangles();
             }
+
+            PathPointA = new SKPoint();
+            PathPointB = new SKPoint();
+            PathPointC = new SKPoint();
+            Center = new SKPoint();
+            _updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
+            TrianglePath = new SKPath {FillType = SKPathFillType.EvenOdd};
         }
 
 		internal abstract HashSet<AnimatedPoint> RenderFrame();
@@ -92,63 +105,70 @@ namespace LowPolyLibrary.Animation
 			    canvas.Clear();
                 
                 //case in frame immediately after animation has completed, nothing needs to be drawn
-			    if (CurrentFrame > numFrames)
+			    if (CurrentFrame > NumFrames)
 			        return;
 
                 WatchMeasure(watch, $"Canvas clear");
-                var trianglePath = new SKPath();
-                using (trianglePath)
-		        {
-                    trianglePath.FillType = SKPathFillType.EvenOdd;
 
-                    //vertex and its original vertex in InternalPoints
-                    var updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
-                    //for quick lookup to check if a specified point index has been modified
-                    var updatedIndices = new int[pointChanges.Count];
-
-		            for (var i = 0; i < pointChanges.Count; i++)
-		            {
-		                var animatedPoint = pointChanges[i];
-                        
-                        //find index of animated point in InternalPoints
-		                var index = InternalPoints.FindIndex(v =>
-		                    v.x.Equals(animatedPoint.Point.X) && v.y.Equals(animatedPoint.Point.Y));
-
-		                updatedPoints[index] = new Tuple<Vertex, Vertex>(
-		                    new Vertex(animatedPoint.Point.X + animatedPoint.XDisplacement,
-		                        animatedPoint.Point.Y + animatedPoint.YDisplacement), InternalPoints[index]);
-		                //mark this point's index as used
-		                updatedIndices[i] = index;
-		            }
-
-		            WatchMeasure(watch, $"Frame points updated");
-                    //increment updated points
-		            foreach (var updatedPoint in updatedPoints)
-		            {
-                        //non-updated points will be null
-		                if (updatedPoint == null)
-		                    continue;
-
-		                //increment each triad that contains this updatedPoint
-		                foreach (var tri in poTriDic[updatedPoint.Item2])
-                        {
-                            var a = new SKPoint();
-                            GetCorrectPoint(updatedPoints, updatedIndices, tri.a, ref a);
-                            var b = new SKPoint();
-                            GetCorrectPoint(updatedPoints, updatedIndices, tri.b, ref b);
-                            var c = new SKPoint();
-                            GetCorrectPoint(updatedPoints, updatedIndices, tri.c, ref c);
-
-                            var center = Geometry.centroid(tri, InternalPoints);
-
-                            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-                            fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-                            Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-                            canvas.DrawPath(trianglePath, fillPaint);
-                        }
-                    }
-                    WatchMeasure(watch, $"path drawing");
+                //only reallocate if necessary
+                if (_updatedPoints.Length != InternalPoints.Count)
+                {
+                    _updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
                 }
+
+                //for quick lookup to check if a specified point index has been modified
+                var updatedIndices = new int[pointChanges.Count];
+
+			    for (var i = 0; i < pointChanges.Count; i++)
+                {
+                    var animatedPoint = pointChanges[i];
+
+                    //find index of animated point in InternalPoints
+                    var index = InternalPoints.FindIndex(v =>
+                        v.x.Equals(animatedPoint.Point.X) && v.y.Equals(animatedPoint.Point.Y));
+
+                    //only malloc if null or item2 is different
+                    if (_updatedPoints[index] != null && _updatedPoints[index].Item2.Equals(InternalPoints[index]))
+                    {
+                        _updatedPoints[index].Item1.x = animatedPoint.Point.X + animatedPoint.XDisplacement;
+                        _updatedPoints[index].Item1.y = animatedPoint.Point.Y + animatedPoint.YDisplacement;
+                    }
+                    else
+                    {
+                        _updatedPoints[index] = new Tuple<Vertex, Vertex>(
+                            new Vertex(animatedPoint.Point.X + animatedPoint.XDisplacement,
+                                animatedPoint.Point.Y + animatedPoint.YDisplacement), InternalPoints[index]);
+                    }
+
+                    //mark this point's index as used
+                    updatedIndices[i] = index;
+                }
+
+                WatchMeasure(watch, $"Frame points updated");
+
+                //increment updated points
+                foreach (var updatedPoint in _updatedPoints)
+                {
+                    //non-updated points will be null
+                    if (updatedPoint == null)
+                        continue;
+
+                    //increment each triad that contains this updatedPoint
+                    foreach (var tri in PoTriDic[updatedPoint.Item2])
+                    {
+                        GetCorrectPoint(_updatedPoints, updatedIndices, tri.a, ref PathPointA);
+                        GetCorrectPoint(_updatedPoints, updatedIndices, tri.b, ref PathPointB);
+                        GetCorrectPoint(_updatedPoints, updatedIndices, tri.c, ref PathPointC);
+
+                        Geometry.centroid(tri, InternalPoints, ref Center);
+                        //triAngleColorCenter
+                        Geometry.KeepInPicBounds(ref Center, BleedX, BleedY, BoundsWidth, BoundsHeight);
+                        fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
+                        Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
+                        canvas.DrawPath(TrianglePath, fillPaint);
+                    }
+                }
+                WatchMeasure(watch, $"path drawing");
             }
 		}
 
@@ -180,7 +200,7 @@ namespace LowPolyLibrary.Animation
         // seperates the internal points into a logical grid of cells
         internal void seperatePointsIntoGridCells(List<DelaunayTriangulator.Vertex> points, int angle)
 		{
-            GridRotation = Geometry.createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
+            GridRotation = Geometry.createGridTransformation(angle, BoundsWidth, BoundsHeight, NumFrames);
 
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 
@@ -205,7 +225,7 @@ namespace LowPolyLibrary.Animation
 		{
 			//this list consists of all the triangles containing the point.
             var v = new Vertex(workingPoint.X, workingPoint.Y);
-			var tris = poTriDic[v];
+			var tris = PoTriDic[v];
 
 			//shortest distance between a workingPoint and all vertices of the given triangle list
 			float shortest = -1;

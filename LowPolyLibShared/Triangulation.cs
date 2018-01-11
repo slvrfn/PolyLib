@@ -24,7 +24,7 @@ namespace LowPolyLibrary
         
 	    internal Dictionary<Vertex, HashSet<Triad>> pointToTriangleDic = null;
 
-        public List<Triad> TriangulatedPoints;
+        public readonly List<Triad> TriangulatedPoints;
 
         //used to speed up color access time from gradient
 	    SKImageInfo readColorImageInfo;
@@ -32,6 +32,13 @@ namespace LowPolyLibrary
 	    IntPtr pixelBuffer;
 
 	    private readonly SKPaint strokePaint, fillPaint;
+
+        //reuseable variables to speed up operations
+	    private SKPoint _pathPointA;
+	    private SKPoint _pathPointB;
+	    private SKPoint _pathPointC;
+	    private SKPoint _center;
+	    private SKPath _trianglePath;
 
         public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
         {
@@ -75,7 +82,7 @@ namespace LowPolyLibrary
                 Style = SKPaintStyle.StrokeAndFill
             };
 
-
+            _trianglePath = new SKPath {FillType = SKPathFillType.EvenOdd};
         }
 
         ~Triangulation()
@@ -97,28 +104,26 @@ namespace LowPolyLibrary
 		    using (var canvas = surface.Canvas)
 		    {
 		        canvas.Clear();
-                var trianglePath = new SKPath();
-		        using (trianglePath)
+
+		        foreach (Triad tri in TriangulatedPoints)
 		        {
-		            trianglePath.FillType = SKPathFillType.EvenOdd;
+		            _pathPointA.X = InternalPoints[tri.a].x;
+		            _pathPointA.Y = InternalPoints[tri.a].y;
+		            _pathPointB.X = InternalPoints[tri.b].x;
+		            _pathPointB.Y = InternalPoints[tri.b].y;
+		            _pathPointC.X = InternalPoints[tri.c].x;
+		            _pathPointC.Y = InternalPoints[tri.c].y;
 
-		            for (int i = 0; i < TriangulatedPoints.Count; i++)
-		            {
-		                var a = new SKPoint(InternalPoints[TriangulatedPoints[i].a].x, InternalPoints[TriangulatedPoints[i].a].y);
-		                var b = new SKPoint(InternalPoints[TriangulatedPoints[i].b].x, InternalPoints[TriangulatedPoints[i].b].y);
-		                var c = new SKPoint(InternalPoints[TriangulatedPoints[i].c].x, InternalPoints[TriangulatedPoints[i].c].y);
+		            Geometry.centroid(tri, InternalPoints, ref _center);
 
-		                var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
-
-		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-		                fillPaint.Color = GetTriangleColor(triAngleColorCenter);
-		                strokePaint.Color = fillPaint.Color;
-		                Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-		                canvas.DrawPath(trianglePath, fillPaint);
-		                canvas.DrawPath(trianglePath, strokePaint);
-		            }
-                }
-            }
+		            Geometry.KeepInPicBounds(ref _center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+		            fillPaint.Color = GetTriangleColor(_center);
+		            strokePaint.Color = fillPaint.Color;
+		            Geometry.DrawTrianglePath(ref _trianglePath, _pathPointA, _pathPointB, _pathPointC);
+		            canvas.DrawPath(_trianglePath, fillPaint);
+		            canvas.DrawPath(_trianglePath, strokePaint);
+		        }
+		    }
         }
 
         private void UpdateVars(SKImageInfo info)

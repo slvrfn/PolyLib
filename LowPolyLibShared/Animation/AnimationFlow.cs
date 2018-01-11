@@ -44,7 +44,7 @@ namespace LowPolyLibrary.Animation
 
                     HashSet<AnimatedPoint> x = new HashSet<AnimatedPoint>();
                     //dont render a frame that won't be drawn
-                    if (anim.CurrentFrame <= anim.numFrames)
+                    if (anim.CurrentFrame <= anim.NumFrames)
                         x = anim.RenderFrame();
 
                     animFrame.Add(x);

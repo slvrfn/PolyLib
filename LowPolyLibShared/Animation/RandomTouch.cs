@@ -45,9 +45,9 @@ namespace LowPolyLibrary.Animation
 
             var p = new SKPointI();
 
-            for (int i = lowerX; i <= upperX; i++)
+            for (var i = lowerX; i <= upperX; i++)
             {
-                for (int j = lowerY; j <= upperY; j++)
+                for (var j = lowerY; j <= upperY; j++)
                 {
                     p.X = i;
                     p.Y = j;
@@ -125,7 +125,7 @@ namespace LowPolyLibrary.Animation
 
                 var v = new Vertex(point.X, point.Y);
                 //get points v is connected to
-                var triadsContaingV = poTriDic[v];
+                var triadsContaingV = PoTriDic[v];
 
                 foreach (var triad in triadsContaingV)
                 {

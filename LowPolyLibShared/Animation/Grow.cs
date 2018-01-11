@@ -31,16 +31,16 @@ namespace LowPolyLibrary.Animation
         {
             base.SetupAnimation();
 			//visible rec so that the start of the anim is from a point visible on screen
-			var visibleRecX = Random.Rand.Next(numFrames);
-            var visibleRecY = Random.Rand.Next(numFrames);
+			var visibleRecX = Random.Rand.Next(NumFrames);
+            var visibleRecY = Random.Rand.Next(NumFrames);
 
             var recIndex = new SKPointI(visibleRecX, visibleRecY);
 
             //keep geting a random index until one exists
             while (!SeperatedPoints.ContainsKey(recIndex))
             {
-                visibleRecX = Random.Rand.Next(numFrames);
-                visibleRecY = Random.Rand.Next(numFrames);
+                visibleRecX = Random.Rand.Next(NumFrames);
+                visibleRecY = Random.Rand.Next(NumFrames);
                 recIndex = new SKPointI(visibleRecX, visibleRecY);
             }
 
@@ -66,7 +66,7 @@ namespace LowPolyLibrary.Animation
             using (var canvas = surface.Canvas)
             {
                 //case in frame immediately after animation has completed, nothing needs to be drawn
-                if (CurrentFrame >= numFrames)
+                if (CurrentFrame >= NumFrames)
                     canvas.Clear();
                 else if (backgroundNeedsToBeSet)
                 {
@@ -74,30 +74,26 @@ namespace LowPolyLibrary.Animation
                     backgroundNeedsToBeSet = false;
                 }
 
-                var trianglePath = new SKPath();
+                var thisFrame = edgeFrameList.Select((input) => new Vertex(input.Point.X, input.Point.Y));
 
-                using(trianglePath)
+                foreach (var updatedPoint in thisFrame)
                 {
-                    trianglePath.FillType = SKPathFillType.EvenOdd;
-
-                    var thisFrame = edgeFrameList.Select((input) => new Vertex(input.Point.X, input.Point.Y));
-
-                    foreach (var updatedPoint in thisFrame)
+                    //increment each triad that contains this updatedPoint
+                    foreach (var tri in PoTriDic[updatedPoint])
                     {
-                        //increment each triad that contains this updatedPoint
-                        foreach (var tri in poTriDic[updatedPoint])
-                        {
-                            var a = new SKPoint(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
-                            var b = new SKPoint(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
-                            var c = new SKPoint(InternalPoints[tri.c].x, InternalPoints[tri.c].y);
+                        PathPointA.X = InternalPoints[tri.a].x;
+                        PathPointA.Y = InternalPoints[tri.a].y;
+                        PathPointB.X = InternalPoints[tri.b].x;
+                        PathPointB.Y = InternalPoints[tri.b].y;
+                        PathPointC.X = InternalPoints[tri.c].x;
+                        PathPointC.Y = InternalPoints[tri.c].y;
 
-                            var center = Geometry.centroid(tri, InternalPoints);
+                        Geometry.centroid(tri, InternalPoints, ref Center);
 
-                            var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
-                            fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-                            Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-                            canvas.DrawPath(trianglePath, fillPaint);
-                        }
+                        Geometry.KeepInPicBounds(ref Center, BleedX, BleedY, BoundsWidth, BoundsHeight);
+                        fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
+                        Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
+                        canvas.DrawPath(TrianglePath, fillPaint);
                     }
                 }
             }
@@ -107,7 +103,7 @@ namespace LowPolyLibrary.Animation
         {
 			var outPoints = new HashSet<AnimatedPoint>();
 
-			for (int i = 0; i < InternalPoints.Count / numFrames; i++)
+			for (int i = 0; i < InternalPoints.Count / NumFrames; i++)
 			{
                 var tempEdges = new HashSet<AnimatedPoint>();
 
@@ -122,7 +118,7 @@ namespace LowPolyLibrary.Animation
 				outPoints.Add(new AnimatedPoint(currentPoint));
 
                 var drawList = new HashSet<Triad>();
-                drawList = poTriDic[currentPoint];
+                drawList = PoTriDic[currentPoint];
                 foreach (var tri in drawList)
                 {
                     //if the point is not used
