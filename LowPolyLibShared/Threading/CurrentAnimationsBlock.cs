@@ -82,15 +82,9 @@ namespace LowPolyLibrary.Threading
 		}
 		#endregion
 
-		private AnimationBase[] CurrentAnimations
-		{
-			get 
-            {
-				return animList.ToArray();
-			}
-		}
+		private AnimationBase[] CurrentAnimations => animList.ToArray();
 
-		private void IncrementAnimations()
+	    private void IncrementAnimations()
 		{
             //for each animation
             var removeList = new List<AnimationBase>();
@@ -101,7 +95,7 @@ namespace LowPolyLibrary.Threading
                     continue;
                 //increment the animations current frame
                 ++anim.CurrentFrame;
-                if (anim.CurrentFrame >= anim.numFrames)
+                if (anim.CurrentFrame > anim.numFrames)
                 {
                     removeList.Add(t);
                 }

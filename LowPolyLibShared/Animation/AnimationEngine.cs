@@ -26,11 +26,6 @@ namespace LowPolyLibrary.Animation
         private bool ShouldStartRandomAnim = false;
         private int RandomAnimationTime = 5000;
 
-        public bool HasFrameToDraw
-        {
-            get { return currentRenderedFrame != null; }
-        }
-
         public AnimationEngine(AnimationUpdateView display)
         {
             //start the thread that will keep the animation flow alive
@@ -75,7 +70,7 @@ namespace LowPolyLibrary.Animation
                         break;
                     case TaskStatus.Faulted:
                         message += "has faulted";
-                        Debug.WriteLine(completionTask.Exception);
+                        Debug.WriteLine(completionTask.Exception.InnerException.InnerException.InnerException);
                         break;
                 }
                 Debug.WriteLine("\n" + message);
@@ -107,6 +102,13 @@ namespace LowPolyLibrary.Animation
             {
                 currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
                 currentRenderedFrame = null;
+            }
+            else
+            {
+                using (var c = surface.Canvas)
+                {
+                    c.Clear();
+                }
             }
         }
 

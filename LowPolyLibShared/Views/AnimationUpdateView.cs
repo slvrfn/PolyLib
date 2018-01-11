@@ -40,14 +40,11 @@ namespace LowPolyLibrary.Views
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
             base.OnDraw(surface, info);
-            
-            if (_animationFlowEngine.HasFrameToDraw)
-            {
-                var watch = new System.Diagnostics.Stopwatch();
-                watch.Start();
-                _animationFlowEngine.DrawOnMe(surface);
-                Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedMilliseconds + " ms\n");
-            }
+
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+            _animationFlowEngine.DrawOnMe(surface);
+            Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedMilliseconds + " ms\n");
         }
 
         public void AddAnimation(AnimationBase anim)

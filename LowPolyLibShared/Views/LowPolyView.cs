@@ -74,6 +74,8 @@ namespace LowPolyLibrary.Views
             else
             {
                 TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
+                //only called here since a whole new Lowpoly view is created in the other case
+                AnimationUpdateView.Invalidate();
                 return this;
             }
         }

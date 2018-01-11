@@ -37,12 +37,16 @@ namespace LowPolyLibrary.Animation
                 var animFrame = new List<HashSet<AnimatedPoint>>();
                 foreach (var anim in arg)
                 {
-                        if (!anim.IsSetup)
-                        {
-                            anim.SetupAnimation();
-                        }
+                    if (!anim.IsSetup)
+                    {
+                        anim.SetupAnimation();
+                    }
 
-                    var x = anim.RenderFrame();
+                    HashSet<AnimatedPoint> x = new HashSet<AnimatedPoint>();
+                    //dont render a frame that won't be drawn
+                    if (anim.CurrentFrame <= anim.numFrames)
+                        x = anim.RenderFrame();
+
                     animFrame.Add(x);
                 }
                 

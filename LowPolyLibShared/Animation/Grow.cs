@@ -23,9 +23,6 @@ namespace LowPolyLibrary.Animation
 			{
 				pointUsed[i] = false;
 			}
-
-            //want to make triangles have no seperators, changing this pait saves having to redraw path just for stroke
-		    fillPaint.Style = SKPaintStyle.StrokeAndFill;
 		}
 
         internal override void SetupAnimation()
@@ -66,7 +63,12 @@ namespace LowPolyLibrary.Animation
         {
             using (var canvas = surface.Canvas)
             {
-                canvas.Clear(SKColors.Black);
+                //case in frame immediately after animation has completed, nothing needs to be drawn
+                if (CurrentFrame >= numFrames)
+                    canvas.Clear();
+                else
+                    canvas.Clear(SKColors.Black);
+
                 var trianglePath = new SKPath();
 
                 using(trianglePath)
@@ -87,8 +89,10 @@ namespace LowPolyLibrary.Animation
 
                             var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
                             fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
+                            strokePaint.Color = fillPaint.Color;
                             Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
                             canvas.DrawPath(trianglePath, fillPaint);
+                            canvas.DrawPath(trianglePath, strokePaint);
                         }
                     }
                 }
@@ -103,9 +107,14 @@ namespace LowPolyLibrary.Animation
 			{
                 var tempEdges = new HashSet<AnimatedPoint>();
 
-                var currentPoint = animateList.Dequeue();
+			    //frame may not have any points to draw in the frame
+                Vertex currentPoint;
+			    if (!animateList.TryDequeue(out currentPoint))
+			    {
+			        return new HashSet<AnimatedPoint>();
+			    }
 
-				//save the first point
+			    //save the first point
 				outPoints.Add(new AnimatedPoint(currentPoint));
 
                 var drawList = new HashSet<Triad>();

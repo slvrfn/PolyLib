@@ -90,6 +90,10 @@ namespace LowPolyLibrary.Animation
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
 			    canvas.Clear();
+                
+                //case in frame immediately after animation has completed, nothing needs to be drawn
+			    if (CurrentFrame > numFrames)
+			        return;
 
                 WatchMeasure(watch, $"Canvas clear");
                 var trianglePath = new SKPath();

@@ -21,9 +21,6 @@ namespace LowPolyLibrary.Animation
             InRange = new HashSet<SKPoint>();
             TouchLocation = new SKPoint(x, y);
             TouchRadius = radius;
-
-            //want to make triangles have no seperators, changing this pait saves having to redraw path just for stroke
-            fillPaint.Style = SKPaintStyle.StrokeAndFill;
         }
 
         //saves 
