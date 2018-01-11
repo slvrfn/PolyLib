@@ -31,6 +31,8 @@ namespace LowPolyLibrary
 	    SKBitmap readColorBitmap;
 	    IntPtr pixelBuffer;
 
+	    private readonly SKPaint strokePaint, fillPaint;
+
         public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
         {
             BoundsWidth = boundsWidth;
@@ -58,6 +60,22 @@ namespace LowPolyLibrary
             // get the pixel buffer for the bitmap
             
             pixelBuffer = readColorBitmap.GetPixels();
+
+            strokePaint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Black,
+                IsAntialias = true
+            };
+
+            //color set later
+            fillPaint = new SKPaint
+            {
+                IsAntialias = true,
+                Style = SKPaintStyle.StrokeAndFill
+            };
+
+
         }
 
         ~Triangulation()
@@ -65,6 +83,8 @@ namespace LowPolyLibrary
             //need to release bitmap
             readColorBitmap.Dispose();
             Gradient.Dispose();
+            strokePaint.Dispose();
+            fillPaint.Dispose();
         }
 
         public void GeneratedBitmap(SKSurface surface)
@@ -78,12 +98,9 @@ namespace LowPolyLibrary
 		    {
 		        canvas.Clear();
                 var trianglePath = new SKPath();
-                using (trianglePath)
-		        using (var paint = new SKPaint())
+		        using (trianglePath)
 		        {
-                    trianglePath.FillType = SKPathFillType.EvenOdd;
-		            paint.Style = SKPaintStyle.StrokeAndFill;
-		            paint.IsAntialias = true;
+		            trianglePath.FillType = SKPathFillType.EvenOdd;
 
 		            for (int i = 0; i < TriangulatedPoints.Count; i++)
 		            {
@@ -94,11 +111,13 @@ namespace LowPolyLibrary
 		                var center = Geometry.centroid(TriangulatedPoints[i], InternalPoints);
 
 		                var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
-		                paint.Color = GetTriangleColor(triAngleColorCenter);
-                        Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
-                        canvas.DrawPath(trianglePath, paint);
+		                fillPaint.Color = GetTriangleColor(triAngleColorCenter);
+		                strokePaint.Color = fillPaint.Color;
+		                Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
+		                canvas.DrawPath(trianglePath, fillPaint);
+		                canvas.DrawPath(trianglePath, strokePaint);
 		            }
-		        }
+                }
             }
         }
 

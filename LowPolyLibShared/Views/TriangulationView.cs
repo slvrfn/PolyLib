@@ -53,7 +53,7 @@ namespace LowPolyLibrary
             if(Triangulation != null)
             {
                 Triangulation.GeneratedBitmap(surface);
-                Console.WriteLine("Triangulation drawn in: " + watch.ElapsedTicks + " ticks\n");
+                Console.WriteLine("Triangulation drawn in: " + watch.ElapsedMilliseconds + " ms\n");
             }
             watch.Stop();
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using DelaunayTriangulator;
+using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
@@ -13,7 +14,10 @@ namespace LowPolyLibrary.Animation
         internal Sweep(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
 			AnimationType = AnimationTypes.Type.Sweep;
-		}
+
+		    //want to make triangles have no seperators, changing this pait saves having to redraw path just for stroke
+		    fillPaint.Style = SKPaintStyle.StrokeAndFill;
+        }
 
         //necessary to prevent animationbase from "setting up" multiple times
         internal override void SetupAnimation()

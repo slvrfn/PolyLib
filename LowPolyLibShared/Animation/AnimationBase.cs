@@ -141,7 +141,6 @@ namespace LowPolyLibrary.Animation
                             fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
                             Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
                             canvas.DrawPath(trianglePath, fillPaint);
-                            canvas.DrawPath(trianglePath, strokePaint);
                         }
                     }
                     WatchMeasure(watch, $"path drawing");
@@ -164,7 +163,7 @@ namespace LowPolyLibrary.Animation
             }
         }
 
-        private void WatchMeasure(System.Diagnostics.Stopwatch watch, string s)
+        protected void WatchMeasure(System.Diagnostics.Stopwatch watch, string s)
         {
             //watch.Stop();
             Console.WriteLine(s + $" took: {watch.ElapsedTicks} ticks");

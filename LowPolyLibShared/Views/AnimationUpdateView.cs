@@ -46,7 +46,7 @@ namespace LowPolyLibrary.Views
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
                 _animationFlowEngine.DrawOnMe(surface);
-                Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedTicks + " ticks\n");
+                Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedMilliseconds + " ms\n");
             }
         }
 
