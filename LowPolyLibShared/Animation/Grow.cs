@@ -13,6 +13,8 @@ namespace LowPolyLibrary.Animation
 		Queue<Vertex> animateList;
 		HashSet<AnimatedPoint> TotalAnimatedPoints;
 
+        private bool backgroundNeedsToBeSet = true;
+
         internal Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
 			AnimationType = AnimationTypes.Type.Grow;
@@ -66,8 +68,11 @@ namespace LowPolyLibrary.Animation
                 //case in frame immediately after animation has completed, nothing needs to be drawn
                 if (CurrentFrame >= numFrames)
                     canvas.Clear();
-                else
+                else if (backgroundNeedsToBeSet)
+                {
                     canvas.Clear(SKColors.Black);
+                    backgroundNeedsToBeSet = false;
+                }
 
                 var trianglePath = new SKPath();
 
@@ -75,11 +80,12 @@ namespace LowPolyLibrary.Animation
                 {
                     trianglePath.FillType = SKPathFillType.EvenOdd;
 
-                    var thisFrame = edgeFrameList.Select((input) => { return new Vertex(input.Point.X, input.Point.Y); });
+                    var thisFrame = edgeFrameList.Select((input) => new Vertex(input.Point.X, input.Point.Y));
 
-                    foreach (var tri in triangulatedPoints)
+                    foreach (var updatedPoint in thisFrame)
                     {
-                        if (thisFrame.Contains(InternalPoints[tri.a]) && thisFrame.Contains(InternalPoints[tri.b]) && thisFrame.Contains(InternalPoints[tri.c]))
+                        //increment each triad that contains this updatedPoint
+                        foreach (var tri in poTriDic[updatedPoint])
                         {
                             var a = new SKPoint(InternalPoints[tri.a].x, InternalPoints[tri.a].y);
                             var b = new SKPoint(InternalPoints[tri.b].x, InternalPoints[tri.b].y);
@@ -89,10 +95,8 @@ namespace LowPolyLibrary.Animation
 
                             var triAngleColorCenter = Geometry.KeepInPicBounds(center, bleed_x, bleed_y, boundsWidth, boundsHeight);
                             fillPaint.Color = CurrentTriangulation.GetTriangleColor(triAngleColorCenter);
-                            strokePaint.Color = fillPaint.Color;
                             Geometry.DrawTrianglePath(ref trianglePath, a, b, c);
                             canvas.DrawPath(trianglePath, fillPaint);
-                            canvas.DrawPath(trianglePath, strokePaint);
                         }
                     }
                 }
@@ -162,8 +166,9 @@ namespace LowPolyLibrary.Animation
                 //tolist to ensure list copy
                 outPoints.UnionWith(tempEdges.ToList());
             }
-			TotalAnimatedPoints.UnionWith(outPoints);
-			return TotalAnimatedPoints;
+            TotalAnimatedPoints = outPoints;
+
+            return TotalAnimatedPoints;
         }
     }
 }

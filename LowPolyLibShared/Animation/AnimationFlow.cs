@@ -111,14 +111,18 @@ namespace LowPolyLibrary.Animation
                     rend.FramePoints = animFrame[0].ToList();
                 }
 
-                _animations.FrameRendered();
+                
                 watch.Stop();
                 Console.WriteLine("Frame rendered in: " + watch.ElapsedTicks + " ticks");
                 return rend;
             }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
 
             //limit parallelism so that only one redraw update can occur
-            _signalFrameRendered = new ActionBlock<RenderedFrame>(notifyFrameReady, new ExecutionDataflowBlockOptions {MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
+            _signalFrameRendered = new ActionBlock<RenderedFrame>((frame =>
+            {
+                notifyFrameReady(frame);
+                _animations.FrameDrawn();
+            }), new ExecutionDataflowBlockOptions {MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
 
             _animations.LinkTo(_frameQueue);
             _frameQueue.LinkTo(_renderFrame);
