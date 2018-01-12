@@ -221,7 +221,37 @@ namespace LowPolyLibrary.Animation
 			}
 		}
 
-		internal float shortestDistanceFromPoints(SKPoint workingPoint)
+	    //adds first layer of points surrounding the points in the sourceList to the destination list, optionally allowing to limit displacement
+        protected void AddConnectedPoints(SKPoint point, IEnumerable<SKPoint> sourceList, ICollection<AnimatedPoint> destinationList, bool limitDisplacement = true)
+	    {
+	        var v = new Vertex(point.X, point.Y);
+	        //get points v is connected to
+	        var triadsContaingV = PoTriDic[v];
+
+	        foreach (var triad in triadsContaingV)
+	        {
+	            //check if points connected to v are not in the source list
+	            //if they are not, adds them to the destination list
+
+	            //no need to create SKPoint until actually added to the animated point
+	            if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.a].x) &&
+	                                     p.Y.Equals(InternalPoints[triad.a].y)))
+	            {
+	                destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y), limitDisplacement: limitDisplacement));
+	            }
+	            if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.b].x) &&
+	                                     p.Y.Equals(InternalPoints[triad.b].y)))
+	            {
+	                destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y), limitDisplacement: limitDisplacement));
+	            }
+	            if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.c].x) &&
+	                                     p.Y.Equals(InternalPoints[triad.c].y)))
+	            {
+	                destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y), limitDisplacement: limitDisplacement));
+	            }
+	        }
+	    }
+        internal float shortestDistanceFromPoints(SKPoint workingPoint)
 		{
 			//this list consists of all the triangles containing the point.
             var v = new Vertex(workingPoint.X, workingPoint.Y);
