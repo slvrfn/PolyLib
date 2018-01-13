@@ -23,7 +23,7 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        internal override HashSet<AnimatedPoint> RenderFrame()
+        internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
 			var animatedPoints = new HashSet<AnimatedPoint>();
             //all the points will move within 15 degrees of the same direction
@@ -33,7 +33,7 @@ namespace LowPolyLibrary.Animation
             List<SkiaSharp.SKPoint> framePoints = new List<SkiaSharp.SKPoint>();
             for (int i = 0; i < NumFrames; i++)
             {
-                var p = new SkiaSharp.SKPointI(CurrentFrame, i);
+                var p = new SkiaSharp.SKPointI(currentFrame, i);
                 if (SeperatedPoints.ContainsKey(p))
                 {
                     framePoints.AddRange(SeperatedPoints[p]);

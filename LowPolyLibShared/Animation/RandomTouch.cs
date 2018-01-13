@@ -10,7 +10,7 @@ namespace LowPolyLibrary.Animation
         {
         }
 
-        protected override void DoPointDisplacement(AnimatedPoint point)
+        protected override void DoPointDisplacement(AnimatedPoint point, int currentFrame)
         {
             var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point.Point);
 

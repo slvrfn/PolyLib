@@ -99,7 +99,7 @@ namespace LowPolyLibrary.Animation
             }
 		}
 
-        internal override HashSet<AnimatedPoint> RenderFrame()
+        internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
 			var outPoints = new HashSet<AnimatedPoint>();
 

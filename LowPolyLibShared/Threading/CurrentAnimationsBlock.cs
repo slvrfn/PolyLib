@@ -113,7 +113,7 @@ namespace LowPolyLibrary.Threading
             toBeAdded.Clear();
         }
 
-		public void FrameDrawn()
+		public void FrameRendered()
 		{
 		    AddPendingAnimations();
             IncrementAnimations();

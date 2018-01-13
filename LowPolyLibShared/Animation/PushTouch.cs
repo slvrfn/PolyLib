@@ -10,12 +10,12 @@ namespace LowPolyLibrary.Animation
         {
         }
 
-        protected override void DoPointDisplacement(AnimatedPoint point)
+        protected override void DoPointDisplacement(AnimatedPoint point, int currentFrame)
         {
             var direction = (int)Geometry.GetPolarCoordinates(TouchLocation, point.Point);
 
             var distCanMove = shortestDistanceFromPoints(point.Point);
-            var frameDistCanMove = frameLocation(CurrentFrame, NumFrames, distCanMove);
+            var frameDistCanMove = frameLocation(currentFrame, NumFrames, distCanMove);
 
             point.XDisplacement = Geometry.getXComponent(direction, frameDistCanMove);
             point.YDisplacement = Geometry.getYComponent(direction, frameDistCanMove);

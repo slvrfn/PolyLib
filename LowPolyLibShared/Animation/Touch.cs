@@ -103,9 +103,9 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        protected abstract void DoPointDisplacement(AnimatedPoint point);
+        protected abstract void DoPointDisplacement(AnimatedPoint point, int currentFrame);
 
-        internal override HashSet<AnimatedPoint> RenderFrame()
+        internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
             if (animatedPoints.Count == 0)
             {
@@ -113,7 +113,7 @@ namespace LowPolyLibrary.Animation
                 {
                     var animPoint = new AnimatedPoint(point);
 
-                    DoPointDisplacement(animPoint);
+                    DoPointDisplacement(animPoint, currentFrame);
 
                     animatedPoints.Add(animPoint);
 
@@ -124,7 +124,7 @@ namespace LowPolyLibrary.Animation
             {
                 foreach (var animPoint in animatedPoints)
                 {
-                    DoPointDisplacement(animPoint);
+                    DoPointDisplacement(animPoint, currentFrame);
                 }
             }
             

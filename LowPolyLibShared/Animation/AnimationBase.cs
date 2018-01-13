@@ -37,8 +37,6 @@ namespace LowPolyLibrary.Animation
 	    protected SKPoint PathPointB;
 	    protected SKPoint PathPointC;
 	    protected SKPoint Center;
-	    //vertex and its original vertex in InternalPoints
-	    private Tuple<Vertex, Vertex>[] _updatedPoints;
 	    protected SKPath TrianglePath;
 
         protected int BoundsWidth => CurrentTriangulation.BoundsWidth;
@@ -90,11 +88,10 @@ namespace LowPolyLibrary.Animation
             PathPointB = new SKPoint();
             PathPointC = new SKPoint();
             Center = new SKPoint();
-            _updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
             TrianglePath = new SKPath {FillType = SKPathFillType.EvenOdd};
         }
 
-		internal abstract HashSet<AnimatedPoint> RenderFrame();
+		internal abstract HashSet<AnimatedPoint> RenderFrame(int currentFrame);
 
         internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
 		{
@@ -110,11 +107,8 @@ namespace LowPolyLibrary.Animation
 
                 WatchMeasure(watch, $"Canvas clear");
 
-                //only reallocate if necessary
-                if (_updatedPoints.Length != InternalPoints.Count)
-                {
-                    _updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
-                }
+                //vertex and its original vertex in InternalPoints
+                var updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
 
                 //for quick lookup to check if a specified point index has been modified
                 var updatedIndices = new int[pointChanges.Count];
@@ -128,14 +122,14 @@ namespace LowPolyLibrary.Animation
                         v.x.Equals(animatedPoint.Point.X) && v.y.Equals(animatedPoint.Point.Y));
 
                     //only malloc if null or item2 is different
-                    if (_updatedPoints[index] != null && _updatedPoints[index].Item2.Equals(InternalPoints[index]))
+                    if (updatedPoints[index] != null && updatedPoints[index].Item2.Equals(InternalPoints[index]))
                     {
-                        _updatedPoints[index].Item1.x = animatedPoint.Point.X + animatedPoint.XDisplacement;
-                        _updatedPoints[index].Item1.y = animatedPoint.Point.Y + animatedPoint.YDisplacement;
+                        updatedPoints[index].Item1.x = animatedPoint.Point.X + animatedPoint.XDisplacement;
+                        updatedPoints[index].Item1.y = animatedPoint.Point.Y + animatedPoint.YDisplacement;
                     }
                     else
                     {
-                        _updatedPoints[index] = new Tuple<Vertex, Vertex>(
+                        updatedPoints[index] = new Tuple<Vertex, Vertex>(
                             new Vertex(animatedPoint.Point.X + animatedPoint.XDisplacement,
                                 animatedPoint.Point.Y + animatedPoint.YDisplacement), InternalPoints[index]);
                     }
@@ -147,7 +141,7 @@ namespace LowPolyLibrary.Animation
                 WatchMeasure(watch, $"Frame points updated");
 
                 //increment updated points
-                foreach (var updatedPoint in _updatedPoints)
+                foreach (var updatedPoint in updatedPoints)
                 {
                     //non-updated points will be null
                     if (updatedPoint == null)
@@ -156,16 +150,18 @@ namespace LowPolyLibrary.Animation
                     //increment each triad that contains this updatedPoint
                     foreach (var tri in PoTriDic[updatedPoint.Item2])
                     {
-                        GetCorrectPoint(_updatedPoints, updatedIndices, tri.a, ref PathPointA);
-                        GetCorrectPoint(_updatedPoints, updatedIndices, tri.b, ref PathPointB);
-                        GetCorrectPoint(_updatedPoints, updatedIndices, tri.c, ref PathPointC);
+                        GetCorrectPoint(updatedPoints, updatedIndices, tri.a, ref PathPointA);
+                        GetCorrectPoint(updatedPoints, updatedIndices, tri.b, ref PathPointB);
+                        GetCorrectPoint(updatedPoints, updatedIndices, tri.c, ref PathPointC);
 
                         Geometry.centroid(tri, InternalPoints, ref Center);
                         //triAngleColorCenter
                         Geometry.KeepInPicBounds(ref Center, BleedX, BleedY, BoundsWidth, BoundsHeight);
                         fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
+                        
                         Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
                         canvas.DrawPath(TrianglePath, fillPaint);
+                        canvas.DrawPath(TrianglePath, strokePaint);
                     }
                 }
                 WatchMeasure(watch, $"path drawing");
