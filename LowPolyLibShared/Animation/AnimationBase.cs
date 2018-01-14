@@ -97,15 +97,10 @@ namespace LowPolyLibrary.Animation
 		{
             using (var canvas = surface.Canvas)
 			{
-                var watch = new System.Diagnostics.Stopwatch();
-                watch.Start();
 			    canvas.Clear();
-                
                 //case in frame immediately after animation has completed, nothing needs to be drawn
 			    if (CurrentFrame > NumFrames)
 			        return;
-
-                WatchMeasure(watch, $"Canvas clear");
 
                 //vertex and its original vertex in InternalPoints
                 var updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
@@ -138,8 +133,6 @@ namespace LowPolyLibrary.Animation
                     updatedIndices[i] = index;
                 }
 
-                WatchMeasure(watch, $"Frame points updated");
-
                 //increment updated points
                 foreach (var updatedPoint in updatedPoints)
                 {
@@ -156,7 +149,7 @@ namespace LowPolyLibrary.Animation
 
                         Geometry.centroid(tri, InternalPoints, ref Center);
                         //triAngleColorCenter
-                        Geometry.KeepInPicBounds(ref Center, BleedX, BleedY, BoundsWidth, BoundsHeight);
+                        CurrentTriangulation.KeepInBounds(ref Center);
                         fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
                         
                         Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
@@ -164,7 +157,6 @@ namespace LowPolyLibrary.Animation
                         canvas.DrawPath(TrianglePath, strokePaint);
                     }
                 }
-                WatchMeasure(watch, $"path drawing");
             }
 		}
 
@@ -181,13 +173,6 @@ namespace LowPolyLibrary.Animation
                 p.X = InternalPoints[internalPointIndex].x;
                 p.Y = InternalPoints[internalPointIndex].y;
             }
-        }
-
-        protected void WatchMeasure(System.Diagnostics.Stopwatch watch, string s)
-        {
-            //watch.Stop();
-            Console.WriteLine(s + $" took: {watch.ElapsedTicks} ticks");
-            watch.Restart();
         }
 		#endregion
 
@@ -247,6 +232,7 @@ namespace LowPolyLibrary.Animation
 	            }
 	        }
 	    }
+
         internal float shortestDistanceFromPoints(SKPoint workingPoint)
 		{
 			//this list consists of all the triangles containing the point.
@@ -285,8 +271,6 @@ namespace LowPolyLibrary.Animation
 			}
 			return shortest;
 		}
-
-		
 
 		#endregion
 	}

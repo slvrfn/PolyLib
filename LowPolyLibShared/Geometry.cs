@@ -8,23 +8,8 @@ namespace LowPolyLibrary
 {
 	public class Geometry
 	{
-		internal static void KeepInPicBounds(ref SKPoint center, double bleed_x, double bleed_y, int BoundsWidth, int BoundsHeight)
-		{
-			if (center.X < 0)
-				center.X += (int)bleed_x;
-			else if (center.X > BoundsWidth)
-				center.X -= (int)bleed_x;
-			else if (center.X.Equals(BoundsWidth))
-				center.X -= (int)bleed_x - 1;
-			if (center.Y < 0)
-				center.Y += (int)bleed_y;
-			else if (center.Y > BoundsHeight)
-				center.Y -= (int)bleed_y + 1;
-			else if (center.Y.Equals(BoundsHeight))
-				center.Y -= (int)bleed_y - 1;
-		}
 
-		#region Circles
+        #region Circles
 		internal static bool pointInsideCircle(SKPoint point, SKPoint center, int radius)
 		{
 			//http://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle

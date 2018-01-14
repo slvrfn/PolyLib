@@ -90,7 +90,7 @@ namespace LowPolyLibrary.Animation
 
                         Geometry.centroid(tri, InternalPoints, ref Center);
 
-                        Geometry.KeepInPicBounds(ref Center, BleedX, BleedY, BoundsWidth, BoundsHeight);
+                        CurrentTriangulation.KeepInBounds(ref Center);
                         fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
                         Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
                         canvas.DrawPath(TrianglePath, fillPaint);

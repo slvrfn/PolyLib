@@ -116,7 +116,7 @@ namespace LowPolyLibrary
 
 		            Geometry.centroid(tri, InternalPoints, ref _center);
 
-		            Geometry.KeepInPicBounds(ref _center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
+		            KeepInBounds(ref _center);
 		            fillPaint.Color = GetTriangleColor(_center);
 		            strokePaint.Color = fillPaint.Color;
 		            Geometry.DrawTrianglePath(ref _trianglePath, _pathPointA, _pathPointB, _pathPointC);
@@ -180,6 +180,22 @@ namespace LowPolyLibrary
 	        // access the color
 	        return readColorBitmap.GetPixel(0, 0);
         }
+
+	    internal void KeepInBounds(ref SKPoint center)
+	    {
+	        if (center.X < 0)
+	            center.X += (int)bleed_x;
+	        else if (center.X > BoundsWidth)
+	            center.X -= (int)bleed_x;
+	        else if (center.X.Equals(BoundsWidth))
+	            center.X -= (int)bleed_x - 1;
+	        if (center.Y < 0)
+	            center.Y += (int)bleed_y;
+	        else if (center.Y > BoundsHeight)
+	            center.Y -= (int)bleed_y + 1;
+	        else if (center.Y.Equals(BoundsHeight))
+	            center.Y -= (int)bleed_y - 1;
+	    }
 
         private SKColor[] getGradientColors()
 		{
