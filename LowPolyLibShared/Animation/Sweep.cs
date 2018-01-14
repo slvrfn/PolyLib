@@ -13,7 +13,7 @@ namespace LowPolyLibrary.Animation
 
         internal Sweep(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
-			AnimationType = AnimationTypes.Type.Sweep;
+
         }
 
         //necessary to prevent animationbase from "setting up" multiple times

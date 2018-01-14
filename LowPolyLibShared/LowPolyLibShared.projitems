@@ -13,7 +13,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationEngine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationFlow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Animation\AnimationTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\Grow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\PushTouch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Animation\RandomTouch.cs" />

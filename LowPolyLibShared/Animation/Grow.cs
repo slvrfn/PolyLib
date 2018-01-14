@@ -17,9 +17,7 @@ namespace LowPolyLibrary.Animation
 
         internal Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
-			AnimationType = AnimationTypes.Type.Grow;
-
-			TotalAnimatedPoints = new HashSet<AnimatedPoint>();
+            TotalAnimatedPoints = new HashSet<AnimatedPoint>();
 			pointUsed = new bool[InternalPoints.Count];
 			for (int i = 0; i < pointUsed.Length; i++)
 			{

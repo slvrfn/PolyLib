@@ -18,8 +18,6 @@ namespace LowPolyLibrary.Animation
 
         internal Touch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames)
         {
-            AnimationType = AnimationTypes.Type.RandomTouch;
-
             InRange = new HashSet<SKPoint>();
             TouchLocation = new SKPoint(x, y);
             TouchRadius = radius;

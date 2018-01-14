@@ -18,15 +18,11 @@ namespace LowPolyLibrary.Animation
 	    internal int CurrentFrame = 0;
         internal Dictionary<SKPointI,HashSet<SKPoint>> SeperatedPoints;
 		internal Dictionary<Vertex, HashSet<Triad>> PoTriDic => CurrentTriangulation.pointToTriangleDic;
-	    internal double BleedX => CurrentTriangulation.bleed_x;
-	    internal double BleedY => CurrentTriangulation.bleed_y;
 
 	    protected readonly Triangulation CurrentTriangulation;
 
         internal Geometry.RotatedGrid GridRotation;
 		internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
-
-	    internal AnimationTypes.Type AnimationType;
 
 	    protected readonly SKPaint strokePaint, fillPaint;
 

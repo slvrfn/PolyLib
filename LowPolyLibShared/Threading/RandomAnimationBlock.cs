@@ -18,7 +18,11 @@ namespace LowPolyLibrary.Threading
 
 		private readonly BroadcastBlock<AnimationBase> _source;
 
-        private Triangulation tri;
+        private Triangulation _tri;
+
+        //functions to be provided by user that specify how an animation should be created
+        //ex: a function which randomly assigns touch locations couild be created
+	    private readonly List<Func<Triangulation, AnimationBase>> animCreators;
 
         //TODO Make user specify what animations could randomly show up, and how long they occur for
 	    private int numFrames = 12;
@@ -41,48 +45,32 @@ namespace LowPolyLibrary.Threading
 
 			//delay until random animation is added
 			tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
+
+            animCreators = new List<Func<Triangulation,AnimationBase>>();
 		}
 		#endregion
 
+	    public void AddAnimationCreator(Func<Triangulation,AnimationBase> animCreator)
+	    {
+	        animCreators.Add(animCreator);
+	    }
+
 		public async Task<bool> AddRandomAnimation(object sender)
 		{
-            var values = Enum.GetValues(typeof(AnimationTypes.Type));
-            var t = values.GetValue(Random.Rand.Next(values.Length));
-            ColorBru.Code randomAnimType = (ColorBru.Code)t;
-            var conv = (AnimationTypes.Type)t;
+            if (animCreators.Count>1)
+		    {
+		        var index = Random.Rand.Next(animCreators.Count);
 
-            //var newAnim = new AnimationBase("custom", 6, 200);
-            AnimationBase newAnim;
+		        var randomAnim = animCreators[index](_tri);
+		        return await _source.SendAsync(randomAnim);
 
-            switch (conv)
-            {
-                case AnimationTypes.Type.Sweep:
-                    newAnim = new Sweep(tri, numFrames);
-                    break;
-                case AnimationTypes.Type.RandomTouch:
-                    var x = Random.Rand.Next(0, tri.BoundsWidth);
-                    var y = Random.Rand.Next(0, tri.BoundsHeight);
-                    newAnim = new RandomTouch(tri, numFrames, x, y, 200);
-                    break;
-                case AnimationTypes.Type.PushTouch:
-                    var xx = Random.Rand.Next(0, tri.BoundsWidth);
-                    var yy = Random.Rand.Next(0, tri.BoundsHeight);
-                    newAnim = new PushTouch(tri, numFrames, xx, yy, 200);
-                    break;
-                case AnimationTypes.Type.Grow:
-                    newAnim = new Grow(tri, numFrames);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            tim.Start();
-			return await _source.SendAsync(newAnim);
+		    }
+			return false;
 		}
 
         public void UpdateTriangulation(Triangulation _tri)
         {
-            tri = _tri;
+            this._tri = _tri;
             tim.Start();
         }
 
