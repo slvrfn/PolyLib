@@ -11,10 +11,8 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Views.Android
 {
-    public class LowPolyView : FrameLayout //, View.IOnTouchListener
+    public class LowPolyView : FrameLayout
     {
-        
-
         public TriangulationView TriangulationView { get; private set; }
         public AnimationUpdateView AnimationUpdateView { get; private set; }
 

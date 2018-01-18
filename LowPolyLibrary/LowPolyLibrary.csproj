@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Gridsum.DataflowEx" Version="2.0.0" />
-    <PackageReference Include="SkiaSharp.Views" Version="1.59.3" />
+    <PackageReference Include="SkiaSharp" Version="1.59.3" />
   </ItemGroup>
 
 </Project>
