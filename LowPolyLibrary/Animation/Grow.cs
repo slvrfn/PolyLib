@@ -7,7 +7,7 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
-    class Grow : AnimationBase
+    public class Grow : AnimationBase
     {
 		bool[] pointUsed;
 		Queue<Vertex> animateList;
@@ -15,7 +15,7 @@ namespace LowPolyLibrary.Animation
 
         private bool backgroundNeedsToBeSet = true;
 
-        internal Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
+        public Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
             TotalAnimatedPoints = new HashSet<AnimatedPoint>();
 			pointUsed = new bool[InternalPoints.Count];
@@ -106,14 +106,13 @@ namespace LowPolyLibrary.Animation
                 var tempEdges = new HashSet<AnimatedPoint>();
 
 			    //frame may not have any points to draw in the frame
-                Vertex currentPoint;
-			    if (!animateList.TryDequeue(out currentPoint))
-			    {
-			        return new HashSet<AnimatedPoint>();
-			    }
+			    if (animateList.Count == 0)
+                    return new HashSet<AnimatedPoint>();
 
-			    //save the first point
-				outPoints.Add(new AnimatedPoint(currentPoint));
+			    var currentPoint = animateList.Dequeue();
+
+                //save the first point
+                outPoints.Add(new AnimatedPoint(currentPoint));
 
                 var drawList = new HashSet<Triad>();
                 drawList = PoTriDic[currentPoint];

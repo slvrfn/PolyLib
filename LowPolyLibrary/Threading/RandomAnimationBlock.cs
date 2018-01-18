@@ -24,9 +24,6 @@ namespace LowPolyLibrary.Threading
         //ex: a function which randomly assigns touch locations couild be created
 	    private readonly List<Func<Triangulation, AnimationBase>> animCreators;
 
-        //TODO Make user specify what animations could randomly show up, and how long they occur for
-	    private int numFrames = 12;
-
 		Timer tim;
 
         #region Constructors

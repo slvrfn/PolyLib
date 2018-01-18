@@ -8,3 +8,5 @@ LowPolySkiaLibrary/obj
 .vs/
 RecTest/bin/*
 RecTest/obj/*
+bin/
+obj/

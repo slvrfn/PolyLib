@@ -7,9 +7,9 @@ using LowPolyLibrary.Animation;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
 
-namespace LowPolyLibrary.Views
+namespace LowPolyLibrary.Views.Android
 {
-    public class AnimationUpdateView : SKCanvasView
+    public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
         private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
 
@@ -41,10 +41,21 @@ namespace LowPolyLibrary.Views
         {
             base.OnDraw(surface, info);
 
+            DrawOnMe(surface);
+            
+        }
+
+        public void DrawOnMe(SKSurface surf)
+        {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            _animationFlowEngine.DrawOnMe(surface);
+            _animationFlowEngine.DrawOnMe(surf);
             Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedMilliseconds + " ms\n");
+        }
+
+        public void SignalRedraw()
+        {
+            Invalidate();
         }
 
         public void AddAnimation(AnimationBase anim)

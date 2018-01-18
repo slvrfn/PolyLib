@@ -113,7 +113,16 @@
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
-  <Import Project="..\LowPolyLibShared\LowPolyLibShared.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\LowPolyLibrary\LowPolyLibrary.csproj">
+      <Project>{debb4c58-fe30-4796-83df-6bc819ee16fa}</Project>
+      <Name>LowPolyLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LowPolyLibrary.Views.Android\LowPolyLibrary.Views.Android.csproj">
+      <Project>{31af6fe2-02e7-4719-ae56-ddb6b0a6424c}</Project>
+      <Name>LowPolyLibrary.Views.Android</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
 </Project>

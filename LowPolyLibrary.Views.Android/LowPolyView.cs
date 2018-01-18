@@ -9,9 +9,9 @@ using Android.Widget;
 using LowPolyLibrary.Animation;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Views
+namespace LowPolyLibrary.Views.Android
 {
-    class LowPolyView : FrameLayout //, View.IOnTouchListener
+    public class LowPolyView : FrameLayout //, View.IOnTouchListener
     {
         
 

@@ -8,7 +8,7 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
-    abstract class Touch : AnimationBase
+    public abstract class Touch : AnimationBase
     {
         protected HashSet<SKPoint> InRange;
         protected SKPoint TouchLocation;

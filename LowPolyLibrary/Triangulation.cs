@@ -6,7 +6,6 @@ using Enum = System.Enum;
 using Math = System.Math;
 using System;
 using DelaunayTriangulator;
-using Java.Util;
 using SkiaSharp;
 
 namespace LowPolyLibrary

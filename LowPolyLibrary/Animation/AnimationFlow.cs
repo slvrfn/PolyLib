@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
   using Gridsum.DataflowEx;
-  using Java.Lang;
   using LowPolyLibrary.Threading;
 using LowPolyLibrary.Animation;
 using SkiaSharp;

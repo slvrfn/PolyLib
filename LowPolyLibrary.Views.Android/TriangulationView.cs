@@ -6,8 +6,9 @@ using Android.Widget;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
 using LowPolyLibrary.Animation;
+using LowPolyLibrary.Views;
 
-namespace LowPolyLibrary
+namespace LowPolyLibrary.Views.Android
 {
     public class TriangulationView : SKCanvasView
     {

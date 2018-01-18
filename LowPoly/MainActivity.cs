@@ -12,7 +12,7 @@ using Android.Views.Animations;
 using Android.Views;
 using LowPolyLibrary.Animation;
 using LowPolyLibrary;
-using LowPolyLibrary.Views;
+using LowPolyLibrary.Views.Android;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
 

@@ -4,14 +4,13 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using LowPolyLibrary.Views;
 using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
-    class AnimationEngine
+    public class AnimationEngine
     {
-        private AnimationUpdateView _currentDisplay;
+        private IAnimationUpdateView _currentDisplay;
         private RenderedFrame currentRenderedFrame;
 
         //for now keep look alive as long as the animation engine exists
@@ -26,7 +25,7 @@ namespace LowPolyLibrary.Animation
         private bool ShouldStartRandomAnim = false;
         private int RandomAnimationTime = 5000;
 
-        public AnimationEngine(AnimationUpdateView display)
+        public AnimationEngine(IAnimationUpdateView display)
         {
             //start the thread that will keep the animation flow alive
             Task.Run(RestartActionBlock);
@@ -49,7 +48,7 @@ namespace LowPolyLibrary.Animation
                 animationFlow = new AnimationFlow((arg) =>
                 {
                     currentRenderedFrame = arg;
-                    _currentDisplay.Invalidate();
+                    _currentDisplay.SignalRedraw();
                 }, uiTaskScheduler);
                 
                 if (ShouldStartRandomAnim)

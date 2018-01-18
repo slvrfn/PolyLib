@@ -7,11 +7,11 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
-    class Sweep : AnimationBase
+    public class Sweep : AnimationBase
     {
 		private int Direction = -1;
 
-        internal Sweep(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
+        public Sweep(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
 		{
 
         }

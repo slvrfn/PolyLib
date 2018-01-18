@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LowPolyLibrary.Animation
 {
-    class RandomTouch : Touch
+    public class RandomTouch : Touch
     {
         public RandomTouch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames, x, y, radius)
         {
