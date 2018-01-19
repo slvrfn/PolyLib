@@ -1,47 +1,41 @@
 ﻿using System;
-using Android.Content;
-using Android.Util;
-using Android.Views;
-using Android.Widget;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using CoreGraphics;
+using Foundation;
+using SkiaSharp.Views.iOS;
+using UIKit;
 using LowPolyLibrary.Animation;
 using SkiaSharp;
-using SkiaSharp.Views.Android;
 
-namespace LowPolyLibrary.Views.Android
+
+namespace LowPolyLibrary.Views.iOS
 {
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
-        private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
+        private AnimationEngine _animationFlowEngine;
 
 #region Constructors
-
-        public AnimationUpdateView(Context context) : base(context)
+        public AnimationUpdateView()
         {
             Initialize();
         }
 
-        public AnimationUpdateView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public AnimationUpdateView(CGRect frame) : base(frame)
         {
             Initialize();
         }
 
-        public AnimationUpdateView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public AnimationUpdateView(IntPtr p) : base(p)
         {
             Initialize();
         }
-
 #endregion
 
-        private void Initialize()
+        void Initialize()
         {
             _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
-        }
-
-        protected override void OnDraw(SKSurface surface, SKImageInfo info)
-        {
-            base.OnDraw(surface, info);
-
-            DrawOnMe(surface);
         }
 
         public void DrawOnMe(SKSurface surf)
@@ -54,7 +48,7 @@ namespace LowPolyLibrary.Views.Android
 
         public void SignalRedraw()
         {
-            Invalidate();
+            SetNeedsDisplay();
         }
 
         public void AddAnimation(AnimationBase anim)
