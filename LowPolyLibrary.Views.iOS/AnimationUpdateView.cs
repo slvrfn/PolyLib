@@ -31,11 +31,24 @@ namespace LowPolyLibrary.Views.iOS
         {
             Initialize();
         }
+
+        public override void AwakeFromNib()
+        {
+            base.AwakeFromNib();
+            // Called when loaded from xib or storyboard.
+            Initialize();
+        }
 #endregion
 
         void Initialize()
         {
             _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
+        }
+
+        public override void DrawInSurface(SKSurface surface, SKImageInfo info)
+        {
+            base.DrawInSurface(surface, info);
+            DrawOnMe(surface);
         }
 
         public void DrawOnMe(SKSurface surf)
