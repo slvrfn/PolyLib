@@ -56,6 +56,33 @@ namespace LowPolyLibrary.Views.iOS
             AddSubview(AnimationUpdateView);
         }
 
+#region Touch
+        public override void TouchesBegan(NSSet touches, UIEvent evt)
+        {
+            base.TouchesBegan(touches, evt);
+            UITouch touch = touches.AnyObject as UITouch;
+            if (touch != null)
+            {
+                var loc = touch.LocationInView(this);
+                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)loc.X, (float)loc.Y, 250);
+                AddAnimation(touchAnimation);
+            }
+
+        }
+
+        public override void TouchesMoved(NSSet touches, UIEvent evt)
+        {
+            base.TouchesMoved(touches, evt);
+            UITouch touch = touches.AnyObject as UITouch;
+            if (touch != null)
+            {
+                var loc = touch.LocationInView(this);
+                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)loc.X, (float)loc.Y, 250);
+                AddAnimation(touchAnimation);
+            }
+        }
+#endregion
+
         public LowPolyView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
