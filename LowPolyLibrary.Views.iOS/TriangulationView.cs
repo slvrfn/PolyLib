@@ -46,11 +46,15 @@ namespace LowPolyLibrary.Views.iOS
 
         void Initialize()
         {
-            
 
-          //  Triangulation = new LowPolyLibrary.Triangulation(1920, 1080, Variance, CellSize);
 
-            Triangulation = new LowPolyLibrary.Triangulation((int)UIScreen.MainScreen.Bounds.Width, (int)UIScreen.MainScreen.Bounds.Height, Variance, CellSize);
+            //Triangulation = new LowPolyLibrary.Triangulation(1920, 1080, Variance, CellSize);
+
+            Triangulation = new LowPolyLibrary.Triangulation((int)(Frame.Size.Width * UIScreen.MainScreen.Scale), 
+                                                             (int)(Frame.Size.Height * UIScreen.MainScreen.Scale), 
+                                                             Variance, 
+                                                             CellSize);
+
             //SetNeedsDisplay();
         }
 
