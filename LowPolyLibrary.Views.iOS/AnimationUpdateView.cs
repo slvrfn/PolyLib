@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Views.iOS
 {
+    [Register("AnimationUpdateView"), DesignTimeVisible(true)]
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
         private AnimationEngine _animationFlowEngine;

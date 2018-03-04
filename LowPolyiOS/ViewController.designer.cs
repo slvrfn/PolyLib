@@ -15,13 +15,13 @@ namespace LowPolyiOS
     {
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        LowPolyLibrary.Views.iOS.TriangulationView triangulationView { get; set; }
+        LowPolyLibrary.Views.iOS.LowPolyView lowPolyView { get; set; }
 
         void ReleaseDesignerOutlets ()
         {
-            if (triangulationView != null) {
-                triangulationView.Dispose ();
-                triangulationView = null;
+            if (lowPolyView != null) {
+                lowPolyView.Dispose ();
+                lowPolyView = null;
             }
         }
     }
