@@ -45,6 +45,7 @@ namespace LowPolyLibrary.Views.iOS
         void Initialize()
         {
             _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
+            this.Opaque = false;
         }
 
         public override void DrawInSurface(SKSurface surface, SKImageInfo info)
