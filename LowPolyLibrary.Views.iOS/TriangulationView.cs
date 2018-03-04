@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using SkiaSharp.Views.iOS;
 
 namespace LowPolyLibrary.Views.iOS
 {
+    [Register("TriangulationView"), DesignTimeVisible(true)]
     public class TriangulationView : SKCanvasView
     {
         public LowPolyLibrary.Triangulation Triangulation { get; private set; }
@@ -33,11 +35,23 @@ namespace LowPolyLibrary.Views.iOS
         {
             Initialize();
         }
+
+        public override void AwakeFromNib()
+        {
+            base.AwakeFromNib();
+            // Called when loaded from xib or storyboard.
+            Initialize();
+        }
 #endregion
 
         void Initialize()
         {
+            
+
+          //  Triangulation = new LowPolyLibrary.Triangulation(1920, 1080, Variance, CellSize);
+
             Triangulation = new LowPolyLibrary.Triangulation((int)UIScreen.MainScreen.Bounds.Width, (int)UIScreen.MainScreen.Bounds.Height, Variance, CellSize);
+            //SetNeedsDisplay();
         }
 
         public override void DrawInSurface(SKSurface surface, SKImageInfo info)
@@ -52,6 +66,8 @@ namespace LowPolyLibrary.Views.iOS
             }
             watch.Stop();
         }
+
+
 
         public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
