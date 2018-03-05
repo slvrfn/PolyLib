@@ -52,6 +52,7 @@ namespace LowPolyLibrary.Views.iOS
             TriangulationView = new TriangulationView(Frame);
 
             AnimationUpdateView = new AnimationUpdateView(Frame);
+
             AddSubview(TriangulationView);
             AddSubview(AnimationUpdateView);
         }
@@ -64,7 +65,7 @@ namespace LowPolyLibrary.Views.iOS
             if (touch != null)
             {
                 var loc = touch.LocationInView(this);
-                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)loc.X, (float)loc.Y, 250);
+                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y* UIScreen.MainScreen.Scale), 250);
                 AddAnimation(touchAnimation);
             }
 
@@ -77,7 +78,7 @@ namespace LowPolyLibrary.Views.iOS
             if (touch != null)
             {
                 var loc = touch.LocationInView(this);
-                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)loc.X, (float)loc.Y, 250);
+                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y * UIScreen.MainScreen.Scale), 250);
                 AddAnimation(touchAnimation);
             }
         }
@@ -90,11 +91,13 @@ namespace LowPolyLibrary.Views.iOS
             if (!boundsWidth.Equals(Frame.Size.Width) || !boundsHeight.Equals(Frame.Size.Height))
             {
                 
-                RemoveFromSuperview();
-                var newCanvasView = new LowPolyView(Frame);
-                newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
-                Superview.AddSubview(newCanvasView);
-                return newCanvasView;
+                //var newCanvasView = new LowPolyView(Frame);
+                //newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
+                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
+                //InsertSubviewAbove(newCanvasView, this);
+                //RemoveFromSuperview();
+                AnimationUpdateView.SetNeedsDisplay();
+                return this;
             }
             else
             {
