@@ -1,46 +1,56 @@
 ﻿using System;
-using Android.Content;
-using Android.Util;
-using Android.Views;
-using Android.Widget;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using CoreGraphics;
+using Foundation;
+using SkiaSharp.Views.iOS;
+using UIKit;
 using LowPolyLibrary.Animation;
 using SkiaSharp;
-using SkiaSharp.Views.Android;
 
-namespace LowPolyLibrary.Views.Android
+
+namespace LowPolyLibrary.Views.iOS
 {
+    [Register("AnimationUpdateView"), DesignTimeVisible(true)]
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
-        private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
+        private AnimationEngine _animationFlowEngine;
 
 #region Constructors
-
-        public AnimationUpdateView(Context context) : base(context)
+        public AnimationUpdateView()
         {
             Initialize();
         }
 
-        public AnimationUpdateView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public AnimationUpdateView(CGRect frame) : base(frame)
         {
             Initialize();
         }
 
-        public AnimationUpdateView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public AnimationUpdateView(IntPtr p) : base(p)
         {
             Initialize();
         }
 
+        public override void AwakeFromNib()
+        {
+            base.AwakeFromNib();
+            // Called when loaded from xib or storyboard.
+            Initialize();
+        }
 #endregion
 
-        private void Initialize()
+        void Initialize()
         {
             _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
+            this.Opaque = false;
         }
 
-        protected override void OnDraw(SKSurface surface, SKImageInfo info)
+        public override void DrawInSurface(SKSurface surface, SKImageInfo info)
         {
-            base.OnDraw(surface, info);
-
+            base.DrawInSurface(surface, info);
             DrawOnMe(surface);
         }
 
@@ -54,7 +64,7 @@ namespace LowPolyLibrary.Views.Android
 
         public void SignalRedraw()
         {
-            Invalidate();
+            SetNeedsDisplay();
         }
 
         public void AddAnimation(AnimationBase anim)
