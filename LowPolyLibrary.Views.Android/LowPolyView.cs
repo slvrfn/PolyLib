@@ -55,7 +55,7 @@ namespace LowPolyLibrary.Views.Android
             AddView(AnimationUpdateView);
         }
 
-        public LowPolyView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize)
+        public LowPolyView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize, View.IOnTouchListener listener = null)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
 
@@ -65,6 +65,11 @@ namespace LowPolyLibrary.Views.Android
                 var index = parent.IndexOfChild(this);
                 parent.RemoveView(this);
                 var newCanvasView = new LowPolyView(Context);
+
+                //setup listeners
+                newCanvasView.SetOnTouchListener(listener);
+                SetOnTouchListener(null);
+
                 newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
                 parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
                 return newCanvasView;

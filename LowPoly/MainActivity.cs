@@ -78,7 +78,7 @@ namespace LowPoly
             var variance = float.Parse(varTB.Text);
 			var cellSize = int.Parse(sizeTB.Text);
 			
-		    polyView = polyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize);
+		    polyView = polyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize, this);
         }
 
         public bool OnTouch(View v, MotionEvent e)
