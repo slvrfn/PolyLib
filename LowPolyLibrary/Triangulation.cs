@@ -302,10 +302,10 @@ namespace LowPolyLibrary
               for (float j = -bleed_y; j < BoundsHeight + bleed_y; j += CellSize) 
               {
                     var noise = fastNoise.GetNoise(i, j);
-                    var noise2 = fastNoise.GetNoise(j, i);
+                    //var noise2 = fastNoise.GetNoise(j, i);
 
                     var x = i + _map(noise, in_range, variance);
-                    var y = j + _map(noise2, in_range, variance);
+                    var y = j + _map(noise, in_range, variance);
                     points.Add(new DelaunayTriangulator.Vertex(x, y));
               }
             }
