@@ -9,6 +9,11 @@ namespace LowPolyLibrary
 	public class Geometry
 	{
 
+        public static float ConvertBetweenRanges(float num, float inMin, float inMax, float outMin, float outMax)
+        {
+            return (num - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+
         #region Circles
 		internal static bool pointInsideCircle(SKPoint point, SKPoint center, int radius)
 		{

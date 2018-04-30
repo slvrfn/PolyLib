@@ -93,7 +93,7 @@ namespace LowPolyLibrary.Views.iOS
                 
                 //var newCanvasView = new LowPolyView(Frame);
                 //newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
-                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
+                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
                 //InsertSubviewAbove(newCanvasView, this);
                 //RemoveFromSuperview();
                 AnimationUpdateView.SetNeedsDisplay();
@@ -101,7 +101,7 @@ namespace LowPolyLibrary.Views.iOS
             }
             else
             {
-                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
+                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
                 //only called here since a whole new Lowpoly view is created in the other case
                 AnimationUpdateView.SetNeedsDisplay();
                 return this;
