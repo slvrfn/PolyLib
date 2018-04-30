@@ -7,6 +7,7 @@ using Math = System.Math;
 using System;
 using DelaunayTriangulator;
 using SkiaSharp;
+using System.Linq;
 
 namespace LowPolyLibrary
 {
@@ -14,10 +15,10 @@ namespace LowPolyLibrary
 	{
         internal int BoundsWidth;
 		internal int BoundsHeight;
-		internal double CellSize = 150;
-		public double Variance = .75;
-		private double calcVariance, cells_x, cells_y;
-		internal double bleed_x, bleed_y;
+		internal float CellSize = 150;
+		public float Variance = .75f;
+        private float calcVariance;
+		internal float bleed_x, bleed_y;
         internal SKSurface Gradient;
 		internal readonly List<DelaunayTriangulator.Vertex> InternalPoints;
         
@@ -30,6 +31,8 @@ namespace LowPolyLibrary
 	    SKBitmap readColorBitmap;
 	    IntPtr pixelBuffer;
 
+        FastNoise fastNoise;
+
 	    private readonly SKPaint strokePaint, fillPaint;
 
         //reuseable variables to speed up operations
@@ -39,7 +42,7 @@ namespace LowPolyLibrary
 	    private SKPoint _center;
 	    private SKPath _trianglePath;
 
-        public Triangulation(int boundsWidth, int boundsHeight, double variance, double cellSize)
+        public Triangulation(int boundsWidth, int boundsHeight, float variance, float cellSize, float frequency, float seed)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;
@@ -47,6 +50,10 @@ namespace LowPolyLibrary
             CellSize = cellSize;
             var info = new SKImageInfo(boundsWidth, boundsHeight);
             UpdateVars(info);
+            fastNoise = new FastNoise((int)seed);
+            fastNoise.SetFrequency(frequency);
+            fastNoise.SetNoiseType(FastNoise.NoiseType.Perlin);
+
 			InternalPoints = GeneratePoints();
 		    var angulator = new Triangulator();
 		    TriangulatedPoints = angulator.Triangulation(InternalPoints);
@@ -128,10 +135,8 @@ namespace LowPolyLibrary
         private void UpdateVars(SKImageInfo info)
         {
             calcVariance = CellSize * Variance / 2;
-            cells_x = Math.Floor((BoundsWidth + 4 * CellSize) / CellSize);
-            cells_y = Math.Floor((BoundsHeight + 4 * CellSize) / CellSize);
-            bleed_x = ((cells_x * CellSize) - BoundsWidth) / 2;
-            bleed_y = ((cells_y * CellSize) - BoundsHeight) / 2;
+            bleed_x =  BoundsWidth / 3;
+            bleed_y = BoundsHeight / 3;
             Gradient = GetGradient(info);
 		}
 
@@ -282,20 +287,33 @@ namespace LowPolyLibrary
 
 		private List<DelaunayTriangulator.Vertex> GeneratePoints()
 		{
-            var points = new List<DelaunayTriangulator.Vertex>();
-			for (var i = - bleed_x; i < BoundsWidth + bleed_x; i += CellSize) 
-			{
-				for (var j = - bleed_y; j < BoundsHeight + bleed_y; j += CellSize) 
-				{
-					var x = i + CellSize/2 + _map(Random.Rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
-					var y = j + CellSize/2 + _map(Random.Rand.NextDouble(),new int[] {0, 1},new double[] {-calcVariance, calcVariance});
-					points.Add(new DelaunayTriangulator.Vertex((float)Math.Floor(x),(float)Math.Floor(y)));
-				}
-			}
-			return points;
+            // avoid duplicate points
+            var points = new HashSet<DelaunayTriangulator.Vertex>();
+            // range of perlin noise is sqrt(dimension)/2
+            // https://stackoverflow.com/a/18263038/3344317
+            // 2D
+            var in_range = new float[] { -.7071f, .7071f };
+            // 3d
+             //var in_range = new float[] { -.866f, .866f };
+            var variance = new float[] {-calcVariance, calcVariance};
+
+            for (float i = -bleed_x; i < BoundsWidth + bleed_x; i += CellSize) 
+            {
+              for (float j = -bleed_y; j < BoundsHeight + bleed_y; j += CellSize) 
+              {
+                    var noise = fastNoise.GetNoise(i, j);
+                    var noise2 = fastNoise.GetNoise(j, i);
+
+                    var x = i + _map(noise, in_range, variance);
+                    var y = j + _map(noise2, in_range, variance);
+                    points.Add(new DelaunayTriangulator.Vertex(x, y));
+              }
+            }
+
+			return points.ToList();
 		}
 
-		private double _map(double num, int[] in_range, double[] out_range)
+		private float _map(float num, float[] in_range, float[] out_range)
 		{
 			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}

@@ -16,6 +16,8 @@ namespace LowPolyLibrary.Views.Android
 
         float Variance = .75f;
         int CellSize = 150;
+        float frequency = .01f;
+        float seed = 0;
 
         #region Constructors
 
@@ -41,7 +43,7 @@ namespace LowPolyLibrary.Views.Android
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
+                Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize, frequency, seed);
                 Invalidate();
             }));
         }
@@ -59,12 +61,12 @@ namespace LowPolyLibrary.Views.Android
             watch.Stop();
         }
 
-        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
+        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize, float frequency, float seed)
         {
             Variance = variance;
             CellSize = cellSize;
 
-            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, Variance, CellSize);
+            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, Variance, CellSize, frequency, seed);
             Invalidate();
         }
     }

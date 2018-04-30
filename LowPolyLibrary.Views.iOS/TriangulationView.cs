@@ -19,6 +19,8 @@ namespace LowPolyLibrary.Views.iOS
 
         float Variance = .75f;
         int CellSize = 150;
+        float frequency = .01f;
+        float seed = 0;
 
 #region Constructors
         public TriangulationView()
@@ -53,7 +55,10 @@ namespace LowPolyLibrary.Views.iOS
             Triangulation = new LowPolyLibrary.Triangulation((int)(Frame.Size.Width * UIScreen.MainScreen.Scale), 
                                                              (int)(Frame.Size.Height * UIScreen.MainScreen.Scale), 
                                                              Variance, 
-                                                             CellSize);
+                                                             CellSize,
+                                                             frequency,
+                                                             seed
+                                                            );
 
             //SetNeedsDisplay();
         }
@@ -73,12 +78,14 @@ namespace LowPolyLibrary.Views.iOS
 
 
 
-        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize)
+        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize, float frequency, float seed)
         {
             Variance = variance;
             CellSize = cellSize;
+            this.frequency = frequency;
+            this.seed = seed;
 
-            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, Variance, CellSize);
+            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, Variance, CellSize, frequency, seed);
             SetNeedsDisplay();
         }
     }
