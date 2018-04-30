@@ -301,21 +301,16 @@ namespace LowPolyLibrary
             {
               for (float j = -bleed_y; j < BoundsHeight + bleed_y; j += CellSize) 
               {
-                    var noise = fastNoise.GetNoise(i, j);
-                    //var noise2 = fastNoise.GetNoise(j, i);
+                    var noiseX = fastNoise.GetNoise(i, j);
+                    var noiseY = fastNoise.GetNoise(j, i);
 
-                    var x = i + _map(noise, in_range, variance);
-                    var y = j + _map(noise, in_range, variance);
+                    var x = i + Geometry.ConvertBetweenRanges(noiseX, in_range[0], in_range[1], variance[0], variance[1]);
+                    var y = j + Geometry.ConvertBetweenRanges(noiseY, in_range[0], in_range[1], variance[0], variance[1]);
                     points.Add(new DelaunayTriangulator.Vertex(x, y));
               }
             }
 
 			return points.ToList();
-		}
-
-		private float _map(float num, float[] in_range, float[] out_range)
-		{
-			return (num - in_range[0]) * (out_range[1] - out_range[0]) / (in_range[1] - in_range[0]) + out_range[0];
 		}
         
 	}
