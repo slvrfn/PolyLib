@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace LowPolyLibrary
@@ -18,24 +17,23 @@ namespace LowPolyLibrary
 			// ReSharper disable InconsistentNaming
 			YlGn, YlGnBu, GnBu, BuGn, PuBuGn, PuBu, BuPu, RdPu, PuRd, OrRd, YlOrRd, YlOrBr,
 			Purples, Blues, Greens, Oranges, Reds, Greys, PuOr, BrBG, PRGn, PiYG, RdBu, RdGy,
-			RdYlBu, Spectral, RdYlGn, Accent, Dark2, Paired, Pastel1, Pastel2, Set1, Set2, Set3,
-			Excel1
+			RdYlBu, Spectral, RdYlGn, Accent, Dark2, Paired, Pastel1, Pastel2, Set1, Set2, Set3
 			// ReSharper restore InconsistentNaming
 		}
 
 		static ColorBru()
 		{
 			Palettes = new List<Palette>();
-			Palettes.Add(new Palette
-				{
-					Code = Code.Excel1,
-					Label = "Excel 1",
-					Type = Type.Qualitative,
-					HtmlCodes = new List<string[]>
-					{
-						new[] {"#5a9bd5","#ec7a31","#a2a9a1","#fac100","#486fca","#6faf41","#2c5c8d","#8b4e22","#636363","#9b700a","#284476","#45672b","#7fafe0","#f69551","#b4b7bc","#ffca40","#6a8dcf","#8ac163","#307dc1","#d45e1e"}
-					}
-				});
+			//Palettes.Add(new Palette
+			//	{
+			//		Code = Code.Excel1,
+			//		Label = "Excel 1",
+			//		Type = Type.Qualitative,
+			//		HtmlCodes = new List<string[]>
+			//		{
+			//			new[] {"#5a9bd5","#ec7a31","#a2a9a1","#fac100","#486fca","#6faf41","#2c5c8d","#8b4e22","#636363","#9b700a","#284476","#45672b","#7fafe0","#f69551","#b4b7bc","#ffca40","#6a8dcf","#8ac163","#307dc1","#d45e1e"}
+			//		}
+			//	});
 			Palettes.Add(new Palette
 				{
 					Code = Code.YlGn,

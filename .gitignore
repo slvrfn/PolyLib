@@ -1,2 +1,12 @@
-LowPoly/obj/Debug/
+LowPoly/obj/
+LowPoly/bin/
+.vs/LowPoly/v14/.suo
 LowPoly/Resources/Resource.designer.cs
+packages/
+LowPolySkiaLibrary/bin/
+LowPolySkiaLibrary/obj
+.vs/
+RecTest/bin/*
+RecTest/obj/*
+bin/
+obj/
