@@ -10,3 +10,5 @@ RecTest/bin/*
 RecTest/obj/*
 bin/
 obj/
+
+.idea/*
