@@ -208,6 +208,10 @@ namespace LowPolyLibrary
             var values = Enum.GetValues(typeof(ColorBru.Code));
 			ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(Random.Rand.Next(values.Length));
 			//gets specified colors in gradient length: #
+            while (!ColorBru.Palettes.Single(c => c.Code == randomCode).HtmlCodes.Any(c => c.Length == 6)){
+                randomCode = (ColorBru.Code)values.GetValue(Random.Rand.Next(values.Length));
+            }
+
 			var brewColors = ColorBru.GetHtmlCodes (randomCode, 6);
 			//array of ints converted from brewColors
 			var colorArray = new SKColor[brewColors.Length];
