@@ -129,24 +129,26 @@ namespace LowPolyLibrary.Animation
             return animatedPoints;
         }
 
-        //only overriding to force display of red ring of current touch area
-        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
-        {
-            //base DrawSKPointrame will render the animation correctly, get the bitmap
-            base.DrawPointFrame(surface, pointChanges);
+        ////////////////////////////////////////////////////
+        //Uncomment to draw ring displaying the touch area//
+        ////////////////////////////////////////////////////
+        //internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
+        //{
+        //    //base DrawSKPointrame will render the animation correctly, get the bitmap
+        //    base.DrawPointFrame(surface, pointChanges);
 
-            //Create a canvas to draw touch location on the bitmap
-            using (var canvas = surface.Canvas)
-            {
-                //used to temp change stroke color
-                var c = strokePaint.Color;
-                strokePaint.Color = new SKColor(247, 77, 77);
+        //    //Create a canvas to draw touch location on the bitmap
+        //    using (var canvas = surface.Canvas)
+        //    {
+        //        //used to temp change stroke color
+        //        var c = strokePaint.Color;
+        //        strokePaint.Color = new SKColor(247, 77, 77);
 
-                //canvas not cleared here bc it is done in the base method above
-                canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, strokePaint);
+        //        //canvas not cleared here bc it is done in the base method above
+        //        canvas.DrawCircle(TouchLocation.X, TouchLocation.Y, TouchRadius, strokePaint);
 
-                strokePaint.Color = c;
-            }
-        }
+        //        strokePaint.Color = c;
+        //    }
+        //}
     }
 }
