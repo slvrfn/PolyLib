@@ -25,6 +25,8 @@ namespace LowPoly
         LowPolyView polyView;
         TextView widthTB, heightTB, varTB, sizeTB;
 
+        LinearLayout controlsContainer;
+
         SeekBar freqSeek, seedSeek;
         float freqProgress = .01f;
         float seedProgress = 0;
@@ -57,6 +59,8 @@ namespace LowPoly
             seedSeek = FindViewById<SeekBar>(Resource.Id.seedSeek);
             freqSeek = FindViewById<SeekBar>(Resource.Id.frequencySeek);
 
+            controlsContainer = FindViewById<LinearLayout>(Resource.Id.controlsContainer);
+
             seedSeek.SetOnSeekBarChangeListener(this);
             freqSeek.SetOnSeekBarChangeListener(this);
 
@@ -78,6 +82,9 @@ namespace LowPoly
             heightTB = null;
             varTB = null;
             sizeTB = null;
+            controlsContainer = null;
+            freqSeek = null;
+            freqSeek = null;
         }
 
         private void UpdatePolyLib(object sender, EventArgs e)
@@ -101,17 +108,19 @@ namespace LowPoly
                     break;
                 case MotionEventActions.Down:
                     startAnim = true;
+                    controlsContainer.Visibility = ViewStates.Invisible;
                     break;
                 case MotionEventActions.Move:
                     startAnim = true;
                     break;
                 case MotionEventActions.Up:
+                    controlsContainer.Visibility = ViewStates.Visible;
                     break;
             }
 
             if (startAnim)
             {
-                var touchAnimation = new RandomTouch(polyView.CurrentTriangulation, 6, touch.X, touch.Y, 250);
+                var touchAnimation = new RandomTouch(polyView.CurrentTriangulation, 12, touch.X, touch.Y, 150);
                 polyView.AddAnimation(touchAnimation);
             }
 
