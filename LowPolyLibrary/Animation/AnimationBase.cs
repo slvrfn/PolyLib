@@ -17,7 +17,7 @@ namespace LowPolyLibrary.Animation
 		internal readonly int NumFrames;
 	    internal int CurrentFrame = 0;
         internal Dictionary<SKPointI,HashSet<SKPoint>> SeperatedPoints;
-		internal Dictionary<Vertex, HashSet<Triad>> PoTriDic => CurrentTriangulation.pointToTriangleDic;
+		internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.pointToTriangleDic;
 
 	    protected readonly Triangulation CurrentTriangulation;
 
@@ -137,7 +137,7 @@ namespace LowPolyLibrary.Animation
                         continue;
 
                     //increment each triad that contains this updatedPoint
-                    foreach (var tri in PoTriDic[updatedPoint.Item2])
+                    foreach (var tri in PointToTriangleDic[updatedPoint.Item2])
                     {
                         GetCorrectPoint(updatedPoints, updatedIndices, tri.a, ref PathPointA);
                         GetCorrectPoint(updatedPoints, updatedIndices, tri.b, ref PathPointB);
@@ -203,7 +203,7 @@ namespace LowPolyLibrary.Animation
 	    {
 	        var v = new Vertex(point.X, point.Y);
 	        //get points v is connected to
-	        var triadsContaingV = PoTriDic[v];
+	        var triadsContaingV = PointToTriangleDic[v];
 
 	        foreach (var triad in triadsContaingV)
 	        {
@@ -233,7 +233,7 @@ namespace LowPolyLibrary.Animation
 		{
 			//this list consists of all the triangles containing the point.
             var v = new Vertex(workingPoint.X, workingPoint.Y);
-			var tris = PoTriDic[v];
+			var tris = PointToTriangleDic[v];
 
 			//shortest distance between a workingPoint and all vertices of the given triangle list
 			float shortest = -1;

@@ -9,73 +9,183 @@ using DelaunayTriangulator;
 using SkiaSharp;
 using System.Linq;
 using WEB;
+using System.ComponentModel;
 
 namespace LowPolyLibrary
 {
-	public class Triangulation
+    public class Triangulation: INotifyPropertyChanged
 	{
-        internal int BoundsWidth;
-		internal int BoundsHeight;
-		internal float CellSize = 150;
-		public float Variance = .75f;
-        private float calcVariance;
-		internal float bleed_x, bleed_y;
-        internal SKSurface Gradient;
-		internal readonly List<DelaunayTriangulator.Vertex> InternalPoints;
+        //allow triangulation views to update when a property is changed
+        public event PropertyChangedEventHandler PropertyChanged;
+
         
-	    internal Dictionary<Vertex, HashSet<Triad>> pointToTriangleDic = null;
+        internal readonly int BoundsWidth;
+		internal readonly int BoundsHeight;
 
-        public readonly List<Triad> TriangulatedPoints;
+        internal List<DelaunayTriangulator.Vertex> InternalPoints;
 
+        public Dictionary<Vertex, HashSet<Triad>> pointToTriangleDic = null;
+
+        public List<Triad> TriangulatedPoints;
+
+        private Triangulator angulator;
+
+        private bool pointsDirty = false;
+
+#region Triangulation Properties
+        public float Seed
+        {
+            get => _seed;
+            set
+            {
+                if (_seed.Equals(value))
+                    return;
+                _seed = value;
+                fastNoise.SetSeed((int)_seed);
+                OnPropertyChanged("Seed");
+            }
+        }
+
+        public float Frequency
+        {
+            get => _frequency;
+            set
+            {
+                if (_frequency.Equals(value))
+                    return;
+                _frequency = value;
+                fastNoise.SetFrequency(Frequency);
+                OnPropertyChanged("Frequency");
+            }
+        }
+
+        public float BleedY
+        {
+            get => _bleedY; 
+            set
+            {
+                if (_bleedY.Equals(value))
+                    return;
+                _bleedY = value;
+                OnPropertyChanged("BleedY");
+            }
+        }
+        public float BleedX
+        {
+            get => _bleedX; 
+            set
+            {
+                if (_bleedX.Equals(value))
+                    return;
+                _bleedX = value;
+                OnPropertyChanged("BleedX");
+            }
+        }
+        public float CellSize
+        {
+            get => _cellSize; 
+            set
+            {
+                if (_cellSize.Equals(value))
+                    return;
+                _cellSize = value;
+                _calcVariance = _cellSize * Variance / 2;
+                OnPropertyChanged("CellSize");
+            }
+        }
+        public float Variance
+        {
+            get => _variance; 
+            set
+            {
+                if (_variance.Equals(value))
+                    return;
+                _variance = value;
+                _calcVariance = CellSize * _variance / 2;
+                OnPropertyChanged("Variance");
+            }
+        }
+        public bool HideLines
+        {
+            get => _hideLines; 
+            set
+            {
+                if (_hideLines.Equals(value))
+                    return;
+                _hideLines = value;
+                OnPropertyChanged("HideLines");
+            }
+        }
+#endregion
+
+#region Private variables
+        //default values
+        private float _cellSize = 150;
+        private float _variance = .75f;
+        private float _calcVariance;
+        private float _bleedX;
+        private float _bleedY;
+        private bool _hideLines = false;
+        //randomly seed the triangulation from the start
+        private float _seed = Guid.NewGuid().GetHashCode();
+        private float _frequency = .01f;
+
+        private SKSurface _gradient;
         //used to speed up color access time from gradient
-	    SKImageInfo readColorImageInfo;
-	    SKBitmap readColorBitmap;
-	    IntPtr pixelBuffer;
+        private SKImageInfo _readColorImageInfo;
+        private SKBitmap _readColorBitmap;
+        private IntPtr _pixelBuffer;
 
-        FastNoise fastNoise;
+        //noise generator
+        private FastNoise fastNoise;
 
-	    private readonly SKPaint strokePaint, fillPaint;
+        //paints for drawing
+        private readonly SKPaint _strokePaint, _fillPaint;
 
         //reuseable variables to speed up operations
-	    private SKPoint _pathPointA;
-	    private SKPoint _pathPointB;
-	    private SKPoint _pathPointC;
-	    private SKPoint _center;
-	    private SKPath _trianglePath;
+        private SKPoint _pathPointA;
+        private SKPoint _pathPointB;
+        private SKPoint _pathPointC;
+        private SKPoint _center;
+        private SKPath _trianglePath;
+#endregion
 
-        public Triangulation(int boundsWidth, int boundsHeight, float variance, float cellSize, float frequency, float seed)
+        public Triangulation(int boundsWidth, int boundsHeight)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;
-            Variance = variance;
-            CellSize = cellSize;
+
             var info = new SKImageInfo(boundsWidth, boundsHeight);
-            UpdateVars(info);
-            fastNoise = new FastNoise((int)seed);
-            fastNoise.SetFrequency(frequency);
+            _gradient = GetGradient(info);
+            _calcVariance = CellSize * Variance / 2;
+            // how the bleeds are initially set
+            BleedX = BoundsWidth / 3;
+            BleedY = BoundsHeight / 3;
+
+            fastNoise = new FastNoise((int)Seed);
+            fastNoise.SetFrequency(Frequency);
             fastNoise.SetNoiseType(FastNoise.NoiseType.Perlin);
 
-			InternalPoints = GeneratePoints();
-		    var angulator = new Triangulator();
-		    TriangulatedPoints = angulator.Triangulation(InternalPoints);
+            angulator = new Triangulator();
+            GeneratePoints();
 
             //https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
             
-            readColorImageInfo = new SKImageInfo();
-            readColorImageInfo.ColorType = SKColorType.Argb4444;
-            readColorImageInfo.AlphaType = SKAlphaType.Premul;
+            _readColorImageInfo = new SKImageInfo();
+            _readColorImageInfo.ColorType = SKColorType.Argb4444;
+            _readColorImageInfo.AlphaType = SKAlphaType.Premul;
 
-            readColorImageInfo.Width = 1;
-            readColorImageInfo.Height = 1;
+            _readColorImageInfo.Width = 1;
+            _readColorImageInfo.Height = 1;
 
             // create the 1x1 bitmap (auto allocates the pixel buffer)
-            readColorBitmap = new SKBitmap(readColorImageInfo);
-            readColorBitmap.LockPixels();
+            _readColorBitmap = new SKBitmap(_readColorImageInfo);
+            _readColorBitmap.LockPixels();
             // get the pixel buffer for the bitmap
             
-            pixelBuffer = readColorBitmap.GetPixels();
+            _pixelBuffer = _readColorBitmap.GetPixels();
 
-            strokePaint = new SKPaint
+            _strokePaint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
                 Color = SKColors.Black,
@@ -83,7 +193,7 @@ namespace LowPolyLibrary
             };
 
             //color set later
-            fillPaint = new SKPaint
+            _fillPaint = new SKPaint
             {
                 IsAntialias = true,
                 Style = SKPaintStyle.StrokeAndFill
@@ -95,20 +205,22 @@ namespace LowPolyLibrary
         ~Triangulation()
         {
             //need to release bitmap
-            readColorBitmap.Dispose();
-            Gradient.Dispose();
-            strokePaint.Dispose();
-            fillPaint.Dispose();
+            _readColorBitmap.Dispose();
+            _gradient.Dispose();
+            _strokePaint.Dispose();
+            _fillPaint.Dispose();
         }
 
-        public void GeneratedBitmap(SKSurface surface)
-	    {
-	        DrawFrame(surface);
-        }
-
-		private void DrawFrame(SKSurface surface)
+		public void DrawFrame(SKSurface surface)
 		{
-		    using (var canvas = surface.Canvas)
+            if (pointsDirty)
+            {
+                GeneratePoints();
+                pointsDirty = false;
+            }
+
+
+            using (var canvas = surface.Canvas)
 		    {
 		        canvas.Clear();
 
@@ -124,22 +236,24 @@ namespace LowPolyLibrary
 		            Geometry.centroid(tri, InternalPoints, ref _center);
 
 		            KeepInBounds(ref _center);
-		            fillPaint.Color = GetTriangleColor(_center);
-		            strokePaint.Color = fillPaint.Color;
+		            _fillPaint.Color = GetTriangleColor(_center);
+
 		            Geometry.DrawTrianglePath(ref _trianglePath, _pathPointA, _pathPointB, _pathPointC);
-		            canvas.DrawPath(_trianglePath, fillPaint);
-		            canvas.DrawPath(_trianglePath, strokePaint);
+		            canvas.DrawPath(_trianglePath, _fillPaint);
+                    if (HideLines){
+                        //need to maintain the strokepaint reguardless if we are just hiding its display
+                        var backup = _strokePaint.Color;
+                        _strokePaint.Color = _fillPaint.Color;
+                        canvas.DrawPath(_trianglePath, _strokePaint);
+                        _strokePaint.Color = backup;
+                    }
+                    else{
+                        canvas.DrawPath(_trianglePath, _strokePaint);
+                    }
+		            
 		        }
 		    }
         }
-
-        private void UpdateVars(SKImageInfo info)
-        {
-            calcVariance = CellSize * Variance / 2;
-            bleed_x =  BoundsWidth / 3;
-            bleed_y = BoundsHeight / 3;
-            Gradient = GetGradient(info);
-		}
 
 	    internal bool HasPointsToTrianglesSetup()
 	    {
@@ -180,26 +294,26 @@ namespace LowPolyLibrary
             //center = KeepInPicBounds(center, bleed_x, bleed_y, BoundsWidth, BoundsHeight);
 
             // read the surface into the bitmap
-	        Gradient.ReadPixels(readColorImageInfo, pixelBuffer, readColorImageInfo.RowBytes, (int)center.X, (int)center.Y);
+	        _gradient.ReadPixels(_readColorImageInfo, _pixelBuffer, _readColorImageInfo.RowBytes, (int)center.X, (int)center.Y);
 
 	        // access the color
-	        return readColorBitmap.GetPixel(0, 0);
+	        return _readColorBitmap.GetPixel(0, 0);
         }
 
 	    internal void KeepInBounds(ref SKPoint center)
 	    {
 	        if (center.X < 0)
-	            center.X += (int)bleed_x;
+	            center.X += (int)BleedX;
 	        else if (center.X > BoundsWidth)
-	            center.X -= (int)bleed_x;
+	            center.X -= (int)BleedX;
 	        else if (center.X.Equals(BoundsWidth))
-	            center.X -= (int)bleed_x - 1;
+	            center.X -= (int)BleedX - 1;
 	        if (center.Y < 0)
-	            center.Y += (int)bleed_y;
+	            center.Y += (int)BleedY;
 	        else if (center.Y > BoundsHeight)
-	            center.Y -= (int)bleed_y + 1;
+	            center.Y -= (int)BleedY + 1;
 	        else if (center.Y.Equals(BoundsHeight))
-	            center.Y -= (int)bleed_y - 1;
+	            center.Y -= (int)BleedY - 1;
 	    }
 
         private SKColor[] getGradientColors()
@@ -290,7 +404,22 @@ namespace LowPolyLibrary
 			return bmp;
 		}
 
-		private List<DelaunayTriangulator.Vertex> GeneratePoints()
+        //used to allow the points to be regenerated on the next frame draw
+        private void MarkPointsDirty()
+        {
+            //lock object to avoid race conditions?
+            pointsDirty = true;
+        }
+
+        public void GeneratePoints()
+        {
+            InternalPoints = GenerateUntriangulatedPoints();
+            TriangulatedPoints = angulator.Triangulation(InternalPoints);
+            //allow this to be recreated
+            pointToTriangleDic = null;
+        }
+
+        private List<DelaunayTriangulator.Vertex> GenerateUntriangulatedPoints()
 		{
             // avoid duplicate points
             var points = new HashSet<DelaunayTriangulator.Vertex>();
@@ -300,11 +429,11 @@ namespace LowPolyLibrary
             var in_range = new float[] { -.7071f, .7071f };
             // 3d
              //var in_range = new float[] { -.866f, .866f };
-            var variance = new float[] {-calcVariance, calcVariance};
+            var variance = new float[] {-_calcVariance, _calcVariance};
 
-            for (float i = -bleed_x; i < BoundsWidth + bleed_x; i += CellSize) 
+            for (float i = -BleedX; i < BoundsWidth + BleedX; i += CellSize) 
             {
-              for (float j = -bleed_y; j < BoundsHeight + bleed_y; j += CellSize) 
+              for (float j = -BleedY; j < BoundsHeight + BleedY; j += CellSize) 
               {
                     var noiseX = fastNoise.GetNoise(i, j);
                     var noiseY = fastNoise.GetNoise(j, i);
@@ -317,6 +446,17 @@ namespace LowPolyLibrary
 
 			return points.ToList();
 		}
+
+        protected void OnPropertyChanged(string name)
+        {
+            //here bc this covers all property changes
+            MarkPointsDirty();
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
         
 	}
 }

@@ -25,11 +25,12 @@ namespace LowPoly
         LowPolyView polyView;
         TextView widthTB, heightTB, varTB, sizeTB;
 
+        Triangulation currentTriangulation;
+
         LinearLayout controlsContainer;
 
         SeekBar freqSeek, seedSeek;
-        float freqProgress = .01f;
-        float seedProgress = 0;
+        float freqProgress, seedProgress;
 
         int numAnimFrames = 12;
 
@@ -51,6 +52,8 @@ namespace LowPoly
 
             polyView = FindViewById<LowPolyView>(Resource.Id.imageView1);
             polyView.SetOnTouchListener(this);
+
+            currentTriangulation = polyView.CurrentTriangulation;
 
             widthTB = FindViewById<TextView>(Resource.Id.widthTextBox);
             heightTB = FindViewById<TextView>(Resource.Id.heightTextBox);
@@ -89,13 +92,26 @@ namespace LowPoly
 
         private void UpdatePolyLib(object sender, EventArgs e)
         {
+            if (currentTriangulation == null)
+            {
+                currentTriangulation = polyView.CurrentTriangulation;
+            }
+
             var boundsWidth = Int32.Parse(widthTB.Text);
             var boundsHeight = Int32.Parse(heightTB.Text);
 
             var variance = float.Parse(varTB.Text);
             var cellSize = int.Parse(sizeTB.Text);
 
-            polyView = polyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize, freqProgress, seedProgress, this);
+            if (!boundsWidth.Equals(polyView.Width) || !boundsHeight.Equals(polyView.Height)) {
+                polyView = polyView.ResizeView(boundsWidth, boundsHeight, this);
+                currentTriangulation = polyView.CurrentTriangulation;
+            }
+            //set props on triangulation
+            currentTriangulation.Variance = variance;
+            currentTriangulation.CellSize = cellSize;
+            currentTriangulation.Frequency = freqProgress;
+            currentTriangulation.Seed = seedProgress;
         }
 
         public bool OnTouch(View v, MotionEvent e)

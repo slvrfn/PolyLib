@@ -55,32 +55,26 @@ namespace LowPolyLibrary.Views.Android
             AddView(AnimationUpdateView);
         }
 
-        public LowPolyView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize,float frequency, float seed, View.IOnTouchListener listener = null)
+        public LowPolyView ResizeView(int boundsWidth, int boundsHeight, View.IOnTouchListener listener = null)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
 
-            if (!boundsWidth.Equals(Width) || !boundsHeight.Equals(Height))
-            {
-                var parent = ((ViewGroup)Parent);
-                var index = parent.IndexOfChild(this);
-                parent.RemoveView(this);
-                var newCanvasView = new LowPolyView(Context);
+            var parent = ((ViewGroup)Parent);
+            var index = parent.IndexOfChild(this);
+            parent.RemoveView(this);
+            var newCanvasView = new LowPolyView(Context);
 
-                //setup listeners
-                newCanvasView.SetOnTouchListener(listener);
-                SetOnTouchListener(null);
+            //setup listeners
+            newCanvasView.SetOnTouchListener(listener);
+            SetOnTouchListener(null);
 
-                newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, frequency, seed);
-                parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
-                return newCanvasView;
-            }
-            else
-            {
-                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, frequency, seed);
-                //only called here since a whole new Lowpoly view is created in the other case
-                AnimationUpdateView.Invalidate();
-                return this;
-            }
+            parent.AddView(newCanvasView, index, new FrameLayout.LayoutParams(boundsWidth, boundsHeight));
+            return newCanvasView;
+        }
+
+        public void UpdateTriangulation(Triangulation tri){
+            TriangulationView.UpdateTriangulation(tri);
+            Invalidate();
         }
 
         public void AddAnimation(AnimationBase anim) => AnimationUpdateView.AddAnimation(anim);

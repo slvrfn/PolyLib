@@ -13,13 +13,7 @@ namespace LowPolyLibrary.Views.Android
     public class TriangulationView : SKCanvasView
     {
         public LowPolyLibrary.Triangulation Triangulation { get; private set; }
-
-        float Variance = .75f;
-        int CellSize = 150;
-        float frequency = .01f;
-        float seed = 0;
-
-        #region Constructors
+#region Constructors
 
         public TriangulationView(Context context) : base(context)
         {
@@ -36,6 +30,10 @@ namespace LowPolyLibrary.Views.Android
             Initialize();
         }
 
+        ~TriangulationView(){
+            Triangulation.PropertyChanged -= Triangulation_PropertyChanged;
+        }
+
 #endregion
 
         private void Initialize()
@@ -43,7 +41,9 @@ namespace LowPolyLibrary.Views.Android
             ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-                Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize, frequency, seed);
+                // Generate simple Triangulation for initial draw
+                Triangulation = new LowPolyLibrary.Triangulation(Width, Height);
+                Triangulation.PropertyChanged += Triangulation_PropertyChanged;
                 Invalidate();
             }));
         }
@@ -51,23 +51,43 @@ namespace LowPolyLibrary.Views.Android
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
             base.OnDraw(surface, info);
-            var watch = new System.Diagnostics.Stopwatch();
-            watch.Start();
             if(Triangulation != null)
             {
-                Triangulation.GeneratedBitmap(surface);
+                var watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
+
+                Triangulation.DrawFrame(surface);
                 Console.WriteLine("Triangulation drawn in: " + watch.ElapsedMilliseconds + " ms\n");
+
+                watch.Stop();
             }
-            watch.Stop();
         }
 
-        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize, float frequency, float seed)
+        public void UpdateTriangulation(Triangulation triangulation)
         {
-            Variance = variance;
-            CellSize = cellSize;
+            //no need to set this to null
+            if (triangulation == null)
+            {
+                return;
+            }
 
-            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight, Variance, CellSize, frequency, seed);
+            //clear previous event
+            if(Triangulation != null){
+                Triangulation.PropertyChanged -= Triangulation_PropertyChanged;
+            }
+
+            Triangulation = triangulation;
+            Triangulation.PropertyChanged += Triangulation_PropertyChanged;
+
             Invalidate();
         }
+
+        void Triangulation_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            //force redraw of entire lowpolyview
+            ((View)Parent).Invalidate();
+            Invalidate();
+        }
+
     }
 }

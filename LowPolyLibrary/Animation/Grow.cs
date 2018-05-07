@@ -77,7 +77,7 @@ namespace LowPolyLibrary.Animation
                 foreach (var updatedPoint in thisFrame)
                 {
                     //increment each triad that contains this updatedPoint
-                    foreach (var tri in PoTriDic[updatedPoint])
+                    foreach (var tri in PointToTriangleDic[updatedPoint])
                     {
                         PathPointA.X = InternalPoints[tri.a].x;
                         PathPointA.Y = InternalPoints[tri.a].y;
@@ -115,7 +115,7 @@ namespace LowPolyLibrary.Animation
                 outPoints.Add(new AnimatedPoint(currentPoint));
 
                 var drawList = new HashSet<Triad>();
-                drawList = PoTriDic[currentPoint];
+                drawList = PointToTriangleDic[currentPoint];
                 foreach (var tri in drawList)
                 {
                     //if the point is not used
