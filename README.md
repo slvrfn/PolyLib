@@ -28,6 +28,9 @@ polyView.AddAnimation(touchAnimation);
 
 Show what each parameter does
 
+## What makes this library different?
+Explain that this does more than create triangulations, but allows you to put animations on top of the triangulations. Even allows for creation of custom animations
+
 ## Libraries and tools used
 
 ### Alternate Usages
