@@ -9,11 +9,12 @@ namespace LowPolyLibrary.Animation
 {
     public class Sweep : AnimationBase
     {
-        private int Direction = -1;
+        private int _direction = Geometry.get360Direction();
 
         public Sweep(Triangulation triangulation, int numFrames) : base(triangulation, numFrames)
         {
-
+            //all the points will move within 15 degrees of the same direction
+            _direction = Geometry.getAngleInRange(_direction, 15);
         }
 
         //necessary to prevent animationbase from "setting up" multiple times
@@ -26,8 +27,6 @@ namespace LowPolyLibrary.Animation
         internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
             var animatedPoints = new HashSet<AnimatedPoint>();
-            //all the points will move within 15 degrees of the same direction
-            var localDirection = Geometry.getAngleInRange(Direction, 15);
 
             //accumulate all points in the current column represented by frame index
             List<SkiaSharp.SKPoint> framePoints = new List<SkiaSharp.SKPoint>();
@@ -43,8 +42,8 @@ namespace LowPolyLibrary.Animation
             foreach (var point in framePoints)
             {
                 var distCanMove = shortestDistanceFromPoints(point);
-                var xComponent = Geometry.getXComponent(localDirection, distCanMove);
-                var yComponent = Geometry.getYComponent(localDirection, distCanMove);
+                var xComponent = Geometry.getXComponent(_direction, distCanMove);
+                var yComponent = Geometry.getYComponent(_direction, distCanMove);
                 var p = new AnimatedPoint(point, (float)xComponent, (float)yComponent);
                 animatedPoints.Add(p);
             }
