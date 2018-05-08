@@ -22,7 +22,7 @@ namespace LowPolyLibrary.Views.iOS
         float _frequency = .01f;
         float _seed = 0;
 
-#region Constructors
+        #region Constructors
         public TriangulationView()
         {
             Initialize();
@@ -44,7 +44,7 @@ namespace LowPolyLibrary.Views.iOS
             // Called when loaded from xib or storyboard.
             Initialize();
         }
-#endregion
+        #endregion
 
         void Initialize()
         {

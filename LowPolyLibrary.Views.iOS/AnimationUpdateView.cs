@@ -18,7 +18,7 @@ namespace LowPolyLibrary.Views.iOS
     {
         private AnimationEngine _animationFlowEngine;
 
-#region Constructors
+        #region Constructors
         public AnimationUpdateView()
         {
             Initialize();
@@ -40,7 +40,7 @@ namespace LowPolyLibrary.Views.iOS
             // Called when loaded from xib or storyboard.
             Initialize();
         }
-#endregion
+        #endregion
 
         void Initialize()
         {

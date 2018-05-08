@@ -18,22 +18,22 @@ namespace LowPolyLibrary.Views.iOS
     {
         public PassthroughView()
         {
-            
+
         }
 
         public PassthroughView(CGRect frame) : base(frame)
         {
-            
+
         }
 
         public PassthroughView(IntPtr p) : base(p)
         {
-            
+
         }
 
         public override UIView HitTest(CGPoint point, UIEvent uievent)
         {
-            var v =  base.HitTest(point, uievent);
+            var v = base.HitTest(point, uievent);
 
             return v == this ? null : v;
         }

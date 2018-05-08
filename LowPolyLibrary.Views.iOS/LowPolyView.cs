@@ -22,7 +22,7 @@ namespace LowPolyLibrary.Views.iOS
 
         public Triangulation CurrentTriangulation => TriangulationView.Triangulation;
 
-#region Constructors
+        #region Constructors
         public LowPolyView()
         {
             Initialize();
@@ -44,11 +44,11 @@ namespace LowPolyLibrary.Views.iOS
             // Called when loaded from xib or storyboard.
             Initialize();
         }
-#endregion
+        #endregion
 
         void Initialize()
         {
-            
+
             TriangulationView = new TriangulationView(Frame);
 
             AnimationUpdateView = new AnimationUpdateView(Frame);
@@ -57,7 +57,7 @@ namespace LowPolyLibrary.Views.iOS
             AddSubview(AnimationUpdateView);
         }
 
-#region Touch
+        #region Touch
         public override void TouchesBegan(NSSet touches, UIEvent evt)
         {
             base.TouchesBegan(touches, evt);
@@ -65,7 +65,7 @@ namespace LowPolyLibrary.Views.iOS
             if (touch != null)
             {
                 var loc = touch.LocationInView(this);
-                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y* UIScreen.MainScreen.Scale), 250);
+                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y * UIScreen.MainScreen.Scale), 250);
                 AddAnimation(touchAnimation);
             }
 
@@ -82,7 +82,7 @@ namespace LowPolyLibrary.Views.iOS
                 AddAnimation(touchAnimation);
             }
         }
-#endregion
+        #endregion
 
         public LowPolyView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
@@ -90,7 +90,7 @@ namespace LowPolyLibrary.Views.iOS
 
             if (!boundsWidth.Equals(Frame.Size.Width) || !boundsHeight.Equals(Frame.Size.Height))
             {
-                
+
                 //var newCanvasView = new LowPolyView(Frame);
                 //newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
                 TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
