@@ -10,7 +10,7 @@ using System.CodeDom.Compiler;
 
 namespace LowPolyiOS
 {
-    [Register ("ViewController")]
+    [Register("ViewController")]
     partial class ViewController
     {
         [Outlet]
@@ -33,38 +33,44 @@ namespace LowPolyiOS
         UIKit.UITextField widthInput { get; set; }
 
         [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
+        [GeneratedCode("iOS Designer", "1.0")]
         LowPolyLibrary.Views.iOS.LowPolyView lowPolyView { get; set; }
 
-        void ReleaseDesignerOutlets ()
+        void ReleaseDesignerOutlets()
         {
-            if (cellSizeInput != null) {
-                cellSizeInput.Dispose ();
+            if (cellSizeInput != null)
+            {
+                cellSizeInput.Dispose();
                 cellSizeInput = null;
             }
 
-            if (generateButton != null) {
-                generateButton.Dispose ();
+            if (generateButton != null)
+            {
+                generateButton.Dispose();
                 generateButton = null;
             }
 
-            if (heightInput != null) {
-                heightInput.Dispose ();
+            if (heightInput != null)
+            {
+                heightInput.Dispose();
                 heightInput = null;
             }
 
-            if (lowPolyView != null) {
-                lowPolyView.Dispose ();
+            if (lowPolyView != null)
+            {
+                lowPolyView.Dispose();
                 lowPolyView = null;
             }
 
-            if (varInput != null) {
-                varInput.Dispose ();
+            if (varInput != null)
+            {
+                varInput.Dispose();
                 varInput = null;
             }
 
-            if (widthInput != null) {
-                widthInput.Dispose ();
+            if (widthInput != null)
+            {
+                widthInput.Dispose();
                 widthInput = null;
             }
         }

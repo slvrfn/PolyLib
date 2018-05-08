@@ -21,19 +21,23 @@ namespace LowPolyiOS
             varInput.Text = ".75";
             cellSizeInput.Text = "150";
 
-            widthInput.ShouldReturn = (textField) => {
+            widthInput.ShouldReturn = (textField) =>
+            {
                 textField.ResignFirstResponder();
                 return true;
             };
-            heightInput.ShouldReturn = (textField) => {
+            heightInput.ShouldReturn = (textField) =>
+            {
                 textField.ResignFirstResponder();
                 return true;
             };
-            varInput.ShouldReturn = (textField) => {
+            varInput.ShouldReturn = (textField) =>
+            {
                 textField.ResignFirstResponder();
                 return true;
             };
-            cellSizeInput.ShouldReturn = (textField) => {
+            cellSizeInput.ShouldReturn = (textField) =>
+            {
                 textField.ResignFirstResponder();
                 return true;
             };
