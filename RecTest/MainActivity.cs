@@ -19,7 +19,7 @@ namespace RecTest
             SetContentView(Resource.Layout.Main);
 
             recView = (RectangleView)FindViewById(Resource.Id.recView);
-            var seekbar = (SeekBar) FindViewById(Resource.Id.angleSeekBar);
+            var seekbar = (SeekBar)FindViewById(Resource.Id.angleSeekBar);
 
             seekbar.SetOnSeekBarChangeListener(this);
             recView.SetOnTouchListener(this);
@@ -32,12 +32,12 @@ namespace RecTest
 
         public void OnStartTrackingTouch(SeekBar seekBar)
         {
-            
+
         }
 
         public void OnStopTrackingTouch(SeekBar seekBar)
         {
-            
+
         }
 
         public bool OnTouch(View v, MotionEvent e)
