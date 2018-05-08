@@ -9,27 +9,27 @@ namespace LowPolyLibrary.Animation
 {
     public class Grow : AnimationBase
     {
-		bool[] pointUsed;
-		Queue<Vertex> animateList;
-		HashSet<AnimatedPoint> TotalAnimatedPoints;
+        bool[] pointUsed;
+        Queue<Vertex> animateList;
+        HashSet<AnimatedPoint> TotalAnimatedPoints;
 
         private bool backgroundNeedsToBeSet = true;
 
-        public Grow(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
-		{
+        public Grow(Triangulation triangulation, int numFrames) : base(triangulation, numFrames)
+        {
             TotalAnimatedPoints = new HashSet<AnimatedPoint>();
-			pointUsed = new bool[InternalPoints.Count];
-			for (int i = 0; i < pointUsed.Length; i++)
-			{
-				pointUsed[i] = false;
-			}
-		}
+            pointUsed = new bool[InternalPoints.Count];
+            for (int i = 0; i < pointUsed.Length; i++)
+            {
+                pointUsed[i] = false;
+            }
+        }
 
         internal override void SetupAnimation()
         {
             base.SetupAnimation();
-			//visible rec so that the start of the anim is from a point visible on screen
-			var visibleRecX = Random.Rand.Next(NumFrames);
+            //visible rec so that the start of the anim is from a point visible on screen
+            var visibleRecX = Random.Rand.Next(NumFrames);
             var visibleRecY = Random.Rand.Next(NumFrames);
 
             var recIndex = new SKPointI(visibleRecX, visibleRecY);
@@ -44,17 +44,17 @@ namespace LowPolyLibrary.Animation
 
             //index of a randoom point on the random visible rec
             var index = Random.Rand.Next(SeperatedPoints[recIndex].Count);
-			//pointF version of the point
+            //pointF version of the point
             var pointT = SeperatedPoints[recIndex].ToArray()[index];
-			//vertex version of the point
-			var point = new Vertex(pointT.X, pointT.Y);
-			//index of the chosen point in the overall points list
-			var indexT = InternalPoints.IndexOf(point);
-			//set the first point as used
-			pointUsed[indexT] = true;
+            //vertex version of the point
+            var point = new Vertex(pointT.X, pointT.Y);
+            //index of the chosen point in the overall points list
+            var indexT = InternalPoints.IndexOf(point);
+            //set the first point as used
+            pointUsed[indexT] = true;
 
-			animateList = new Queue<Vertex>();
-			animateList.Enqueue(point);
+            animateList = new Queue<Vertex>();
+            animateList.Enqueue(point);
 
             IsSetup = true;
         }
@@ -95,21 +95,21 @@ namespace LowPolyLibrary.Animation
                     }
                 }
             }
-		}
+        }
 
         internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
-			var outPoints = new HashSet<AnimatedPoint>();
+            var outPoints = new HashSet<AnimatedPoint>();
 
-			for (int i = 0; i < InternalPoints.Count / NumFrames; i++)
-			{
+            for (int i = 0; i < InternalPoints.Count / NumFrames; i++)
+            {
                 var tempEdges = new HashSet<AnimatedPoint>();
 
-			    //frame may not have any points to draw in the frame
-			    if (animateList.Count == 0)
+                //frame may not have any points to draw in the frame
+                if (animateList.Count == 0)
                     return new HashSet<AnimatedPoint>();
 
-			    var currentPoint = animateList.Dequeue();
+                var currentPoint = animateList.Dequeue();
 
                 //save the first point
                 outPoints.Add(new AnimatedPoint(currentPoint));
@@ -130,7 +130,7 @@ namespace LowPolyLibrary.Animation
                             //work on the point next iteration
                             animateList.Enqueue(InternalPoints[tri.a]);
                             //save the point
-							tempEdges.Add(new AnimatedPoint(InternalPoints[tri.a]));
+                            tempEdges.Add(new AnimatedPoint(InternalPoints[tri.a]));
                         }
                     }
                     if (!pointUsed[tri.b])
@@ -140,7 +140,7 @@ namespace LowPolyLibrary.Animation
                         if (!currentPoint.Equals(InternalPoints[tri.b]))
                         {
                             animateList.Enqueue(InternalPoints[tri.b]);
-							tempEdges.Add(new AnimatedPoint(InternalPoints[tri.b]));
+                            tempEdges.Add(new AnimatedPoint(InternalPoints[tri.b]));
                         }
                     }
                     if (!pointUsed[tri.c])
@@ -150,7 +150,7 @@ namespace LowPolyLibrary.Animation
                         if (!currentPoint.Equals(InternalPoints[tri.c]))
                         {
                             animateList.Enqueue(InternalPoints[tri.c]);
-							tempEdges.Add(new AnimatedPoint(InternalPoints[tri.c]));
+                            tempEdges.Add(new AnimatedPoint(InternalPoints[tri.c]));
                         }
                     }
 

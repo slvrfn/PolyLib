@@ -11,47 +11,47 @@ using SkiaSharp;
 
 namespace LowPolyLibrary.Animation
 {
-	public abstract class AnimationBase
-	{
-		#region Global Variables
-		internal readonly int NumFrames;
-	    internal int CurrentFrame = 0;
-        internal Dictionary<SKPointI,HashSet<SKPoint>> SeperatedPoints;
-		internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.pointToTriangleDic;
+    public abstract class AnimationBase
+    {
+        #region Global Variables
+        internal readonly int NumFrames;
+        internal int CurrentFrame = 0;
+        internal Dictionary<SKPointI, HashSet<SKPoint>> SeperatedPoints;
+        internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.pointToTriangleDic;
 
-	    protected readonly Triangulation CurrentTriangulation;
+        protected readonly Triangulation CurrentTriangulation;
 
         internal Geometry.RotatedGrid GridRotation;
-		internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
+        internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
 
-	    protected readonly SKPaint strokePaint, fillPaint;
+        protected readonly SKPaint strokePaint, fillPaint;
 
         internal bool IsSetup = false;
 
-	    //pull out variables that can be reused to prevent excessive mallocs
-	    protected SKPoint PathPointA;
-	    protected SKPoint PathPointB;
-	    protected SKPoint PathPointC;
-	    protected SKPoint Center;
-	    protected SKPath TrianglePath;
+        //pull out variables that can be reused to prevent excessive mallocs
+        protected SKPoint PathPointA;
+        protected SKPoint PathPointB;
+        protected SKPoint PathPointC;
+        protected SKPoint Center;
+        protected SKPath TrianglePath;
 
         protected int BoundsWidth => CurrentTriangulation.BoundsWidth;
-	    protected int BoundsHeight => CurrentTriangulation.BoundsHeight;
+        protected int BoundsHeight => CurrentTriangulation.BoundsHeight;
         #endregion
 
-		#region Constructor
-		protected AnimationBase(Triangulation triangulation, int frames)
-		{
-		    NumFrames = frames;
+        #region Constructor
+        protected AnimationBase(Triangulation triangulation, int frames)
+        {
+            NumFrames = frames;
             CurrentTriangulation = triangulation;
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 
-		    strokePaint = new SKPaint
-		    {
-		        Style = SKPaintStyle.Stroke,
-		        Color = SKColors.Black,
-		        IsAntialias = true
-		    };
+            strokePaint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Black,
+                IsAntialias = true
+            };
 
             //color set later
             fillPaint = new SKPaint
@@ -61,20 +61,20 @@ namespace LowPolyLibrary.Animation
             };
         }
 
-	    ~AnimationBase()
-	    {
-	        strokePaint.Dispose();
+        ~AnimationBase()
+        {
+            strokePaint.Dispose();
             fillPaint.Dispose();
             TrianglePath.Dispose();
-	    }
+        }
         #endregion
 
         #region Animation Methods
 
         internal virtual void SetupAnimation()
         {
-			var direction = Geometry.get360Direction();
-			seperatePointsIntoGridCells(InternalPoints, direction);
+            var direction = Geometry.get360Direction();
+            seperatePointsIntoGridCells(InternalPoints, direction);
             if (!CurrentTriangulation.HasPointsToTrianglesSetup())
             {
                 CurrentTriangulation.SetupPointsToTriangles();
@@ -84,19 +84,19 @@ namespace LowPolyLibrary.Animation
             PathPointB = new SKPoint();
             PathPointC = new SKPoint();
             Center = new SKPoint();
-            TrianglePath = new SKPath {FillType = SKPathFillType.EvenOdd};
+            TrianglePath = new SKPath { FillType = SKPathFillType.EvenOdd };
         }
 
-		internal abstract HashSet<AnimatedPoint> RenderFrame(int currentFrame);
+        internal abstract HashSet<AnimatedPoint> RenderFrame(int currentFrame);
 
         internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
-		{
+        {
             using (var canvas = surface.Canvas)
-			{
-			    canvas.Clear();
+            {
+                canvas.Clear();
                 //case in frame immediately after animation has completed, nothing needs to be drawn
-			    if (CurrentFrame > NumFrames)
-			        return;
+                if (CurrentFrame > NumFrames)
+                    return;
 
                 //vertex and its original vertex in InternalPoints
                 var updatedPoints = new Tuple<Vertex, Vertex>[InternalPoints.Count];
@@ -104,7 +104,7 @@ namespace LowPolyLibrary.Animation
                 //for quick lookup to check if a specified point index has been modified
                 var updatedIndices = new int[pointChanges.Count];
 
-			    for (var i = 0; i < pointChanges.Count; i++)
+                for (var i = 0; i < pointChanges.Count; i++)
                 {
                     var animatedPoint = pointChanges[i];
 
@@ -147,14 +147,14 @@ namespace LowPolyLibrary.Animation
                         //triAngleColorCenter
                         CurrentTriangulation.KeepInBounds(ref Center);
                         fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
-                        
+
                         Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
                         canvas.DrawPath(TrianglePath, fillPaint);
                         canvas.DrawPath(TrianglePath, strokePaint);
                     }
                 }
             }
-		}
+        }
 
         //gets the correct point to draw. Either a point updated this frame, or the original point in InternalPoints
         private void GetCorrectPoint(Tuple<Vertex, Vertex>[] updatedPoints, int[] updatedIndices, int internalPointIndex, ref SKPoint p)
@@ -170,24 +170,24 @@ namespace LowPolyLibrary.Animation
                 p.Y = InternalPoints[internalPointIndex].y;
             }
         }
-		#endregion
+        #endregion
 
-		#region Animation Helper Functions
+        #region Animation Helper Functions
 
         // seperates the internal points into a logical grid of cells
         internal void seperatePointsIntoGridCells(List<DelaunayTriangulator.Vertex> points, int angle)
-		{
+        {
             GridRotation = Geometry.createGridTransformation(angle, BoundsWidth, BoundsHeight, NumFrames);
 
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
 
-		    SKPointI gridIndex = new SKPointI();
+            SKPointI gridIndex = new SKPointI();
 
             var newPoint = new SKPoint();
-			foreach (var point in points)
-			{
-				newPoint.X = point.x;
-				newPoint.Y = point.y;
+            foreach (var point in points)
+            {
+                newPoint.X = point.x;
+                newPoint.Y = point.y;
 
                 GridRotation.CellCoordsFromOriginPoint(ref gridIndex, newPoint);
 
@@ -195,79 +195,79 @@ namespace LowPolyLibrary.Animation
                 if (!SeperatedPoints.ContainsKey(gridIndex))
                     SeperatedPoints[gridIndex] = new HashSet<SKPoint>();
                 SeperatedPoints[gridIndex].Add(newPoint);
-			}
-		}
+            }
+        }
 
-	    //adds first layer of points surrounding the points in the sourceList to the destination list, optionally allowing to limit displacement
+        //adds first layer of points surrounding the points in the sourceList to the destination list, optionally allowing to limit displacement
         protected void AddConnectedPoints(SKPoint point, IEnumerable<SKPoint> sourceList, ICollection<AnimatedPoint> destinationList, bool limitDisplacement = true)
-	    {
-	        var v = new Vertex(point.X, point.Y);
-	        //get points v is connected to
-	        var triadsContaingV = PointToTriangleDic[v];
+        {
+            var v = new Vertex(point.X, point.Y);
+            //get points v is connected to
+            var triadsContaingV = PointToTriangleDic[v];
 
-	        foreach (var triad in triadsContaingV)
-	        {
-	            //check if points connected to v are not in the source list
-	            //if they are not, adds them to the destination list
+            foreach (var triad in triadsContaingV)
+            {
+                //check if points connected to v are not in the source list
+                //if they are not, adds them to the destination list
 
-	            //no need to create SKPoint until actually added to the animated point
-	            if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.a].x) &&
-	                                     p.Y.Equals(InternalPoints[triad.a].y)))
-	            {
-	                destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y), limitDisplacement: limitDisplacement));
-	            }
-	            if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.b].x) &&
-	                                     p.Y.Equals(InternalPoints[triad.b].y)))
-	            {
-	                destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y), limitDisplacement: limitDisplacement));
-	            }
-	            if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.c].x) &&
-	                                     p.Y.Equals(InternalPoints[triad.c].y)))
-	            {
-	                destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y), limitDisplacement: limitDisplacement));
-	            }
-	        }
-	    }
+                //no need to create SKPoint until actually added to the animated point
+                if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.a].x) &&
+                                         p.Y.Equals(InternalPoints[triad.a].y)))
+                {
+                    destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.a].x, InternalPoints[triad.a].y), limitDisplacement: limitDisplacement));
+                }
+                if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.b].x) &&
+                                         p.Y.Equals(InternalPoints[triad.b].y)))
+                {
+                    destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.b].x, InternalPoints[triad.b].y), limitDisplacement: limitDisplacement));
+                }
+                if (!sourceList.Any(p => p.X.Equals(InternalPoints[triad.c].x) &&
+                                         p.Y.Equals(InternalPoints[triad.c].y)))
+                {
+                    destinationList.Add(new AnimatedPoint(new SKPoint(InternalPoints[triad.c].x, InternalPoints[triad.c].y), limitDisplacement: limitDisplacement));
+                }
+            }
+        }
 
         internal float shortestDistanceFromPoints(SKPoint workingPoint)
-		{
-			//this list consists of all the triangles containing the point.
+        {
+            //this list consists of all the triangles containing the point.
             var v = new Vertex(workingPoint.X, workingPoint.Y);
-			var tris = PointToTriangleDic[v];
+            var tris = PointToTriangleDic[v];
 
-			//shortest distance between a workingPoint and all vertices of the given triangle list
-			float shortest = -1;
-			foreach (var tri in tris)
-			{
-				//get distances between a workingPoint and the close triangle vertices
-				float vertDistance = float.MinValue;
+            //shortest distance between a workingPoint and all vertices of the given triangle list
+            float shortest = -1;
+            foreach (var tri in tris)
+            {
+                //get distances between a workingPoint and the close triangle vertices
+                float vertDistance = float.MinValue;
 
-				var vertDistance1 = Geometry.dist(workingPoint, InternalPoints[tri.a]);
-				var vertDistance2 = Geometry.dist(workingPoint, InternalPoints[tri.b]);
-				var vertDistance3 = Geometry.dist(workingPoint, InternalPoints[tri.c]);
+                var vertDistance1 = Geometry.dist(workingPoint, InternalPoints[tri.a]);
+                var vertDistance2 = Geometry.dist(workingPoint, InternalPoints[tri.b]);
+                var vertDistance3 = Geometry.dist(workingPoint, InternalPoints[tri.c]);
 
-				if (vertDistance1.Equals(0))
-					vertDistance = Math.Min(vertDistance2, vertDistance3);
-				else if (vertDistance2.Equals(0))
-				{
-					vertDistance = Math.Min(vertDistance1, vertDistance3);
-				}
-				else if (vertDistance3.Equals(0))
-				{
-					vertDistance = Math.Min(vertDistance1, vertDistance2);
-				}
+                if (vertDistance1.Equals(0))
+                    vertDistance = Math.Min(vertDistance2, vertDistance3);
+                else if (vertDistance2.Equals(0))
+                {
+                    vertDistance = Math.Min(vertDistance1, vertDistance3);
+                }
+                else if (vertDistance3.Equals(0))
+                {
+                    vertDistance = Math.Min(vertDistance1, vertDistance2);
+                }
 
-				//if this is the first run (shortest == -1) then tempShortest is the vertDistance
-				if (shortest.CompareTo(-1) == 0) //if shortest == -1
-					shortest = vertDistance;
-				//if not the first run, only assign shortest if vertDistance is smaller
-				else
-					if (vertDistance < shortest)//if the vertDistance < current shortest distance and not equal to 0
-					shortest = vertDistance;
-			}
-			return shortest;
-		}
+                //if this is the first run (shortest == -1) then tempShortest is the vertDistance
+                if (shortest.CompareTo(-1) == 0) //if shortest == -1
+                    shortest = vertDistance;
+                //if not the first run, only assign shortest if vertDistance is smaller
+                else
+                    if (vertDistance < shortest)//if the vertDistance < current shortest distance and not equal to 0
+                    shortest = vertDistance;
+            }
+            return shortest;
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

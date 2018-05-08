@@ -10,60 +10,60 @@ using LowPolyLibrary.Animation;
 
 namespace LowPolyLibrary.Threading
 {
-	// Propagates data in a sliding window fashion.
-	public class RandomAnimationBlock : ISourceBlock<AnimationBase>
-	{
-		// The source part of the block.
-		private readonly IReceivableSourceBlock<AnimationBase> _msource;
+    // Propagates data in a sliding window fashion.
+    public class RandomAnimationBlock : ISourceBlock<AnimationBase>
+    {
+        // The source part of the block.
+        private readonly IReceivableSourceBlock<AnimationBase> _msource;
 
-		private readonly BroadcastBlock<AnimationBase> _source;
+        private readonly BroadcastBlock<AnimationBase> _source;
 
         private Triangulation _tri;
 
         //functions to be provided by user that specify how an animation should be created
         //ex: a function which randomly assigns touch locations couild be created
-	    private readonly List<Func<Triangulation, AnimationBase>> animCreators;
+        private readonly List<Func<Triangulation, AnimationBase>> animCreators;
 
-		Timer tim;
+        Timer tim;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
         public RandomAnimationBlock(CurrentAnimationsBlock animBlock, int MSdelayUntilAnimAdded)
-		{
-			_source = new BroadcastBlock<AnimationBase>(f => f);
+        {
+            _source = new BroadcastBlock<AnimationBase>(f => f);
 
             _msource = _source;
 
-			//LinkTo(animBlock, new DataflowLinkOptions());
+            //LinkTo(animBlock, new DataflowLinkOptions());
 
 
-			animBlock.AnimationAdded += AnimBlock_AnimationAdded;
-			animBlock.NoPendingAnimations += AnimBlock_NoPendingAnimations;
+            animBlock.AnimationAdded += AnimBlock_AnimationAdded;
+            animBlock.NoPendingAnimations += AnimBlock_NoPendingAnimations;
 
-			//delay until random animation is added
-			tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
+            //delay until random animation is added
+            tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
 
-            animCreators = new List<Func<Triangulation,AnimationBase>>();
-		}
-		#endregion
+            animCreators = new List<Func<Triangulation, AnimationBase>>();
+        }
+        #endregion
 
-	    public void AddAnimationCreator(Func<Triangulation,AnimationBase> animCreator)
-	    {
-	        animCreators.Add(animCreator);
-	    }
+        public void AddAnimationCreator(Func<Triangulation, AnimationBase> animCreator)
+        {
+            animCreators.Add(animCreator);
+        }
 
-		public async Task<bool> AddRandomAnimation(object sender)
-		{
-            if (animCreators.Count>1)
-		    {
-		        var index = Random.Rand.Next(animCreators.Count);
+        public async Task<bool> AddRandomAnimation(object sender)
+        {
+            if (animCreators.Count > 1)
+            {
+                var index = Random.Rand.Next(animCreators.Count);
 
-		        var randomAnim = animCreators[index](_tri);
-		        return await _source.SendAsync(randomAnim);
+                var randomAnim = animCreators[index](_tri);
+                return await _source.SendAsync(randomAnim);
 
-		    }
-			return false;
-		}
+            }
+            return false;
+        }
 
         public void UpdateTriangulation(Triangulation _tri)
         {
@@ -71,66 +71,66 @@ namespace LowPolyLibrary.Threading
             tim.Start();
         }
 
-		void AnimBlock_AnimationAdded(object sender, EventArgs e)
-		{
-			tim.Stop();
-		}
+        void AnimBlock_AnimationAdded(object sender, EventArgs e)
+        {
+            tim.Stop();
+        }
 
-		void AnimBlock_NoPendingAnimations(object sender, EventArgs e)
-		{
-			tim.Start();
-		}
+        void AnimBlock_NoPendingAnimations(object sender, EventArgs e)
+        {
+            tim.Start();
+        }
 
-		#region ISourceBlock<TOutput> members
+        #region ISourceBlock<TOutput> members
 
-		// Links this dataflow block to the provided target.
-		public IDisposable LinkTo(ITargetBlock<AnimationBase> target, DataflowLinkOptions linkOptions)
-		{
-			return _msource.LinkTo(target, linkOptions);
-		}
+        // Links this dataflow block to the provided target.
+        public IDisposable LinkTo(ITargetBlock<AnimationBase> target, DataflowLinkOptions linkOptions)
+        {
+            return _msource.LinkTo(target, linkOptions);
+        }
 
-		// Called by a target to reserve a message previously offered by a source 
-		// but not yet consumed by this target.
-		bool ISourceBlock<AnimationBase>.ReserveMessage(DataflowMessageHeader messageHeader,
-		   ITargetBlock<AnimationBase> target)
-		{
-			return _msource.ReserveMessage(messageHeader, target);
-		}
+        // Called by a target to reserve a message previously offered by a source 
+        // but not yet consumed by this target.
+        bool ISourceBlock<AnimationBase>.ReserveMessage(DataflowMessageHeader messageHeader,
+           ITargetBlock<AnimationBase> target)
+        {
+            return _msource.ReserveMessage(messageHeader, target);
+        }
 
-		// Called by a target to consume a previously offered message from a source.
-		AnimationBase ISourceBlock<AnimationBase>.ConsumeMessage(DataflowMessageHeader messageHeader,
-		   ITargetBlock<AnimationBase> target, out bool messageConsumed)
-		{
-			return _msource.ConsumeMessage(messageHeader,
-			   target, out messageConsumed);
-		}
+        // Called by a target to consume a previously offered message from a source.
+        AnimationBase ISourceBlock<AnimationBase>.ConsumeMessage(DataflowMessageHeader messageHeader,
+           ITargetBlock<AnimationBase> target, out bool messageConsumed)
+        {
+            return _msource.ConsumeMessage(messageHeader,
+               target, out messageConsumed);
+        }
 
-		// Called by a target to release a previously reserved message from a source.
-		void ISourceBlock<AnimationBase>.ReleaseReservation(DataflowMessageHeader messageHeader,
-		   ITargetBlock<AnimationBase> target)
-		{
-			_msource.ReleaseReservation(messageHeader, target);
-		}
+        // Called by a target to release a previously reserved message from a source.
+        void ISourceBlock<AnimationBase>.ReleaseReservation(DataflowMessageHeader messageHeader,
+           ITargetBlock<AnimationBase> target)
+        {
+            _msource.ReleaseReservation(messageHeader, target);
+        }
 
-		#endregion
+        #endregion
 
-		#region IDataflowBlock members
+        #region IDataflowBlock members
 
-		// Gets a Task that represents the completion of this dataflow block.
-		public Task Completion { get { return _msource.Completion; } }
+        // Gets a Task that represents the completion of this dataflow block.
+        public Task Completion { get { return _msource.Completion; } }
 
-		// Signals to this target block that it should not accept any more messages, 
-		// nor consume postponed messages. 
-		public void Complete()
-		{
-			_msource.Complete();
-		}
+        // Signals to this target block that it should not accept any more messages, 
+        // nor consume postponed messages. 
+        public void Complete()
+        {
+            _msource.Complete();
+        }
 
-		public void Fault(Exception error)
-		{
-			_msource.Fault(error);
-		}
+        public void Fault(Exception error)
+        {
+            _msource.Fault(error);
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

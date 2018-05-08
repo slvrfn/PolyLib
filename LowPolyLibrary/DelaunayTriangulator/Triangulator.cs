@@ -310,7 +310,7 @@ namespace DelaunayTriangulator
         {
             return ConvexHull(points, false);
         }
-        
+
         /// <summary>
         /// Return the convex hull of the supplied points,
         /// Optionally check for duplicate points
@@ -374,7 +374,7 @@ namespace DelaunayTriangulator
             int flipped = FlipTriangles(triads, idsA);
 
             int iterations = 1;
-            while (flipped > (int)(fraction * (float)numt) && iterations<1000)
+            while (flipped > (int)(fraction * (float)numt) && iterations < 1000)
             {
                 if ((iterations & 1) == 1)
                     flipped = FlipTriangles(triads, idsA, idsB);
@@ -389,7 +389,7 @@ namespace DelaunayTriangulator
                 ((iterations & 1) == 1) ? idsA : idsB, idSetA);
 
             iterations = 1;
-            while (flipped > 0 && iterations< 2000)
+            while (flipped > 0 && iterations < 2000)
             {
                 if ((iterations & 1) == 1)
                     flipped = FlipTriangles(triads, idSetA, idSetB);
@@ -501,7 +501,7 @@ namespace DelaunayTriangulator
 
             return false;
         }
-         
+
         /// <summary>
         /// Flip triangles that do not satisfy the Delaunay condition
         /// </summary>
@@ -525,7 +525,7 @@ namespace DelaunayTriangulator
 
             return flipped;
         }
-         
+
         private int FlipTriangles(List<Triad> triads, bool[] idsToTest, bool[] idsFlipped)
         {
             int numt = (int)triads.Count;

@@ -29,7 +29,7 @@ namespace LowPolyLibrary.Animation
         {
             //start the thread that will keep the animation flow alive
             Task.Run(RestartActionBlock);
-            
+
             uiTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             _currentDisplay = display;
@@ -50,7 +50,7 @@ namespace LowPolyLibrary.Animation
                     currentRenderedFrame = arg;
                     _currentDisplay.SignalRedraw();
                 }, uiTaskScheduler);
-                
+
                 if (ShouldStartRandomAnim)
                 {
                     animationFlow.StartRandomAnimationsLoop(RandomAnimationTime);

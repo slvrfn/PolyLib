@@ -19,9 +19,9 @@ namespace DelaunayTriangulator
         // Position and radius squared of circumcircle
         public float circumcircleR2, circumcircleX, circumcircleY;
 
-        public Triad(int x, int y, int z) 
+        public Triad(int x, int y, int z)
         {
-            a = x; b = y; c = z; ab = -1; bc = -1; ac = -1; 
+            a = x; b = y; c = z; ab = -1; bc = -1; ac = -1;
             circumcircleR2 = -1; //x = 0; y = 0;
         }
 

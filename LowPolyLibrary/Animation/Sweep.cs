@@ -9,10 +9,10 @@ namespace LowPolyLibrary.Animation
 {
     public class Sweep : AnimationBase
     {
-		private int Direction = -1;
+        private int Direction = -1;
 
-        public Sweep(Triangulation triangulation, int numFrames): base(triangulation, numFrames) 
-		{
+        public Sweep(Triangulation triangulation, int numFrames) : base(triangulation, numFrames)
+        {
 
         }
 
@@ -25,7 +25,7 @@ namespace LowPolyLibrary.Animation
 
         internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
-			var animatedPoints = new HashSet<AnimatedPoint>();
+            var animatedPoints = new HashSet<AnimatedPoint>();
             //all the points will move within 15 degrees of the same direction
             var localDirection = Geometry.getAngleInRange(Direction, 15);
 
@@ -45,10 +45,10 @@ namespace LowPolyLibrary.Animation
                 var distCanMove = shortestDistanceFromPoints(point);
                 var xComponent = Geometry.getXComponent(localDirection, distCanMove);
                 var yComponent = Geometry.getYComponent(localDirection, distCanMove);
-				var p = new AnimatedPoint(point, (float)xComponent, (float)yComponent);
+                var p = new AnimatedPoint(point, (float)xComponent, (float)yComponent);
                 animatedPoints.Add(p);
             }
-			return animatedPoints;
+            return animatedPoints;
         }
     }
 }

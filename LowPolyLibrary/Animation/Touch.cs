@@ -125,7 +125,7 @@ namespace LowPolyLibrary.Animation
                     DoPointDisplacement(animPoint, currentFrame);
                 }
             }
-            
+
             return animatedPoints;
         }
 

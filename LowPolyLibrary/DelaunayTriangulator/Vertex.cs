@@ -16,7 +16,7 @@ namespace DelaunayTriangulator
 
         protected Vertex() { }
 
-        public Vertex(float x, float y) 
+        public Vertex(float x, float y)
         {
             this.x = x; this.y = y;
         }
@@ -54,7 +54,7 @@ namespace DelaunayTriangulator
         {
             unchecked
             {
-                return (x.GetHashCode()*397) ^ y.GetHashCode();
+                return (x.GetHashCode() * 397) ^ y.GetHashCode();
             }
         }
     }

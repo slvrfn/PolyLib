@@ -27,7 +27,7 @@ namespace DelaunayTriangulator
         public void DeepCopy(Set<T> other)
         {
             list.Clear();
-            foreach(T k in other.list.Keys)
+            foreach (T k in other.list.Keys)
                 Add(k);
         }
 

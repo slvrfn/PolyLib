@@ -16,7 +16,7 @@ namespace LowPolyLibrary.Animation
             DrawFunction = funct;
         }
 
-        public RenderedFrame(Action<SKSurface, List<AnimatedPoint>> funct, List<AnimatedPoint> points )
+        public RenderedFrame(Action<SKSurface, List<AnimatedPoint>> funct, List<AnimatedPoint> points)
         {
             FramePoints = points;
             DrawFunction = funct;

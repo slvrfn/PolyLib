@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,26 +6,26 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
-  using Gridsum.DataflowEx;
-  using LowPolyLibrary.Threading;
+using Gridsum.DataflowEx;
+using LowPolyLibrary.Threading;
 using LowPolyLibrary.Animation;
 using SkiaSharp;
-  using Exception = System.Exception;
-  using Math = System.Math;
+using Exception = System.Exception;
+using Math = System.Math;
 
 namespace LowPolyLibrary.Animation
 {
-	public class AnimationFlow : Dataflow<AnimationBase>
-	{
-		private readonly CurrentAnimationsBlock _animations; 
-		private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
-		private readonly FrameQueueBlock<AnimationBase[]> _frameQueue;
-		private RandomAnimationBlock _randomAnim;
-		private readonly ActionBlock<RenderedFrame> _signalFrameRendered;
+    public class AnimationFlow : Dataflow<AnimationBase>
+    {
+        private readonly CurrentAnimationsBlock _animations;
+        private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
+        private readonly FrameQueueBlock<AnimationBase[]> _frameQueue;
+        private RandomAnimationBlock _randomAnim;
+        private readonly ActionBlock<RenderedFrame> _signalFrameRendered;
 
         public AnimationFlow(Action<RenderedFrame> notifyFrameReady, TaskScheduler uiScheduler) : base(DataflowOptions.Default)
         {
-            
+
             _animations = new CurrentAnimationsBlock();
             _frameQueue = new FrameQueueBlock<AnimationBase[]>(new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
@@ -46,11 +46,11 @@ namespace LowPolyLibrary.Animation
 
                     animFrame.Add(x);
                 }
-                
+
                 //allows any derived draw function
                 //newest animation determines how all current animations will be drawn
-                var rend = new RenderedFrame(arg[arg.Length-1].DrawPointFrame);
-            
+                var rend = new RenderedFrame(arg[arg.Length - 1].DrawPointFrame);
+
                 //no use in "combining" animations unless there is more than 1 anim for this frame
                 if (animFrame.Count > 1)
                 {
@@ -110,10 +110,10 @@ namespace LowPolyLibrary.Animation
                 _animations.FrameRendered();
 
                 return rend;
-            }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = Environment.ProcessorCount});
+            }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             //limit parallelism so that only one redraw update can occur
-            _signalFrameRendered = new ActionBlock<RenderedFrame>(notifyFrameReady, new ExecutionDataflowBlockOptions {MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
+            _signalFrameRendered = new ActionBlock<RenderedFrame>(notifyFrameReady, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
 
             _animations.LinkTo(_frameQueue);
             _frameQueue.LinkTo(_renderFrame);
@@ -123,25 +123,25 @@ namespace LowPolyLibrary.Animation
             RegisterChild(_frameQueue);
             RegisterChild(_renderFrame);
             RegisterChild(_signalFrameRendered);
-		}
-
-	    public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
-	    {
-	        _randomAnim = new RandomAnimationBlock(_animations, msBetweenRandomAnim);
-	        _randomAnim.LinkTo(_animations, new DataflowLinkOptions());
-	        RegisterChild(_randomAnim);
         }
 
-	    public void StopRandomAnimationsLoop()
-	    {
-            //force completion of the flow, which will make the flow get recreated
-	        //engine determines if a new animation should be added
-            _animations.Complete();
-	    }
+        public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
+        {
+            _randomAnim = new RandomAnimationBlock(_animations, msBetweenRandomAnim);
+            _randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+            RegisterChild(_randomAnim);
+        }
 
-	    public override ITargetBlock<AnimationBase> InputBlock
-	    {
-	        get { return _animations; }
-	    }
-	}
+        public void StopRandomAnimationsLoop()
+        {
+            //force completion of the flow, which will make the flow get recreated
+            //engine determines if a new animation should be added
+            _animations.Complete();
+        }
+
+        public override ITargetBlock<AnimationBase> InputBlock
+        {
+            get { return _animations; }
+        }
+    }
 }
