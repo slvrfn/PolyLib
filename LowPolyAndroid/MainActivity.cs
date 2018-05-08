@@ -103,7 +103,8 @@ namespace LowPolyAndroid
             var variance = float.Parse(varTB.Text);
             var cellSize = int.Parse(sizeTB.Text);
 
-            if (!boundsWidth.Equals(polyView.Width) || !boundsHeight.Equals(polyView.Height)) {
+            if (!boundsWidth.Equals(polyView.Width) || !boundsHeight.Equals(polyView.Height))
+            {
                 polyView = polyView.ResizeView(boundsWidth, boundsHeight, this);
                 currentTriangulation = polyView.CurrentTriangulation;
             }
@@ -155,18 +156,18 @@ namespace LowPolyAndroid
             polyView.AddAnimation(sweepAnim);
         }
 
-#region seekbar change listener
+        #region seekbar change listener
         public void OnProgressChanged(SeekBar seekBar, int progress, bool fromUser)
         {
-            switch(seekBar.Id)
+            switch (seekBar.Id)
             {
                 case Resource.Id.seedSeek:
                     //keep seedprogress from 0-1000
-                    seedProgress = (progress/100f) * 1000;
+                    seedProgress = (progress / 100f) * 1000;
                     break;
                 case Resource.Id.frequencySeek:
                     //keep freqProgress 0-1
-                    freqProgress = ((progress+1) / 100f);
+                    freqProgress = ((progress + 1) / 100f);
                     break;
             }
             UpdatePolyLib(null, null);
@@ -174,14 +175,14 @@ namespace LowPolyAndroid
 
         public void OnStartTrackingTouch(SeekBar seekBar)
         {
-            
+
         }
 
         public void OnStopTrackingTouch(SeekBar seekBar)
         {
-            
+
         }
-#endregion
+        #endregion
     }
 }
 
