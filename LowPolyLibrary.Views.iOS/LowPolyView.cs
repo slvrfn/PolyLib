@@ -16,8 +16,8 @@ namespace LowPolyLibrary.Views.iOS
     [Register("LowPolyView"), DesignTimeVisible(true)]
     public class LowPolyView : UIView
     {
-        TriangulationView TriangulationView;
-        AnimationUpdateView AnimationUpdateView;
+        public TriangulationView TriangulationView;
+        public AnimationUpdateView AnimationUpdateView;
 
 
         public Triangulation CurrentTriangulation => TriangulationView.Triangulation;
