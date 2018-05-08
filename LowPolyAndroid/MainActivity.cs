@@ -16,7 +16,7 @@ using LowPolyLibrary.Views.Android;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
 
-namespace LowPoly
+namespace LowPolyAndroid
 {
     [Activity(Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
     public class MainActivity : Activity, View.IOnTouchListener, SeekBar.IOnSeekBarChangeListener

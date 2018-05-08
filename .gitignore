@@ -1,7 +1,7 @@
 LowPoly/obj/
 LowPoly/bin/
 .vs/LowPoly/v14/.suo
-LowPoly/Resources/Resource.designer.cs
+Resource.designer.cs
 packages/
 LowPolySkiaLibrary/bin/
 LowPolySkiaLibrary/obj
@@ -12,3 +12,5 @@ bin/
 obj/
 
 .idea/*
+
+*.user

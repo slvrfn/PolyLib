@@ -80,9 +80,9 @@
       <Project>{debb4c58-fe30-4796-83df-6bc819ee16fa}</Project>
       <Name>LowPolyLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LowPoly\LowPoly.csproj">
+    <ProjectReference Include="..\LowPolyAndroid\LowPolyAndroid.csproj">
       <Project>{8603726e-c512-46c0-a623-1d68777aa852}</Project>
-      <Name>LowPoly</Name>
+      <Name>LowPolyAndroid</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
