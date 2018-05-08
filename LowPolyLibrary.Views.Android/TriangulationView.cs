@@ -13,7 +13,7 @@ namespace LowPolyLibrary.Views.Android
     public class TriangulationView : SKCanvasView
     {
         public LowPolyLibrary.Triangulation Triangulation { get; private set; }
-#region Constructors
+        #region Constructors
 
         public TriangulationView(Context context) : base(context)
         {
@@ -30,11 +30,12 @@ namespace LowPolyLibrary.Views.Android
             Initialize();
         }
 
-        ~TriangulationView(){
+        ~TriangulationView()
+        {
             Triangulation.PropertyChanged -= Triangulation_PropertyChanged;
         }
 
-#endregion
+        #endregion
 
         private void Initialize()
         {
@@ -51,7 +52,7 @@ namespace LowPolyLibrary.Views.Android
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
         {
             base.OnDraw(surface, info);
-            if(Triangulation != null)
+            if (Triangulation != null)
             {
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
@@ -72,7 +73,8 @@ namespace LowPolyLibrary.Views.Android
             }
 
             //clear previous event
-            if(Triangulation != null){
+            if (Triangulation != null)
+            {
                 Triangulation.PropertyChanged -= Triangulation_PropertyChanged;
             }
 

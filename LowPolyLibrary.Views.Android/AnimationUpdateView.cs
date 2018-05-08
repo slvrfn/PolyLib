@@ -13,7 +13,7 @@ namespace LowPolyLibrary.Views.Android
     {
         private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
 
-#region Constructors
+        #region Constructors
 
         public AnimationUpdateView(Context context) : base(context)
         {
@@ -30,7 +30,7 @@ namespace LowPolyLibrary.Views.Android
             Initialize();
         }
 
-#endregion
+        #endregion
 
         private void Initialize()
         {

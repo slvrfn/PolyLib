@@ -18,7 +18,7 @@ namespace LowPolyLibrary.Views.Android
 
         public Triangulation CurrentTriangulation => TriangulationView.Triangulation;
 
-#region Constructors
+        #region Constructors
 
         protected LowPolyView(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
         {
@@ -40,7 +40,7 @@ namespace LowPolyLibrary.Views.Android
             Init();
         }
 
-#endregion
+        #endregion
 
         private void Init()
         {
@@ -72,7 +72,8 @@ namespace LowPolyLibrary.Views.Android
             return newCanvasView;
         }
 
-        public void UpdateTriangulation(Triangulation tri){
+        public void UpdateTriangulation(Triangulation tri)
+        {
             TriangulationView.UpdateTriangulation(tri);
             Invalidate();
         }
