@@ -35,6 +35,8 @@ namespace LowPolyLibrary.Animation
         protected SKPoint Center;
         protected SKPath TrianglePath;
 
+        protected readonly bool HideLines;
+
         protected int BoundsWidth => CurrentTriangulation.BoundsWidth;
         protected int BoundsHeight => CurrentTriangulation.BoundsHeight;
         #endregion
@@ -45,6 +47,7 @@ namespace LowPolyLibrary.Animation
             NumFrames = frames;
             CurrentTriangulation = triangulation;
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
+            HideLines = triangulation.HideLines;
 
             strokePaint = new SKPaint
             {
@@ -150,7 +153,18 @@ namespace LowPolyLibrary.Animation
 
                         Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
                         canvas.DrawPath(TrianglePath, fillPaint);
-                        canvas.DrawPath(TrianglePath, strokePaint);
+                        if (HideLines)
+                        {
+                            //need to maintain the strokepaint reguardless if we are just hiding its display
+                            var backup = strokePaint.Color;
+                            strokePaint.Color = fillPaint.Color;
+                            canvas.DrawPath(TrianglePath, strokePaint);
+                            strokePaint.Color = backup;
+                        }
+                        else
+                        {
+                            canvas.DrawPath(TrianglePath, strokePaint);
+                        }
                     }
                 }
             }

@@ -92,6 +92,18 @@ namespace LowPolyLibrary.Animation
                         fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
                         Geometry.DrawTrianglePath(ref TrianglePath, PathPointA, PathPointB, PathPointC);
                         canvas.DrawPath(TrianglePath, fillPaint);
+                        if (HideLines)
+                        {
+                            //need to maintain the strokepaint reguardless if we are just hiding its display
+                            var backup = strokePaint.Color;
+                            strokePaint.Color = fillPaint.Color;
+                            canvas.DrawPath(TrianglePath, strokePaint);
+                            strokePaint.Color = backup;
+                        }
+                        else
+                        {
+                            canvas.DrawPath(TrianglePath, strokePaint);
+                        }
                     }
                 }
             }
