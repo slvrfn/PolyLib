@@ -21,18 +21,18 @@ namespace LowPolyAndroid
     [Activity(Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
     public class MainActivity : Activity, View.IOnTouchListener, SeekBar.IOnSeekBarChangeListener
     {
-        Button button, animSButton, animGButton;
-        LowPolyView polyView;
-        TextView widthTB, heightTB, varTB, sizeTB;
+        Button _button, _animSButton, _animGButton;
+        LowPolyView _polyView;
+        TextView _widthTB, _heightTB, _varTB, _sizeTB;
 
-        Triangulation currentTriangulation;
+        Triangulation _currentTriangulation;
 
-        LinearLayout controlsContainer;
+        LinearLayout _controlsContainer;
 
-        SeekBar freqSeek, seedSeek;
-        float freqProgress, seedProgress;
+        SeekBar _freqSeek, _seedSeek;
+        float _freqProgress, _seedProgress;
 
-        int numAnimFrames = 12;
+        int _numAnimFrames = 12;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -43,76 +43,76 @@ namespace LowPolyAndroid
 
             // Get our button from the layout resource,
             // and attach an event to it
-            button = FindViewById<Button>(Resource.Id.button1);
-            button.Click += UpdatePolyLib;
-            animSButton = FindViewById<Button>(Resource.Id.animSButton);
-            animSButton.Click += sweepAnimation;
-            animGButton = FindViewById<Button>(Resource.Id.animGButton);
-            animGButton.Click += growAnimation;
+            _button = FindViewById<Button>(Resource.Id.button1);
+            _button.Click += UpdatePolyLib;
+            _animSButton = FindViewById<Button>(Resource.Id.animSButton);
+            _animSButton.Click += sweepAnimation;
+            _animGButton = FindViewById<Button>(Resource.Id.animGButton);
+            _animGButton.Click += growAnimation;
 
-            polyView = FindViewById<LowPolyView>(Resource.Id.imageView1);
-            polyView.SetOnTouchListener(this);
+            _polyView = FindViewById<LowPolyView>(Resource.Id.imageView1);
+            _polyView.SetOnTouchListener(this);
 
-            currentTriangulation = polyView.CurrentTriangulation;
+            _currentTriangulation = _polyView.CurrentTriangulation;
 
-            widthTB = FindViewById<TextView>(Resource.Id.widthTextBox);
-            heightTB = FindViewById<TextView>(Resource.Id.heightTextBox);
-            varTB = FindViewById<TextView>(Resource.Id.varTextBox);
-            sizeTB = FindViewById<TextView>(Resource.Id.sizeTextBox);
-            seedSeek = FindViewById<SeekBar>(Resource.Id.seedSeek);
-            freqSeek = FindViewById<SeekBar>(Resource.Id.frequencySeek);
+            _widthTB = FindViewById<TextView>(Resource.Id.widthTextBox);
+            _heightTB = FindViewById<TextView>(Resource.Id.heightTextBox);
+            _varTB = FindViewById<TextView>(Resource.Id.varTextBox);
+            _sizeTB = FindViewById<TextView>(Resource.Id.sizeTextBox);
+            _seedSeek = FindViewById<SeekBar>(Resource.Id.seedSeek);
+            _freqSeek = FindViewById<SeekBar>(Resource.Id.frequencySeek);
 
-            controlsContainer = FindViewById<LinearLayout>(Resource.Id.controlsContainer);
+            _controlsContainer = FindViewById<LinearLayout>(Resource.Id.controlsContainer);
 
-            seedSeek.SetOnSeekBarChangeListener(this);
-            freqSeek.SetOnSeekBarChangeListener(this);
+            _seedSeek.SetOnSeekBarChangeListener(this);
+            _freqSeek.SetOnSeekBarChangeListener(this);
 
 
             var metrics = Resources.DisplayMetrics;
 
-            widthTB.Text = metrics.WidthPixels.ToString();
-            heightTB.Text = metrics.HeightPixels.ToString();
+            _widthTB.Text = metrics.WidthPixels.ToString();
+            _heightTB.Text = metrics.HeightPixels.ToString();
 
-            varTB.Text = ".75";
-            sizeTB.Text = "150";
+            _varTB.Text = ".75";
+            _sizeTB.Text = "150";
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            polyView = null;
-            widthTB = null;
-            heightTB = null;
-            varTB = null;
-            sizeTB = null;
-            controlsContainer = null;
-            freqSeek = null;
-            freqSeek = null;
+            _polyView = null;
+            _widthTB = null;
+            _heightTB = null;
+            _varTB = null;
+            _sizeTB = null;
+            _controlsContainer = null;
+            _freqSeek = null;
+            _freqSeek = null;
         }
 
         private void UpdatePolyLib(object sender, EventArgs e)
         {
-            if (currentTriangulation == null)
+            if (_currentTriangulation == null)
             {
-                currentTriangulation = polyView.CurrentTriangulation;
+                _currentTriangulation = _polyView.CurrentTriangulation;
             }
 
-            var boundsWidth = Int32.Parse(widthTB.Text);
-            var boundsHeight = Int32.Parse(heightTB.Text);
+            var boundsWidth = Int32.Parse(_widthTB.Text);
+            var boundsHeight = Int32.Parse(_heightTB.Text);
 
-            var variance = float.Parse(varTB.Text);
-            var cellSize = int.Parse(sizeTB.Text);
+            var variance = float.Parse(_varTB.Text);
+            var cellSize = int.Parse(_sizeTB.Text);
 
-            if (!boundsWidth.Equals(polyView.Width) || !boundsHeight.Equals(polyView.Height))
+            if (!boundsWidth.Equals(_polyView.Width) || !boundsHeight.Equals(_polyView.Height))
             {
-                polyView = polyView.ResizeView(boundsWidth, boundsHeight, this);
-                currentTriangulation = polyView.CurrentTriangulation;
+                _polyView = _polyView.ResizeView(boundsWidth, boundsHeight, this);
+                _currentTriangulation = _polyView.CurrentTriangulation;
             }
             //set props on triangulation
-            currentTriangulation.Variance = variance;
-            currentTriangulation.CellSize = cellSize;
-            currentTriangulation.Frequency = freqProgress;
-            currentTriangulation.Seed = seedProgress;
+            _currentTriangulation.Variance = variance;
+            _currentTriangulation.CellSize = cellSize;
+            _currentTriangulation.Frequency = _freqProgress;
+            _currentTriangulation.Seed = _seedProgress;
         }
 
         public bool OnTouch(View v, MotionEvent e)
@@ -125,20 +125,20 @@ namespace LowPolyAndroid
                     break;
                 case MotionEventActions.Down:
                     startAnim = true;
-                    controlsContainer.Visibility = ViewStates.Invisible;
+                    _controlsContainer.Visibility = ViewStates.Invisible;
                     break;
                 case MotionEventActions.Move:
                     startAnim = true;
                     break;
                 case MotionEventActions.Up:
-                    controlsContainer.Visibility = ViewStates.Visible;
+                    _controlsContainer.Visibility = ViewStates.Visible;
                     break;
             }
 
             if (startAnim)
             {
-                var touchAnimation = new RandomTouch(polyView.CurrentTriangulation, 12, touch.X, touch.Y, 150);
-                polyView.AddAnimation(touchAnimation);
+                var touchAnimation = new RandomTouch(_polyView.CurrentTriangulation, 12, touch.X, touch.Y, 150);
+                _polyView.AddAnimation(touchAnimation);
             }
 
             return true;
@@ -146,14 +146,14 @@ namespace LowPolyAndroid
 
         private void growAnimation(object sender, EventArgs e)
         {
-            var growAnim = new Grow(polyView.CurrentTriangulation, numAnimFrames);
-            polyView.AddAnimation(growAnim);
+            var growAnim = new Grow(_polyView.CurrentTriangulation, _numAnimFrames);
+            _polyView.AddAnimation(growAnim);
         }
 
         private void sweepAnimation(object sender, EventArgs e)
         {
-            var sweepAnim = new Sweep(polyView.CurrentTriangulation, numAnimFrames);
-            polyView.AddAnimation(sweepAnim);
+            var sweepAnim = new Sweep(_polyView.CurrentTriangulation, _numAnimFrames);
+            _polyView.AddAnimation(sweepAnim);
         }
 
         #region seekbar change listener
@@ -163,11 +163,11 @@ namespace LowPolyAndroid
             {
                 case Resource.Id.seedSeek:
                     //keep seedprogress from 0-1000
-                    seedProgress = (progress / 100f) * 1000;
+                    _seedProgress = (progress / 100f) * 1000;
                     break;
                 case Resource.Id.frequencySeek:
                     //keep freqProgress 0-1
-                    freqProgress = ((progress + 1) / 100f);
+                    _freqProgress = ((progress + 1) / 100f);
                     break;
             }
             UpdatePolyLib(null, null);
