@@ -11,52 +11,52 @@ namespace LowPolyLibrary.Animation
     public class AnimationEngine
     {
         private IAnimationUpdateView _currentDisplay;
-        private RenderedFrame currentRenderedFrame;
+        private RenderedFrame _currentRenderedFrame;
 
         //for now keep look alive as long as the animation engine exists
-        private AnimationFlow animationFlow;
+        private AnimationFlow _animationFlow;
 
         //used to run final action of notifying canvas of a frame being availbe for drawing
-        readonly TaskScheduler uiTaskScheduler;
+        private readonly TaskScheduler _uiTaskScheduler;
 
-        private bool KeepLoopAlive = true;
+        private bool _keepLoopAlive = true;
 
         //used to track if a random animation loop should be added to the animaiton flow when it is started or recreated
-        private bool ShouldStartRandomAnim = false;
-        private int RandomAnimationTime = 5000;
+        private bool _shouldStartRandomAnim = false;
+        private int _randomAnimationTime = 5000;
 
         public AnimationEngine(IAnimationUpdateView display)
         {
             //start the thread that will keep the animation flow alive
             Task.Run(RestartActionBlock);
 
-            uiTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            _uiTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             _currentDisplay = display;
         }
 
         ~AnimationEngine()
         {
-            KeepLoopAlive = false;
+            _keepLoopAlive = false;
             _currentDisplay = null;
         }
 
         private async Task RestartActionBlock()
         {
-            while (KeepLoopAlive)
+            while (_keepLoopAlive)
             {
-                animationFlow = new AnimationFlow((arg) =>
+                _animationFlow = new AnimationFlow((arg) =>
                 {
-                    currentRenderedFrame = arg;
+                    _currentRenderedFrame = arg;
                     _currentDisplay.SignalRedraw();
-                }, uiTaskScheduler);
+                }, _uiTaskScheduler);
 
-                if (ShouldStartRandomAnim)
+                if (_shouldStartRandomAnim)
                 {
-                    animationFlow.StartRandomAnimationsLoop(RandomAnimationTime);
+                    _animationFlow.StartRandomAnimationsLoop(_randomAnimationTime);
                 }
 
-                var completionTask = await Task.WhenAny(animationFlow.CompletionTask);
+                var completionTask = await Task.WhenAny(_animationFlow.CompletionTask);
 
                 var message = "Animation Loop Has Closed: it ";
                 switch (completionTask.Status)
@@ -78,29 +78,29 @@ namespace LowPolyLibrary.Animation
 
         public void AddAnimation(AnimationBase anim)
         {
-            animationFlow.InputBlock.Post(anim);
+            _animationFlow.InputBlock.Post(anim);
         }
 
         public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
         {
-            RandomAnimationTime = msBetweenRandomAnim;
-            ShouldStartRandomAnim = true;
+            _randomAnimationTime = msBetweenRandomAnim;
+            _shouldStartRandomAnim = true;
 
-            animationFlow.StartRandomAnimationsLoop(RandomAnimationTime);
+            _animationFlow.StartRandomAnimationsLoop(_randomAnimationTime);
         }
 
         public void StopRandomAnimationsLoop()
         {
-            ShouldStartRandomAnim = false;
-            animationFlow.StopRandomAnimationsLoop();
+            _shouldStartRandomAnim = false;
+            _animationFlow.StopRandomAnimationsLoop();
         }
 
         public void DrawOnMe(SKSurface surface)
         {
-            if (currentRenderedFrame != null)
+            if (_currentRenderedFrame != null)
             {
-                currentRenderedFrame.DrawFunction(surface, currentRenderedFrame.FramePoints);
-                currentRenderedFrame = null;
+                _currentRenderedFrame.DrawFunction(surface, _currentRenderedFrame.FramePoints);
+                _currentRenderedFrame = null;
             }
             else
             {

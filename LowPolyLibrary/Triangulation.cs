@@ -28,9 +28,9 @@ namespace LowPolyLibrary
 
         public List<Triad> TriangulatedPoints;
 
-        private Triangulator angulator;
+        private Triangulator _angulator;
 
-        private bool pointsDirty = false;
+        private bool _pointsDirty = false;
 
         #region Triangulation Properties
         public float Seed
@@ -166,7 +166,7 @@ namespace LowPolyLibrary
             fastNoise.SetFrequency(Frequency);
             fastNoise.SetNoiseType(FastNoise.NoiseType.Perlin);
 
-            angulator = new Triangulator();
+            _angulator = new Triangulator();
             GeneratePoints();
 
             //https://forums.xamarin.com/discussion/92899/read-a-pixel-info-from-a-canvas
@@ -213,10 +213,10 @@ namespace LowPolyLibrary
 
         public void DrawFrame(SKSurface surface)
         {
-            if (pointsDirty)
+            if (_pointsDirty)
             {
                 GeneratePoints();
-                pointsDirty = false;
+                _pointsDirty = false;
             }
 
 
@@ -413,13 +413,13 @@ namespace LowPolyLibrary
         private void MarkPointsDirty()
         {
             //lock object to avoid race conditions?
-            pointsDirty = true;
+            _pointsDirty = true;
         }
 
         public void GeneratePoints()
         {
             InternalPoints = GenerateUntriangulatedPoints();
-            TriangulatedPoints = angulator.Triangulation(InternalPoints);
+            TriangulatedPoints = _angulator.Triangulation(InternalPoints);
             //allow this to be recreated
             pointToTriangleDic = null;
         }

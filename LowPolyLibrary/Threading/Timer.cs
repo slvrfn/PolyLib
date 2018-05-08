@@ -8,23 +8,23 @@ namespace LowPolyLibrary.Threading
     //http://stackoverflow.com/a/33683963/3344317
     public class Timer
     {
-        private bool timerRunning;
-        private int interval;
-        private TimerCallback tick;
-        private bool runOnce;
+        private bool _timerRunning;
+        private int _interval;
+        private TimerCallback _tick;
+        private bool _runOnce;
 
         public Timer(int interval, TimerCallback tick, bool runOnce = false)
         {
-            this.interval = interval;
-            this.tick = tick;
-            this.runOnce = runOnce;
+            this._interval = interval;
+            this._tick = tick;
+            this._runOnce = runOnce;
         }
 
         public Timer Start()
         {
-            if (!timerRunning)
+            if (!_timerRunning)
             {
-                timerRunning = true;
+                _timerRunning = true;
                 RunTimer();
             }
 
@@ -33,22 +33,22 @@ namespace LowPolyLibrary.Threading
 
         public void Stop()
         {
-            timerRunning = false;
+            _timerRunning = false;
         }
 
         private async Task RunTimer()
         {
-            while (timerRunning)
+            while (_timerRunning)
             {
-                await Task.Delay(interval);
+                await Task.Delay(_interval);
 
-                if (timerRunning)
+                if (_timerRunning)
                 {
                     //tick(this);
                     //intention is to complete whatever frame before the next
-                    await tick(this);
+                    await _tick(this);
 
-                    if (runOnce)
+                    if (_runOnce)
                     {
                         Stop();
                     }

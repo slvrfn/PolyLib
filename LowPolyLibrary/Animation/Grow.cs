@@ -9,19 +9,19 @@ namespace LowPolyLibrary.Animation
 {
     public class Grow : AnimationBase
     {
-        bool[] pointUsed;
-        Queue<Vertex> animateList;
-        HashSet<AnimatedPoint> TotalAnimatedPoints;
+        private bool[] _pointUsed;
+        private Queue<Vertex> _animateList;
+        private HashSet<AnimatedPoint> _totalAnimatedPoints;
 
-        private bool backgroundNeedsToBeSet = true;
+        private bool _backgroundNeedsToBeSet = true;
 
         public Grow(Triangulation triangulation, int numFrames) : base(triangulation, numFrames)
         {
-            TotalAnimatedPoints = new HashSet<AnimatedPoint>();
-            pointUsed = new bool[InternalPoints.Count];
-            for (int i = 0; i < pointUsed.Length; i++)
+            _totalAnimatedPoints = new HashSet<AnimatedPoint>();
+            _pointUsed = new bool[InternalPoints.Count];
+            for (int i = 0; i < _pointUsed.Length; i++)
             {
-                pointUsed[i] = false;
+                _pointUsed[i] = false;
             }
         }
 
@@ -51,10 +51,10 @@ namespace LowPolyLibrary.Animation
             //index of the chosen point in the overall points list
             var indexT = InternalPoints.IndexOf(point);
             //set the first point as used
-            pointUsed[indexT] = true;
+            _pointUsed[indexT] = true;
 
-            animateList = new Queue<Vertex>();
-            animateList.Enqueue(point);
+            _animateList = new Queue<Vertex>();
+            _animateList.Enqueue(point);
 
             IsSetup = true;
         }
@@ -66,10 +66,10 @@ namespace LowPolyLibrary.Animation
                 //case in frame immediately after animation has completed, nothing needs to be drawn
                 if (CurrentFrame >= NumFrames)
                     canvas.Clear();
-                else if (backgroundNeedsToBeSet)
+                else if (_backgroundNeedsToBeSet)
                 {
                     canvas.Clear(SKColors.Black);
-                    backgroundNeedsToBeSet = false;
+                    _backgroundNeedsToBeSet = false;
                 }
 
                 var thisFrame = edgeFrameList.Select((input) => new Vertex(input.Point.X, input.Point.Y));
@@ -118,10 +118,10 @@ namespace LowPolyLibrary.Animation
                 var tempEdges = new HashSet<AnimatedPoint>();
 
                 //frame may not have any points to draw in the frame
-                if (animateList.Count == 0)
+                if (_animateList.Count == 0)
                     return new HashSet<AnimatedPoint>();
 
-                var currentPoint = animateList.Dequeue();
+                var currentPoint = _animateList.Dequeue();
 
                 //save the first point
                 outPoints.Add(new AnimatedPoint(currentPoint));
@@ -131,37 +131,37 @@ namespace LowPolyLibrary.Animation
                 foreach (var tri in drawList)
                 {
                     //if the point is not used
-                    if (!pointUsed[tri.a])
+                    if (!_pointUsed[tri.a])
                     {
                         //the point is now used
-                        pointUsed[tri.a] = true;
+                        _pointUsed[tri.a] = true;
 
                         //if currentPoint is not equal to the tri vertex
                         if (!currentPoint.Equals(InternalPoints[tri.a]))
                         {
                             //work on the point next iteration
-                            animateList.Enqueue(InternalPoints[tri.a]);
+                            _animateList.Enqueue(InternalPoints[tri.a]);
                             //save the point
                             tempEdges.Add(new AnimatedPoint(InternalPoints[tri.a]));
                         }
                     }
-                    if (!pointUsed[tri.b])
+                    if (!_pointUsed[tri.b])
                     {
-                        pointUsed[tri.b] = true;
+                        _pointUsed[tri.b] = true;
 
                         if (!currentPoint.Equals(InternalPoints[tri.b]))
                         {
-                            animateList.Enqueue(InternalPoints[tri.b]);
+                            _animateList.Enqueue(InternalPoints[tri.b]);
                             tempEdges.Add(new AnimatedPoint(InternalPoints[tri.b]));
                         }
                     }
-                    if (!pointUsed[tri.c])
+                    if (!_pointUsed[tri.c])
                     {
-                        pointUsed[tri.c] = true;
+                        _pointUsed[tri.c] = true;
 
                         if (!currentPoint.Equals(InternalPoints[tri.c]))
                         {
-                            animateList.Enqueue(InternalPoints[tri.c]);
+                            _animateList.Enqueue(InternalPoints[tri.c]);
                             tempEdges.Add(new AnimatedPoint(InternalPoints[tri.c]));
                         }
                     }
@@ -171,9 +171,9 @@ namespace LowPolyLibrary.Animation
                 //tolist to ensure list copy
                 outPoints.UnionWith(tempEdges.ToList());
             }
-            TotalAnimatedPoints = outPoints;
+            _totalAnimatedPoints = outPoints;
 
-            return TotalAnimatedPoints;
+            return _totalAnimatedPoints;
         }
     }
 }

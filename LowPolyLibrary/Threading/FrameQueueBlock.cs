@@ -21,7 +21,7 @@ namespace LowPolyLibrary.Threading
 
         private readonly BufferBlock<T> _target;
 
-        Timer tim;
+        private Timer _tim;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
@@ -57,8 +57,8 @@ namespace LowPolyLibrary.Threading
             _msource = _source;
 
             //estimated fps
-            tim = new Timer(42, DisplayFrame, false);
-            tim.Start();
+            _tim = new Timer(42, DisplayFrame, false);
+            _tim.Start();
         }
         #endregion
 

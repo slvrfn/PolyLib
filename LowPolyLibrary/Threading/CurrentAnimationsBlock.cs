@@ -27,11 +27,11 @@ namespace LowPolyLibrary.Threading
 
         private readonly BroadcastBlock<AnimationBase[]> _source;
 
-        private List<AnimationBase> animList;
-        private List<AnimationBase> toBeAdded;
+        private List<AnimationBase> _animList;
+        private List<AnimationBase> _toBeAdded;
 
         //bool of whether or not a new anim should be started by various conditions
-        bool NoAnimation = true;
+        private bool _noAnimation = true;
 
 
         #region Constructors
@@ -45,9 +45,9 @@ namespace LowPolyLibrary.Threading
         public CurrentAnimationsBlock(DataflowBlockOptions broadcastBlockOptions, ExecutionDataflowBlockOptions actionBlockOptions)
         {
             // Create a queue to hold messages.
-            animList = new List<AnimationBase>();
+            _animList = new List<AnimationBase>();
 
-            toBeAdded = new List<AnimationBase>();
+            _toBeAdded = new List<AnimationBase>();
 
             // The source part of the propagator holds arrays of size windowSize
             // and propagates data out to any connected targets.
@@ -59,15 +59,15 @@ namespace LowPolyLibrary.Threading
                 //Signal that an animation was added
                 RaiseAnimationAdded();
                 //Add the item to the queue.
-                toBeAdded.Add(item);
+                _toBeAdded.Add(item);
 
-                if (NoAnimation)
+                if (_noAnimation)
                 {
                     AddPendingAnimations();
                     _source.Post(CurrentAnimations);
                 }
 
-                NoAnimation = false;
+                _noAnimation = false;
             }, actionBlockOptions);
 
             // When the target is set to the completed state, propagate out any
@@ -82,13 +82,13 @@ namespace LowPolyLibrary.Threading
         }
         #endregion
 
-        private AnimationBase[] CurrentAnimations => animList.ToArray();
+        private AnimationBase[] CurrentAnimations => _animList.ToArray();
 
         private void IncrementAnimations()
         {
             //for each animation
             var removeList = new List<AnimationBase>();
-            foreach (var t in animList)
+            foreach (var t in _animList)
             {
                 var anim = t as AnimationBase;
                 if (anim == null)
@@ -104,13 +104,13 @@ namespace LowPolyLibrary.Threading
             if (removeList.Count <= 0)
                 return;
             //remove elements from animList that are in removeList
-            animList.RemoveAll(x => removeList.Contains(x));
+            _animList.RemoveAll(x => removeList.Contains(x));
         }
 
         private void AddPendingAnimations()
         {
-            animList.AddRange(toBeAdded);
-            toBeAdded.Clear();
+            _animList.AddRange(_toBeAdded);
+            _toBeAdded.Clear();
         }
 
         public void FrameRendered()
@@ -124,7 +124,7 @@ namespace LowPolyLibrary.Threading
             }
             else
             {
-                NoAnimation = true;
+                _noAnimation = true;
                 RaiseNoPendingAnimations();
             }
         }

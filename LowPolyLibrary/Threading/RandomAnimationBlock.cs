@@ -22,9 +22,9 @@ namespace LowPolyLibrary.Threading
 
         //functions to be provided by user that specify how an animation should be created
         //ex: a function which randomly assigns touch locations couild be created
-        private readonly List<Func<Triangulation, AnimationBase>> animCreators;
+        private readonly List<Func<Triangulation, AnimationBase>> _animCreators;
 
-        Timer tim;
+        private Timer _tim;
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
@@ -41,24 +41,24 @@ namespace LowPolyLibrary.Threading
             animBlock.NoPendingAnimations += AnimBlock_NoPendingAnimations;
 
             //delay until random animation is added
-            tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
+            _tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
 
-            animCreators = new List<Func<Triangulation, AnimationBase>>();
+            _animCreators = new List<Func<Triangulation, AnimationBase>>();
         }
         #endregion
 
         public void AddAnimationCreator(Func<Triangulation, AnimationBase> animCreator)
         {
-            animCreators.Add(animCreator);
+            _animCreators.Add(animCreator);
         }
 
         public async Task<bool> AddRandomAnimation(object sender)
         {
-            if (animCreators.Count > 1)
+            if (_animCreators.Count > 1)
             {
-                var index = Random.Rand.Next(animCreators.Count);
+                var index = Random.Rand.Next(_animCreators.Count);
 
-                var randomAnim = animCreators[index](_tri);
+                var randomAnim = _animCreators[index](_tri);
                 return await _source.SendAsync(randomAnim);
 
             }
@@ -68,17 +68,17 @@ namespace LowPolyLibrary.Threading
         public void UpdateTriangulation(Triangulation _tri)
         {
             this._tri = _tri;
-            tim.Start();
+            _tim.Start();
         }
 
         void AnimBlock_AnimationAdded(object sender, EventArgs e)
         {
-            tim.Stop();
+            _tim.Stop();
         }
 
         void AnimBlock_NoPendingAnimations(object sender, EventArgs e)
         {
-            tim.Start();
+            _tim.Start();
         }
 
         #region ISourceBlock<TOutput> members
