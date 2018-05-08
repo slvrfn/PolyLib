@@ -18,9 +18,8 @@ namespace LowPolyLibrary
         //allow triangulation views to update when a property is changed
         public event PropertyChangedEventHandler PropertyChanged;
 
-
-        internal readonly int BoundsWidth;
-        internal readonly int BoundsHeight;
+        public readonly int BoundsWidth;
+        public readonly int BoundsHeight;
 
         internal List<DelaunayTriangulator.Vertex> InternalPoints;
 

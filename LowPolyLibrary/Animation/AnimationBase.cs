@@ -14,14 +14,12 @@ namespace LowPolyLibrary.Animation
     public abstract class AnimationBase
     {
         #region Global Variables
-        internal readonly int NumFrames;
-        internal int CurrentFrame = 0;
+        public readonly int NumFrames;
         internal Dictionary<SKPointI, HashSet<SKPoint>> SeperatedPoints;
         internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.pointToTriangleDic;
 
-        protected readonly Triangulation CurrentTriangulation;
+        public readonly Triangulation CurrentTriangulation;
 
-        internal Geometry.RotatedGrid GridRotation;
         internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
 
         protected readonly SKPaint strokePaint, fillPaint;
@@ -35,10 +33,23 @@ namespace LowPolyLibrary.Animation
         protected SKPoint Center;
         protected SKPath TrianglePath;
 
-        protected readonly bool HideLines;
+        public int BoundsWidth => CurrentTriangulation.BoundsWidth;
+        public int BoundsHeight => CurrentTriangulation.BoundsHeight;
 
-        protected int BoundsWidth => CurrentTriangulation.BoundsWidth;
-        protected int BoundsHeight => CurrentTriangulation.BoundsHeight;
+        public Geometry.RotatedGrid GridRotation
+        {
+            get;
+            private set;
+        }
+        public int CurrentFrame{
+            get;
+            internal set;
+        }
+        public bool HideLines
+        {
+            get;
+            internal set;
+        }
         #endregion
 
         #region Constructor
