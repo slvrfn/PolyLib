@@ -113,6 +113,13 @@ namespace LowPolyAndroid
             _currentTriangulation.CellSize = cellSize;
             _currentTriangulation.Frequency = _freqProgress;
             _currentTriangulation.Seed = _seedProgress;
+
+            var colors = Triangulation.getRandomColorBruColors(6);
+            var shader = Triangulation.GetRandomGradientShader(colors, _currentTriangulation.BoundsWidth,
+                _currentTriangulation.BoundsHeight);
+
+            _currentTriangulation.GradientColors = colors;
+            _currentTriangulation.GradientShader = shader;
         }
 
         public bool OnTouch(View v, MotionEvent e)

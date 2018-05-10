@@ -30,6 +30,7 @@ namespace LowPolyLibrary
         private Triangulator _angulator;
 
         private bool _pointsDirty = false;
+        private bool _gradientDirty = false;
 
         #region Triangulation Properties
         public float Seed
@@ -124,11 +125,24 @@ namespace LowPolyLibrary
                 if (_gradientColors.Equals(value))
                     return;
                 _gradientColors = value;
-                var info = new SKImageInfo(BoundsWidth, BoundsHeight);
-                _gradient = GetGradient(info, GradientColors);
+                MarkGradientDirty();
                 OnPropertyChanged("GradientColors");
             }
         }
+
+        public SKShader GradientShader
+        {
+            get => _gradientShader;
+            set
+            {
+                if (_gradientShader.Equals(value))
+                    return;
+                _gradientShader = value;
+                MarkGradientDirty();
+                OnPropertyChanged("GradientShader");
+            }
+        }
+
         #endregion
 
         #region Private variables
@@ -142,7 +156,9 @@ namespace LowPolyLibrary
         //randomly seed the triangulation from the start
         private float _seed = Guid.NewGuid().GetHashCode();
         private float _frequency = .01f;
+
         private SKColor[] _gradientColors = new SKColor[0];
+        private SKShader _gradientShader = SKShader.CreateEmpty();
         private bool gradientSetByUser = false;
 
         private SKSurface _gradient;
@@ -165,13 +181,18 @@ namespace LowPolyLibrary
         private SKPath _trianglePath;
         #endregion
 
-        public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors = null)
+        public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors = null, SKShader gradientShader = null)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;
 
             //use colors provided by user for gradient. If none provided, get some random colors
             GradientColors = gradientColors == null ? getRandomColorBruColors(6) : gradientColors;
+            //use gradient shader provided by user for gradient. If none provided, get some random shader
+            GradientShader = gradientShader == null ? GetRandomGradientShader(GradientColors, BoundsWidth, BoundsHeight) : gradientShader;
+
+            var info = new SKImageInfo(boundsWidth, boundsHeight);
+            _gradient = GetGradient(info, GradientColors, GradientShader);
 
             _calcVariance = CellSize * Variance / 2;
             // how the bleeds are initially set
@@ -234,7 +255,12 @@ namespace LowPolyLibrary
                 GeneratePoints();
                 _pointsDirty = false;
             }
-
+            if (_gradientDirty)
+            {
+                var info = new SKImageInfo(BoundsWidth, BoundsHeight);
+                _gradient = GetGradient(info, GradientColors, GradientShader);
+                _gradientDirty = false;
+            }
 
             using (var canvas = surface.Canvas)
             {
@@ -268,7 +294,6 @@ namespace LowPolyLibrary
                     {
                         canvas.DrawPath(_trianglePath, _strokePaint);
                     }
-
                 }
             }
         }
@@ -334,7 +359,7 @@ namespace LowPolyLibrary
                 center.Y -= (int)BleedY - 1;
         }
 
-        private SKColor[] getRandomColorBruColors(int colorCount)
+        public static SKColor[] getRandomColorBruColors(int colorCount)
         {
             //get all gradient codes
             var values = Enum.GetValues(typeof(ColorBru.Code));
@@ -356,7 +381,7 @@ namespace LowPolyLibrary
             return colorArray;
         }
 
-        private SKSurface GetGradient(SKImageInfo info, SKColor[] colorArray)
+        public static SKShader GetRandomGradientShader(SKColor[] colorArray, int boundsWidth, int boundsHeight)
         {
             SKShader gradientShader;
             //set to 2, bc want to temporarily not make sweep gradient
@@ -364,39 +389,45 @@ namespace LowPolyLibrary
             {
                 case 0:
                     gradientShader = SKShader.CreateLinearGradient(
-                                              new SKPoint(0, 0),
-                                              new SKPoint(BoundsWidth, BoundsHeight),
-                                              colorArray,
-                                              null,
-                                              SKShaderTileMode.Repeat
-                                          );
+                        new SKPoint(0, 0),
+                        new SKPoint(boundsWidth, boundsHeight),
+                        colorArray,
+                        null,
+                        SKShaderTileMode.Repeat
+                    );
                     break;
                 case 1:
                     gradientShader = SKShader.CreateRadialGradient(
-                                                new SKPoint(BoundsWidth / 2, BoundsHeight / 2),
-                                                ((float)BoundsWidth / 2),
-                                                colorArray,
-                                                null,
-                                                SKShaderTileMode.Clamp
-                                            );
+                        new SKPoint(boundsWidth / 2, boundsHeight / 2),
+                        ((float)boundsWidth / 2),
+                        colorArray,
+                        null,
+                        SKShaderTileMode.Clamp
+                    );
                     break;
                 case 2:
                     gradientShader = SKShader.CreateSweepGradient(
-                    new SKPoint(BoundsWidth / 2, BoundsHeight / 2),
-                            colorArray,
-                            null
-                        );
+                        new SKPoint(boundsWidth / 2, boundsHeight / 2),
+                        colorArray,
+                        null
+                    );
                     break;
                 default:
                     gradientShader = SKShader.CreateLinearGradient(
-                                              new SKPoint(0, 0),
-                                              new SKPoint(BoundsWidth, BoundsHeight),
-                                              colorArray,
-                                              null,
-                                              SKShaderTileMode.Repeat
-                                          );
+                        new SKPoint(0, 0),
+                        new SKPoint(boundsWidth, boundsHeight),
+                        colorArray,
+                        null,
+                        SKShaderTileMode.Repeat
+                    );
                     break;
             }
+
+            return gradientShader;
+        }
+
+        private SKSurface GetGradient(SKImageInfo info, SKColor[] colorArray, SKShader gradientShader)
+        {
             var bmp = SKSurface.Create(info);
             using (var paint = new SKPaint())
             {
@@ -429,6 +460,13 @@ namespace LowPolyLibrary
         {
             //lock object to avoid race conditions?
             _pointsDirty = true;
+        }
+
+        //used to allow the points to be regenerated on the next frame draw
+        private void MarkGradientDirty()
+        {
+            //lock object to avoid race conditions?
+            _gradientDirty = true;
         }
 
         public void GeneratePoints()
