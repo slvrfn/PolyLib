@@ -115,6 +115,20 @@ namespace LowPolyLibrary
                 OnPropertyChanged("HideLines");
             }
         }
+
+        public SKColor[] GradientColors
+        {
+            get => _gradientColors;
+            set
+            {
+                if (_gradientColors.Equals(value))
+                    return;
+                _gradientColors = value;
+                var info = new SKImageInfo(BoundsWidth, BoundsHeight);
+                _gradient = GetGradient(info, GradientColors);
+                OnPropertyChanged("GradientColors");
+            }
+        }
         #endregion
 
         #region Private variables
@@ -128,6 +142,8 @@ namespace LowPolyLibrary
         //randomly seed the triangulation from the start
         private float _seed = Guid.NewGuid().GetHashCode();
         private float _frequency = .01f;
+        private SKColor[] _gradientColors = new SKColor[0];
+        private bool gradientSetByUser = false;
 
         private SKSurface _gradient;
         //used to speed up color access time from gradient
@@ -149,13 +165,14 @@ namespace LowPolyLibrary
         private SKPath _trianglePath;
         #endregion
 
-        public Triangulation(int boundsWidth, int boundsHeight)
+        public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors = null)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;
 
-            var info = new SKImageInfo(boundsWidth, boundsHeight);
-            _gradient = GetGradient(info);
+            //use colors provided by user for gradient. If none provided, get some random colors
+            GradientColors = gradientColors == null ? getRandomColorBruColors(6) : gradientColors;
+
             _calcVariance = CellSize * Variance / 2;
             // how the bleeds are initially set
             BleedX = BoundsWidth / 3;
@@ -317,18 +334,19 @@ namespace LowPolyLibrary
                 center.Y -= (int)BleedY - 1;
         }
 
-        private SKColor[] getGradientColors()
+        private SKColor[] getRandomColorBruColors(int colorCount)
         {
             //get all gradient codes
             var values = Enum.GetValues(typeof(ColorBru.Code));
             ColorBru.Code randomCode = (ColorBru.Code)values.GetValue(Random.Rand.Next(values.Length));
             //gets specified colors in gradient length: #
-            while (!ColorBru.Palettes.Single(c => c.Code == randomCode).HtmlCodes.Any(c => c.Length == 6))
+            //not all ColorBru.Code(s) have HtmlCodes with the desired length
+            while (!ColorBru.Palettes.Single(c => c.Code == randomCode).HtmlCodes.Any(c => c.Length == colorCount))
             {
                 randomCode = (ColorBru.Code)values.GetValue(Random.Rand.Next(values.Length));
             }
 
-            var brewColors = ColorBru.GetHtmlCodes(randomCode, 6);
+            var brewColors = ColorBru.GetHtmlCodes(randomCode, (byte)colorCount);
             //array of ints converted from brewColors
             var colorArray = new SKColor[brewColors.Length];
             for (int i = 0; i < brewColors.Length; i++)
@@ -338,10 +356,8 @@ namespace LowPolyLibrary
             return colorArray;
         }
 
-        private SKSurface GetGradient(SKImageInfo info)
+        private SKSurface GetGradient(SKImageInfo info, SKColor[] colorArray)
         {
-            var colorArray = getGradientColors();
-
             SKShader gradientShader;
             //set to 2, bc want to temporarily not make sweep gradient
             switch (Random.Rand.Next(2))
