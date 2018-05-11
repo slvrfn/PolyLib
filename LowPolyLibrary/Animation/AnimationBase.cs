@@ -16,7 +16,7 @@ namespace LowPolyLibrary.Animation
         #region Global Variables
         public readonly int NumFrames;
         internal Dictionary<SKPointI, HashSet<SKPoint>> SeperatedPoints;
-        internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.pointToTriangleDic;
+        internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.PointToTriangleDic;
 
         public readonly Triangulation CurrentTriangulation;
 

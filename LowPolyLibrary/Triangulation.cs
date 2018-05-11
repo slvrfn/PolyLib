@@ -21,12 +21,6 @@ namespace LowPolyLibrary
         public readonly int BoundsWidth;
         public readonly int BoundsHeight;
 
-        internal List<DelaunayTriangulator.Vertex> InternalPoints;
-
-        public Dictionary<Vertex, HashSet<Triad>> pointToTriangleDic = null;
-
-        public List<Triad> TriangulatedPoints;
-
         private Triangulator _angulator;
 
         private bool _pointsDirty = false;
@@ -143,6 +137,30 @@ namespace LowPolyLibrary
             }
         }
 
+        public List<Vertex> InternalPoints 
+        {
+            get => _internalPoints.Select((arg) => arg.Clone()).ToList();
+        }
+
+        public List<Triad> TriangulatedPoints
+        {
+            get => _triangulatedPoints.Select((arg) => arg.Clone()).ToList();
+        }
+
+        public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic
+        {
+            get
+            {
+                Dictionary<Vertex, HashSet<Triad>> newDic = new Dictionary<Vertex, HashSet<Triad>>(_pointToTriangleDic.Count, _pointToTriangleDic.Comparer);
+                foreach (var entry in _pointToTriangleDic)
+                {
+                    //clone key
+                    //create new hashset, and clone each of its values
+                    newDic.Add(entry.Key.Clone(), new HashSet<Triad>(entry.Value.Select(arg => arg.Clone())));
+                }
+                return newDic;
+            }
+        }
         #endregion
 
         #region Private variables
@@ -179,6 +197,10 @@ namespace LowPolyLibrary
         private SKPoint _pathPointC;
         private SKPoint _center;
         private SKPath _trianglePath;
+
+        private List<DelaunayTriangulator.Vertex> _internalPoints;
+        private Dictionary<Vertex, HashSet<Triad>> _pointToTriangleDic = null;
+        public List<Triad> _triangulatedPoints;
         #endregion
 
         public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors = null, SKShader gradientShader = null)
@@ -266,16 +288,16 @@ namespace LowPolyLibrary
             {
                 canvas.Clear();
 
-                foreach (Triad tri in TriangulatedPoints)
+                foreach (Triad tri in _triangulatedPoints)
                 {
-                    _pathPointA.X = InternalPoints[tri.a].x;
-                    _pathPointA.Y = InternalPoints[tri.a].y;
-                    _pathPointB.X = InternalPoints[tri.b].x;
-                    _pathPointB.Y = InternalPoints[tri.b].y;
-                    _pathPointC.X = InternalPoints[tri.c].x;
-                    _pathPointC.Y = InternalPoints[tri.c].y;
+                    _pathPointA.X = _internalPoints[tri.a].x;
+                    _pathPointA.Y = _internalPoints[tri.a].y;
+                    _pathPointB.X = _internalPoints[tri.b].x;
+                    _pathPointB.Y = _internalPoints[tri.b].y;
+                    _pathPointC.X = _internalPoints[tri.c].x;
+                    _pathPointC.Y = _internalPoints[tri.c].y;
 
-                    Geometry.centroid(tri, InternalPoints, ref _center);
+                    Geometry.centroid(tri, _internalPoints, ref _center);
 
                     KeepInBounds(ref _center);
                     _fillPaint.Color = GetTriangleColor(_center);
@@ -300,35 +322,35 @@ namespace LowPolyLibrary
 
         internal bool HasPointsToTrianglesSetup()
         {
-            return pointToTriangleDic != null;
+            return _pointToTriangleDic != null;
         }
 
         internal void SetupPointsToTriangles()
         {
-            pointToTriangleDic = new Dictionary<Vertex, HashSet<Triad>>();
-            divyTris(InternalPoints);
+            _pointToTriangleDic = new Dictionary<Vertex, HashSet<Triad>>();
+            divyTris(_internalPoints);
         }
 
         private void divyTris(Vertex point, int arrayLoc)
         {
             //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
-            if (pointToTriangleDic.ContainsKey(point))
-                pointToTriangleDic[point].Add(TriangulatedPoints[arrayLoc]);
+            if (_pointToTriangleDic.ContainsKey(point))
+                _pointToTriangleDic[point].Add(_triangulatedPoints[arrayLoc]);
             //if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
             else
             {
-                pointToTriangleDic[point] = new HashSet<Triad> { TriangulatedPoints[arrayLoc] };
+                _pointToTriangleDic[point] = new HashSet<Triad> { _triangulatedPoints[arrayLoc] };
             }
         }
 
         internal void divyTris(List<Vertex> points)
         {
-            for (int i = 0; i < TriangulatedPoints.Count; i++)
+            for (int i = 0; i < _triangulatedPoints.Count; i++)
             {
                 //animation logic
-                divyTris(points[TriangulatedPoints[i].a], i);
-                divyTris(points[TriangulatedPoints[i].b], i);
-                divyTris(points[TriangulatedPoints[i].c], i);
+                divyTris(points[_triangulatedPoints[i].a], i);
+                divyTris(points[_triangulatedPoints[i].b], i);
+                divyTris(points[_triangulatedPoints[i].c], i);
             }
         }
 
@@ -471,10 +493,10 @@ namespace LowPolyLibrary
 
         public void GeneratePoints()
         {
-            InternalPoints = GenerateUntriangulatedPoints();
-            TriangulatedPoints = _angulator.Triangulation(InternalPoints);
+            _internalPoints = GenerateUntriangulatedPoints();
+            _triangulatedPoints = _angulator.Triangulation(_internalPoints);
             //allow this to be recreated
-            pointToTriangleDic = null;
+            _pointToTriangleDic = null;
         }
 
         private List<DelaunayTriangulator.Vertex> GenerateUntriangulatedPoints()
