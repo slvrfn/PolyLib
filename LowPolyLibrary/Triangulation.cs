@@ -1,11 +1,6 @@
 ﻿using System.Collections.Generic;
-using Triangulator = DelaunayTriangulator.Triangulator;
-using Triad = DelaunayTriangulator.Triad;
-using Double = System.Double;
-using Enum = System.Enum;
-using Math = System.Math;
-using System;
 using DelaunayTriangulator;
+using System;
 using SkiaSharp;
 using System.Linq;
 using WEB;
