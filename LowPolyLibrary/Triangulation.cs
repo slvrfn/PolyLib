@@ -177,7 +177,6 @@ namespace LowPolyLibrary
 
         private SKColor[] _gradientColors = new SKColor[0];
         private SKShader _gradientShader = SKShader.CreateEmpty();
-        private bool gradientSetByUser = false;
 
         private SKSurface _gradient;
         //used to speed up color access time from gradient
