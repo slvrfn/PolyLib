@@ -25,12 +25,16 @@ namespace LowPolyLibrary.Animation
         private bool _shouldStartRandomAnim = false;
         private int _randomAnimationTime = 5000;
 
+        private FrameDrawManager frameDrawManager;
+
         public AnimationEngine(IAnimationUpdateView display)
         {
             //start the thread that will keep the animation flow alive
             Task.Run(RestartActionBlock);
 
             _uiTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            frameDrawManager = new FrameDrawManager();
 
             _currentDisplay = display;
         }
@@ -45,11 +49,12 @@ namespace LowPolyLibrary.Animation
         {
             while (_keepLoopAlive)
             {
-                _animationFlow = new AnimationFlow((arg) =>
+                //let the frame manager decide which frame needs to be drawn
+                _animationFlow = new AnimationFlow(frameDrawManager.BuildDrawFrameAction((arg) =>
                 {
                     _currentRenderedFrame = arg;
                     _currentDisplay.SignalRedraw();
-                }, _uiTaskScheduler);
+                }), _uiTaskScheduler);
 
                 if (_shouldStartRandomAnim)
                 {
@@ -102,6 +107,7 @@ namespace LowPolyLibrary.Animation
             if (_currentRenderedFrame != null)
             {
                 _currentRenderedFrame.DrawFunction(surface, _currentRenderedFrame.FramePoints);
+                frameDrawManager.MarkFrameDrawn(_currentRenderedFrame.FrameIdentifier);
                 _currentRenderedFrame = null;
             }
             else

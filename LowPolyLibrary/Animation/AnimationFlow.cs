@@ -21,9 +21,10 @@ namespace LowPolyLibrary.Animation
         private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;
         private readonly FrameQueueBlock<AnimationBase[]> _frameQueue;
         private RandomAnimationBlock _randomAnim;
-        private readonly ActionBlock<RenderedFrame> _signalFrameRendered;
+        private readonly TransformBlock<RenderedFrame, bool> _frameDrawer;
+        private readonly ActionBlock<bool> _allFramesDrawnChecker;
 
-        public AnimationFlow(Action<RenderedFrame> notifyFrameReady, TaskScheduler uiScheduler) : base(DataflowOptions.Default)
+        public AnimationFlow(Func<RenderedFrame, bool> notifyFrameReady, TaskScheduler uiScheduler) : base(DataflowOptions.Default)
         {
 
             _animations = new CurrentAnimationsBlock();
@@ -47,9 +48,12 @@ namespace LowPolyLibrary.Animation
                     animFrame.Add(x);
                 }
 
+                var curr = arg[arg.Length - 1].CurrentFrame;
+                var tot = arg[arg.Length - 1].NumFrames;
                 //allows any derived draw function
                 //newest animation determines how all current animations will be drawn
-                var rend = new RenderedFrame(arg[arg.Length - 1].DrawPointFrame);
+                var rend = new RenderedFrame(arg[arg.Length - 1].DrawPointFrame, curr, tot);
+
 
                 //no use in "combining" animations unless there is more than 1 anim for this frame
                 if (animFrame.Count > 1)
@@ -113,16 +117,30 @@ namespace LowPolyLibrary.Animation
             }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
             //limit parallelism so that only one redraw update can occur
-            _signalFrameRendered = new ActionBlock<RenderedFrame>(notifyFrameReady, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
+            _frameDrawer = new TransformBlock<RenderedFrame, bool>(notifyFrameReady, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
+
+            //limit parallelism so that only one redraw update can occur
+            _allFramesDrawnChecker = new ActionBlock<bool>((arg) => 
+            { 
+                //just want to signal a frame should be drawn still
+                if (arg)
+                {
+                    notifyFrameReady(null);
+                }
+            }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
+
 
             _animations.LinkTo(_frameQueue);
             _frameQueue.LinkTo(_renderFrame);
-            _renderFrame.LinkTo(_signalFrameRendered);
+            _renderFrame.LinkTo(_frameDrawer);
+            _frameDrawer.LinkTo(_allFramesDrawnChecker);
+
 
             RegisterChild(_animations);
             RegisterChild(_frameQueue);
             RegisterChild(_renderFrame);
-            RegisterChild(_signalFrameRendered);
+            RegisterChild(_frameDrawer);
+            RegisterChild(_allFramesDrawnChecker);
         }
 
         public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
