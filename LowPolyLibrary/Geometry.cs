@@ -6,7 +6,7 @@ using SkiaSharp;
 
 namespace LowPolyLibrary
 {
-    public class Geometry
+    public static class Geometry
     {
 
         public static float ConvertBetweenRanges(float num, float inMin, float inMax, float outMin, float outMax)

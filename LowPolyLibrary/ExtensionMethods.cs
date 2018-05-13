@@ -8,7 +8,11 @@ namespace LowPolyLibrary
     {
         #region DelaunayTriangulator.Triad
 
-        //Create clone method for Triad
+        /// <summary>
+        /// Create clone method for Triad
+        /// </summary>
+        /// <param name="t">A Triad object t.</param>
+        /// <returns>A copy of the Triad t</returns>
         public static Triad Clone(this Triad t)
         {
             return new Triad(t.a, t.b, t.c)
@@ -26,7 +30,11 @@ namespace LowPolyLibrary
 
         #region DelaunayTriangulator.Vertex
 
-        //Create clone method for Vertex
+        /// <summary>
+        /// Create clone method for Vertex
+        /// </summary>
+        /// <param name="v">A Vertex object v.</param>
+        /// <returns>A copy of the Vertex v</returns>
         public static Vertex Clone(this Vertex v)
         {
             return new Vertex(v.x, v.y);
