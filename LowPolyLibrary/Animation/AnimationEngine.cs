@@ -54,6 +54,8 @@ namespace LowPolyLibrary.Animation
                 if (_shouldStartRandomAnim)
                 {
                     _animationFlow.StartRandomAnimationsLoop(_randomAnimationTime);
+                    //only start one at a time
+                    _shouldStartRandomAnim = false;
                 }
 
                 var completionTask = await Task.WhenAny(_animationFlow.CompletionTask);

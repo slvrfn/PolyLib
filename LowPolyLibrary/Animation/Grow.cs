@@ -25,7 +25,7 @@ namespace LowPolyLibrary.Animation
             }
         }
 
-        internal override void SetupAnimation()
+        public override void SetupAnimation()
         {
             base.SetupAnimation();
             //visible rec so that the start of the anim is from a point visible on screen
@@ -59,7 +59,7 @@ namespace LowPolyLibrary.Animation
             IsSetup = true;
         }
 
-        internal override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> edgeFrameList)
+        public override void DrawPointFrame(SKSurface surface, List<AnimatedPoint> edgeFrameList)
         {
             using (var canvas = surface.Canvas)
             {
@@ -109,7 +109,7 @@ namespace LowPolyLibrary.Animation
             }
         }
 
-        internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
+        public override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
             var outPoints = new HashSet<AnimatedPoint>();
 

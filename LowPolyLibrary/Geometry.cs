@@ -124,40 +124,6 @@ namespace LowPolyLibrary
             return new Rectangle(ADIntersection, ABIntersection, BCIntersection, DCIntersection);
         }
 
-        // create the RotatedGrid numFrames*numFrames transformation for the given angle and bounds w&h
-        public static RotatedGrid createGridTransformation(int angle, int boundsWidth, int boundsHeight, int numFrames)
-        {
-            var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
-
-            //creating X basis, so needs to be 1 relative unit away on X plane
-            var newB = walkAngle(angle, 1f, containingRec.A);
-
-            //reciprocal used bc perpendicular from current angle
-            var recipAngle = (angle + 270) % 360;
-            //creating Y basis, so needs to be 1 relative unit away on Y plane
-            var newD = walkAngle(recipAngle, 1f, containingRec.A);
-
-            //find origin shift (negative to shift points to standard origin
-            var trans = SKMatrix.MakeTranslation(-containingRec.A.X, -containingRec.A.Y);
-            //need to translate B&D by origin to make the points relative from their origin (A)
-            newB = trans.MapPoint(newB);
-            newD = trans.MapPoint(newD);
-
-            //grid in space
-            var basisMatrix = new SKMatrix()
-            {
-                ScaleX = newB.X,
-                SkewX = newB.Y,
-                SkewY = newD.X,
-                ScaleY = newD.Y,
-                TransX = containingRec.A.X,
-                TransY = containingRec.A.Y,
-                Persp2 = 1
-            };
-
-            return new RotatedGrid(basisMatrix, containingRec, numFrames);
-        }
-
         public static Rectangle[][] createContaingGrid(int angle, int numFrames, int boundsWidth, int boundsHeight)
         {
             var rotGrid = createGridTransformation(angle, boundsWidth, boundsHeight, numFrames);
@@ -286,6 +252,43 @@ namespace LowPolyLibrary
             //          circleContainsPoints(center, radius, D, A);
             //}
         }
+        #endregion
+
+        #region Grid
+
+        // create the RotatedGrid numFrames*numFrames transformation for the given angle and bounds w&h
+        public static RotatedGrid createGridTransformation(int angle, int boundsWidth, int boundsHeight, int numFrames)
+        {
+            var containingRec = createContainingRec(angle, boundsWidth, boundsHeight);
+
+            //creating X basis, so needs to be 1 relative unit away on X plane
+            var newB = walkAngle(angle, 1f, containingRec.A);
+
+            //reciprocal used bc perpendicular from current angle
+            var recipAngle = (angle + 270) % 360;
+            //creating Y basis, so needs to be 1 relative unit away on Y plane
+            var newD = walkAngle(recipAngle, 1f, containingRec.A);
+
+            //find origin shift (negative to shift points to standard origin
+            var trans = SKMatrix.MakeTranslation(-containingRec.A.X, -containingRec.A.Y);
+            //need to translate B&D by origin to make the points relative from their origin (A)
+            newB = trans.MapPoint(newB);
+            newD = trans.MapPoint(newD);
+
+            //grid in space
+            var basisMatrix = new SKMatrix()
+            {
+                ScaleX = newB.X,
+                SkewX = newB.Y,
+                SkewY = newD.X,
+                ScaleY = newD.Y,
+                TransX = containingRec.A.X,
+                TransY = containingRec.A.Y,
+                Persp2 = 1
+            };
+
+            return new RotatedGrid(basisMatrix, containingRec, numFrames);
+        }
 
         public class RotatedGrid
         {
@@ -334,6 +337,7 @@ namespace LowPolyLibrary
                 indexPoint.X = (int)(gridPoint.X / CellWidth);
             }
         }
+
         #endregion
 
         #region Lines

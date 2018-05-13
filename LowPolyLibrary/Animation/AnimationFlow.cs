@@ -15,7 +15,7 @@ using Math = System.Math;
 
 namespace LowPolyLibrary.Animation
 {
-    public class AnimationFlow : Dataflow<AnimationBase>
+    internal class AnimationFlow : Dataflow<AnimationBase>
     {
         private readonly CurrentAnimationsBlock _animations;
         private readonly TransformBlock<AnimationBase[], RenderedFrame> _renderFrame;

@@ -13,18 +13,18 @@ namespace LowPolyLibrary.Animation
 {
     public abstract class AnimationBase
     {
-        #region Global Variables
+        #region Variables
         public readonly int NumFrames;
-        internal Dictionary<SKPointI, HashSet<SKPoint>> SeperatedPoints;
-        internal Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.PointToTriangleDic;
+        public Dictionary<SKPointI, HashSet<SKPoint>> SeperatedPoints;
+        public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.PointToTriangleDic;
 
         public readonly Triangulation CurrentTriangulation;
 
-        internal List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
-
-        protected readonly SKPaint strokePaint, fillPaint;
+        public List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
 
         internal bool IsSetup = false;
+
+        protected readonly SKPaint strokePaint, fillPaint;
 
         //pull out variables that can be reused to prevent excessive mallocs
         protected SKPoint PathPointA;
@@ -53,7 +53,7 @@ namespace LowPolyLibrary.Animation
         #endregion
 
         #region Constructor
-        protected AnimationBase(Triangulation triangulation, int frames)
+        public AnimationBase(Triangulation triangulation, int frames)
         {
             NumFrames = frames;
             CurrentTriangulation = triangulation;
@@ -85,7 +85,7 @@ namespace LowPolyLibrary.Animation
 
         #region Animation Methods
 
-        internal virtual void SetupAnimation()
+        public virtual void SetupAnimation()
         {
             var direction = Geometry.get360Direction();
             seperatePointsIntoGridCells(InternalPoints, direction);
@@ -101,9 +101,9 @@ namespace LowPolyLibrary.Animation
             TrianglePath = new SKPath { FillType = SKPathFillType.EvenOdd };
         }
 
-        internal abstract HashSet<AnimatedPoint> RenderFrame(int currentFrame);
+        public abstract HashSet<AnimatedPoint> RenderFrame(int currentFrame);
 
-        internal virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
+        public virtual void DrawPointFrame(SKSurface surface, List<AnimatedPoint> pointChanges)
         {
             using (var canvas = surface.Canvas)
             {
@@ -158,7 +158,7 @@ namespace LowPolyLibrary.Animation
                         GetCorrectPoint(updatedPoints, updatedIndices, tri.c, ref PathPointC);
 
                         Geometry.centroid(tri, InternalPoints, ref Center);
-                        //triAngleColorCenter
+                        //triangle color center
                         CurrentTriangulation.KeepInBounds(ref Center);
                         fillPaint.Color = CurrentTriangulation.GetTriangleColor(Center);
 
@@ -254,7 +254,7 @@ namespace LowPolyLibrary.Animation
             }
         }
 
-        internal float shortestDistanceFromPoints(SKPoint workingPoint)
+        public float shortestDistanceFromPoints(SKPoint workingPoint)
         {
             //this list consists of all the triangles containing the point.
             var v = new Vertex(workingPoint.X, workingPoint.Y);

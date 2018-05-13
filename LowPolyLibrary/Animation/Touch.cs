@@ -90,7 +90,7 @@ namespace LowPolyLibrary.Animation
             return thisCoord;
         }
 
-        internal override void SetupAnimation()
+        public override void SetupAnimation()
         {
             base.SetupAnimation();
 
@@ -103,7 +103,7 @@ namespace LowPolyLibrary.Animation
 
         protected abstract void DoPointDisplacement(AnimatedPoint point, int currentFrame);
 
-        internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
+        public override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
             if (animatedPoints.Count == 0)
             {

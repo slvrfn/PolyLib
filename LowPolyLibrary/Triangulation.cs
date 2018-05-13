@@ -166,6 +166,10 @@ namespace LowPolyLibrary
         private float _bleedX;
         private float _bleedY;
         private bool _hideLines = false;
+        private List<DelaunayTriangulator.Vertex> _internalPoints;
+        private Dictionary<Vertex, HashSet<Triad>> _pointToTriangleDic = null;
+        private List<Triad> _triangulatedPoints;
+
         //randomly seed the triangulation from the start
         private float _seed = Guid.NewGuid().GetHashCode();
         private float _frequency = .01f;
@@ -191,10 +195,7 @@ namespace LowPolyLibrary
         private SKPoint _pathPointC;
         private SKPoint _center;
         private SKPath _trianglePath;
-
-        private List<DelaunayTriangulator.Vertex> _internalPoints;
-        private Dictionary<Vertex, HashSet<Triad>> _pointToTriangleDic = null;
-        public List<Triad> _triangulatedPoints;
+        
         #endregion
 
         public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors = null, SKShader gradientShader = null)
@@ -325,21 +326,22 @@ namespace LowPolyLibrary
             divyTris(_internalPoints);
         }
 
-        private void divyTris(Vertex point, int arrayLoc)
+        private void divyTris(List<Vertex> points)
         {
-            //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
-            if (_pointToTriangleDic.ContainsKey(point))
-                _pointToTriangleDic[point].Add(_triangulatedPoints[arrayLoc]);
-            //if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
-            else
+            void divyTris(Vertex point, int arrayLoc)
             {
-                _pointToTriangleDic[point] = new HashSet<Triad> { _triangulatedPoints[arrayLoc] };
+                //if the point/triList distionary has a point already, add that triangle to the list at that key(point)
+                if (_pointToTriangleDic.ContainsKey(point))
+                    _pointToTriangleDic[point].Add(_triangulatedPoints[arrayLoc]);
+                //if the point/triList distionary doesnt not have a point, initialize it, and add that triangle to the list at that key(point)
+                else
+                {
+                    _pointToTriangleDic[point] = new HashSet<Triad> { _triangulatedPoints[arrayLoc] };
+                }
             }
-        }
 
-        internal void divyTris(List<Vertex> points)
-        {
-            for (int i = 0; i < _triangulatedPoints.Count; i++)
+
+            for (var i = 0; i < _triangulatedPoints.Count; i++)
             {
                 //animation logic
                 divyTris(points[_triangulatedPoints[i].a], i);
@@ -359,7 +361,7 @@ namespace LowPolyLibrary
             return _readColorBitmap.GetPixel(0, 0);
         }
 
-        internal void KeepInBounds(ref SKPoint center)
+        public void KeepInBounds(ref SKPoint center)
         {
             if (center.X < 0)
                 center.X += (int)BleedX;
@@ -485,7 +487,7 @@ namespace LowPolyLibrary
             _gradientDirty = true;
         }
 
-        public void GeneratePoints()
+        private void GeneratePoints()
         {
             _internalPoints = GenerateUntriangulatedPoints();
             _triangulatedPoints = _angulator.Triangulation(_internalPoints);

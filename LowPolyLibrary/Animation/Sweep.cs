@@ -18,13 +18,13 @@ namespace LowPolyLibrary.Animation
         }
 
         //necessary to prevent animationbase from "setting up" multiple times
-        internal override void SetupAnimation()
+        public override void SetupAnimation()
         {
             base.SetupAnimation();
             IsSetup = true;
         }
 
-        internal override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
+        public override HashSet<AnimatedPoint> RenderFrame(int currentFrame)
         {
             var animatedPoints = new HashSet<AnimatedPoint>();
 
