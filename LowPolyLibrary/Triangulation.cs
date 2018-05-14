@@ -31,6 +31,7 @@ namespace LowPolyLibrary
                     return;
                 _seed = value;
                 fastNoise.SetSeed((int)_seed);
+                MarkPointsDirty();
                 OnPropertyChanged("Seed");
             }
         }
@@ -44,6 +45,7 @@ namespace LowPolyLibrary
                     return;
                 _frequency = value;
                 fastNoise.SetFrequency(Frequency);
+                MarkPointsDirty();
                 OnPropertyChanged("Frequency");
             }
         }
@@ -56,6 +58,7 @@ namespace LowPolyLibrary
                 if (_bleedY.Equals(value))
                     return;
                 _bleedY = value;
+                MarkPointsDirty();
                 OnPropertyChanged("BleedY");
             }
         }
@@ -67,6 +70,7 @@ namespace LowPolyLibrary
                 if (_bleedX.Equals(value))
                     return;
                 _bleedX = value;
+                MarkPointsDirty();
                 OnPropertyChanged("BleedX");
             }
         }
@@ -79,6 +83,7 @@ namespace LowPolyLibrary
                     return;
                 _cellSize = value;
                 _calcVariance = _cellSize * Variance / 2;
+                MarkPointsDirty();
                 OnPropertyChanged("CellSize");
             }
         }
@@ -91,6 +96,7 @@ namespace LowPolyLibrary
                     return;
                 _variance = value;
                 _calcVariance = CellSize * _variance / 2;
+                MarkPointsDirty();
                 OnPropertyChanged("Variance");
             }
         }
@@ -109,14 +115,8 @@ namespace LowPolyLibrary
         public SKColor[] GradientColors
         {
             get => _gradientColors;
-            set
-            {
-                if (_gradientColors.Equals(value))
-                    return;
-                _gradientColors = value;
-                MarkGradientDirty();
-                OnPropertyChanged("GradientColors");
-            }
+            //cant set bc we dont know which shader to recreate
+            //user must create new shader and set it to get a gradient change
         }
 
         public SKShader GradientShader
@@ -132,14 +132,26 @@ namespace LowPolyLibrary
             }
         }
 
-        public List<Vertex> InternalPoints 
+        public List<Vertex> Points 
         {
             get => _internalPoints.Select((arg) => arg.Clone()).ToList();
+        }
+
+        //allow animations to use original list for speed
+        internal List<Vertex> InternalPoints
+        {
+            get => _internalPoints;
         }
 
         public List<Triad> TriangulatedPoints
         {
             get => _triangulatedPoints.Select((arg) => arg.Clone()).ToList();
+        }
+
+        //allow animations to use original list for speed
+        internal List<Triad> InternalTriangulatedPoints
+        {
+            get => _triangulatedPoints;
         }
 
         public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic
@@ -155,6 +167,12 @@ namespace LowPolyLibrary
                 }
                 return newDic;
             }
+        }
+
+        //allow animations to use original dict for speed
+        internal Dictionary<Vertex, HashSet<Triad>> InternalPointToTriangleDic
+        {
+            get => _pointToTriangleDic;
         }
         #endregion
 
@@ -204,12 +222,12 @@ namespace LowPolyLibrary
             BoundsHeight = boundsHeight;
 
             //use colors provided by user for gradient. If none provided, get some random colors
-            GradientColors = gradientColors == null ? getRandomColorBruColors(6) : gradientColors;
+            _gradientColors = gradientColors == null ? getRandomColorBruColors(6) : gradientColors;
             //use gradient shader provided by user for gradient. If none provided, get some random shader
-            GradientShader = gradientShader == null ? GetRandomGradientShader(GradientColors, BoundsWidth, BoundsHeight) : gradientShader;
+            GradientShader = gradientShader == null ? GetRandomGradientShader(_gradientColors, BoundsWidth, BoundsHeight) : gradientShader;
 
             var info = new SKImageInfo(boundsWidth, boundsHeight);
-            _gradient = GetGradient(info, GradientColors, GradientShader);
+            _gradient = GetGradient(info, GradientShader);
 
             _calcVariance = CellSize * Variance / 2;
             // how the bleeds are initially set
@@ -275,7 +293,7 @@ namespace LowPolyLibrary
             if (_gradientDirty)
             {
                 var info = new SKImageInfo(BoundsWidth, BoundsHeight);
-                _gradient = GetGradient(info, GradientColors, GradientShader);
+                _gradient = GetGradient(info, GradientShader);
                 _gradientDirty = false;
             }
 
@@ -444,7 +462,7 @@ namespace LowPolyLibrary
             return gradientShader;
         }
 
-        private SKSurface GetGradient(SKImageInfo info, SKColor[] colorArray, SKShader gradientShader)
+        private SKSurface GetGradient(SKImageInfo info, SKShader gradientShader)
         {
             var bmp = SKSurface.Create(info);
             using (var paint = new SKPaint())
@@ -525,8 +543,6 @@ namespace LowPolyLibrary
 
         protected void OnPropertyChanged(string name)
         {
-            //here bc this covers all property changes
-            MarkPointsDirty();
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null)
             {

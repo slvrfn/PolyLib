@@ -16,11 +16,11 @@ namespace LowPolyLibrary.Animation
         #region Variables
         public readonly int NumFrames;
         public Dictionary<SKPointI, HashSet<SKPoint>> SeperatedPoints;
-        public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic => CurrentTriangulation.PointToTriangleDic;
 
         public readonly Triangulation CurrentTriangulation;
 
-        public List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
+        protected Dictionary<Vertex, HashSet<Triad>> InternalPointToTriangleDic => CurrentTriangulation.InternalPointToTriangleDic;
+        protected List<Vertex> InternalPoints => CurrentTriangulation.InternalPoints;
 
         internal bool IsSetup = false;
 
@@ -151,7 +151,7 @@ namespace LowPolyLibrary.Animation
                         continue;
 
                     //increment each triad that contains this updatedPoint
-                    foreach (var tri in PointToTriangleDic[updatedPoint.Item2])
+                    foreach (var tri in InternalPointToTriangleDic[updatedPoint.Item2])
                     {
                         GetCorrectPoint(updatedPoints, updatedIndices, tri.a, ref PathPointA);
                         GetCorrectPoint(updatedPoints, updatedIndices, tri.b, ref PathPointB);
@@ -228,7 +228,7 @@ namespace LowPolyLibrary.Animation
         {
             var v = new Vertex(point.X, point.Y);
             //get points v is connected to
-            var triadsContaingV = PointToTriangleDic[v];
+            var triadsContaingV = InternalPointToTriangleDic[v];
 
             foreach (var triad in triadsContaingV)
             {
@@ -258,7 +258,7 @@ namespace LowPolyLibrary.Animation
         {
             //this list consists of all the triangles containing the point.
             var v = new Vertex(workingPoint.X, workingPoint.Y);
-            var tris = PointToTriangleDic[v];
+            var tris = InternalPointToTriangleDic[v];
 
             //shortest distance between a workingPoint and all vertices of the given triangle list
             float shortest = -1;
