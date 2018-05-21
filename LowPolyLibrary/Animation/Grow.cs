@@ -15,6 +15,7 @@ namespace LowPolyLibrary.Animation
 
         private bool _backgroundNeedsToBeSet = true;
 
+        //grid direction does not matter for this animation
         public Grow(Triangulation triangulation, int numFrames) : base(triangulation, numFrames)
         {
             _totalAnimatedPoints = new HashSet<AnimatedPoint>();

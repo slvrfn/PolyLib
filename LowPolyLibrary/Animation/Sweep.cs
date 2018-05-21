@@ -9,12 +9,12 @@ namespace LowPolyLibrary.Animation
 {
     public class Sweep : AnimationBase
     {
-        private int _direction = Geometry.get360Direction();
+        private int _direction;
 
-        public Sweep(Triangulation triangulation, int numFrames) : base(triangulation, numFrames)
+        public Sweep(Triangulation triangulation, int numFrames, int gridDirection = -1) : base(triangulation, numFrames, gridDirection)
         {
             //all the points will move within 15 degrees of the same direction
-            _direction = Geometry.getAngleInRange(_direction, 15);
+            _direction = Geometry.getAngleInRange(GridDirection, 15);
         }
 
         //necessary to prevent animationbase from "setting up" multiple times

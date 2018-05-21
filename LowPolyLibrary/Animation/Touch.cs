@@ -16,7 +16,8 @@ namespace LowPolyLibrary.Animation
 
         protected HashSet<AnimatedPoint> animatedPoints;
 
-        internal Touch(Triangulation triangulation, int numFrames, float x, float y, int radius) : base(triangulation, numFrames)
+        //allow user to specify grid direction
+        internal Touch(Triangulation triangulation, int numFrames, float x, float y, int radius, int gridDirection = -1) : base(triangulation, numFrames, gridDirection)
         {
             InRange = new HashSet<SKPoint>();
             TouchLocation = new SKPoint(x, y);
