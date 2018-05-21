@@ -36,6 +36,8 @@ namespace LowPolyLibrary.Animation
         public int BoundsWidth => CurrentTriangulation.BoundsWidth;
         public int BoundsHeight => CurrentTriangulation.BoundsHeight;
 
+        protected int GridDirection = Geometry.get360Direction();
+
         public Geometry.RotatedGrid GridRotation
         {
             get;
@@ -53,12 +55,17 @@ namespace LowPolyLibrary.Animation
         #endregion
 
         #region Constructor
-        public AnimationBase(Triangulation triangulation, int frames)
+        public AnimationBase(Triangulation triangulation, int frames, int gridDirection = -1)
         {
             NumFrames = frames;
             CurrentTriangulation = triangulation;
             SeperatedPoints = new Dictionary<SKPointI, HashSet<SKPoint>>();
             HideLines = triangulation.HideLines;
+            //allow user to set a grid direction. Otherwise, a random direction will be used
+            if (gridDirection != -1)
+            {
+                GridDirection = gridDirection;
+            }
 
             strokePaint = new SKPaint
             {
@@ -87,8 +94,7 @@ namespace LowPolyLibrary.Animation
 
         public virtual void SetupAnimation()
         {
-            var direction = Geometry.get360Direction();
-            seperatePointsIntoGridCells(InternalPoints, direction);
+            seperatePointsIntoGridCells(InternalPoints, GridDirection);
             if (!CurrentTriangulation.HasPointsToTrianglesSetup())
             {
                 CurrentTriangulation.SetupPointsToTriangles();
