@@ -81,15 +81,34 @@ namespace LowPolyAndroid
                     startAnim = true;
                     break;
                 case MotionEventActions.Up:
-                    var t = _currentTriangulation.GradientColors;
+                    //var colors = Triangulation.getRandomColorBruColors(6);
 
-                    var colors = Triangulation.getRandomColorBruColors(6);
+                    //foreach (var colCode in colors)
+                    //{
+                    //    Console.WriteLine(colCode.ToString());
+                    //}
+
+                    var col = new[]{
+                        "#ffd53e4f",
+                        "#fffc8d59",
+                        "#fffee08b",
+                        "#ffe6f598",
+                        "#ff99d594",
+                        "#ff3288bd",
+                    };
+
+                    var colors = new SKColor[col.Length];
+
+                    for (int i = 0; i < colors.Length; i++)
+                    {
+                        colors[i] = SKColor.Parse(col[i]);
+                    }
 
                     var gradientShader = SKShader.CreateLinearGradient(
                         new SKPoint(0, 0),
                         new SKPoint(_currentTriangulation.BoundsWidth, _currentTriangulation.BoundsHeight),
                         colors,
-                        null,
+                        null, //spread colors evenly
                         SKShaderTileMode.Repeat
                     );
 
@@ -100,24 +119,24 @@ namespace LowPolyAndroid
 
             if (startAnim)
             {
-                var touchAnimation = new RandomTouch(_polyView.CurrentTriangulation, 12, touch.X, touch.Y, 150);
+                var touchAnimation = new RandomTouch(_polyView.CurrentTriangulation, 8, touch.X, touch.Y, 150);
                 _polyView.AddAnimation(touchAnimation);
             }
 
             return true;
         }
 
-        //private void growAnimation(object sender, EventArgs e)
-        //{
-        //    var growAnim = new Grow(_polyView.CurrentTriangulation, _numAnimFrames);
-        //    _polyView.AddAnimation(growAnim);
-        //}
+        private void growAnimation(object sender, EventArgs e)
+        {
+            var growAnim = new Grow(_polyView.CurrentTriangulation, _numAnimFrames);
+            _polyView.AddAnimation(growAnim);
+        }
 
-        //private void sweepAnimation(object sender, EventArgs e)
-        //{
-        //    var sweepAnim = new Sweep(_polyView.CurrentTriangulation, _numAnimFrames);
-        //    _polyView.AddAnimation(sweepAnim);
-        //}
+        private void sweepAnimation(object sender, EventArgs e)
+        {
+            var sweepAnim = new Sweep(_polyView.CurrentTriangulation, _numAnimFrames);
+            _polyView.AddAnimation(sweepAnim);
+        }
     }
 }
 
