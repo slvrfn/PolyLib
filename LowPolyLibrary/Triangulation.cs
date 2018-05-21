@@ -112,13 +112,6 @@ namespace LowPolyLibrary
             }
         }
 
-        public SKColor[] GradientColors
-        {
-            get => _gradientColors;
-            //cant set bc we dont know which shader to recreate
-            //user must create new shader and set it to get a gradient change
-        }
-
         public SKShader GradientShader
         {
             get => _gradientShader;
@@ -192,7 +185,6 @@ namespace LowPolyLibrary
         private float _seed = Guid.NewGuid().GetHashCode();
         private float _frequency = .01f;
 
-        private SKColor[] _gradientColors = new SKColor[0];
         private SKShader _gradientShader = SKShader.CreateEmpty();
 
         private SKSurface _gradient;
@@ -222,9 +214,9 @@ namespace LowPolyLibrary
             BoundsHeight = boundsHeight;
 
             //use colors provided by user for gradient. If none provided, get some random colors
-            _gradientColors = gradientColors == null ? getRandomColorBruColors(6) : gradientColors;
+            var colorsForGradient = gradientColors == null ? getRandomColorBruColors(6) : gradientColors;
             //use gradient shader provided by user for gradient. If none provided, get some random shader
-            GradientShader = gradientShader == null ? GetRandomGradientShader(_gradientColors, BoundsWidth, BoundsHeight) : gradientShader;
+            GradientShader = gradientShader == null ? GetRandomGradientShader(colorsForGradient, BoundsWidth, BoundsHeight) : gradientShader;
 
             var info = new SKImageInfo(boundsWidth, boundsHeight);
             _gradient = GetGradient(info, GradientShader);
