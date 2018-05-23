@@ -118,7 +118,6 @@ namespace LowPolyAndroid
             var shader = Triangulation.GetRandomGradientShader(colors, _currentTriangulation.BoundsWidth,
                 _currentTriangulation.BoundsHeight);
 
-            _currentTriangulation.GradientColors = colors;
             _currentTriangulation.GradientShader = shader;
         }
 

@@ -1,16 +1,10 @@
-LowPoly/obj/
-LowPoly/bin/
-.vs/LowPoly/v14/.suo
 Resource.designer.cs
 packages/
-LowPolySkiaLibrary/bin/
-LowPolySkiaLibrary/obj
 .vs/
-RecTest/bin/*
-RecTest/obj/*
 bin/
 obj/
 
 .idea/*
 
 *.user
+*.suo
