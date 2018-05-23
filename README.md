@@ -1,31 +1,60 @@
-# PolyLib
-Library for creating (dynamically) animated Delaunay Triangulations
 
-## Demo each default animation
+ # PolyLib 
+ 
+Sweep | Touch | Grow
+--- | --- | ---
+<img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/sweep.gif?raw=true" alt="Demo of the Sweep Animation" title="Demo of the Sweep Animation"> | <img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/touch.gif?raw=true" alt="Demo of the random Touch animation" title="Demo of the random Touch animation"> | <img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/grow.gif?raw=true" alt="Demo of the Grow Animation" title="Demo of the Grow Animation">
 
-## Show how to generate each animation
-
+## Usage
+#### Create the view
+>Android
+```xml
+<LowPolyLibrary.Views.Android.LowPolyView
+	android:layout_width="match_parent"		<!-- Any size is possible -->
+	android:layout_height="match_parent"	<!-- Same here -->
+	android:id="@+id/triangulationView" />
 ```
-LowPolyView polyView = FindViewById<LowPolyView> (Resource.Id...);
+>iOS
+```
+storyboard info
+```
+#### Reference the view
+```c#
+LowPolyView polyView = FindViewById<LowPolyView> (Resource.Id.triangulationView);
 
 polyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize, this)
 ```
-```
-// 12 frames in the animation
-var growAnim = new Grow(polyView.CurrentTriangulation, 12);
+#### Create animations
+>Grow Animation
+```c#
+var growAnim = new Grow(
+	triangulation: _polyView.CurrentTriangulation,
+	numFrames: _numAnimFrames
+	);
 polyView.AddAnimation(growAnim);
 ```
-```
-// 12 frames in the animation
-var sweepAnim = new Sweep(polyView.CurrentTriangulation, 12);
+> Sweep Animation
+```C#
+var sweepAnim = new Sweep(
+	triangulation: _polyView.CurrentTriangulation,
+	numFrames: _numAnimFrames
+	);
 polyView.AddAnimation(sweepAnim);
 ```
-```
+> Touch Animation
+```c#
 // new Touch animation at touch location, radius=250, 6 frames in the animation
-var touchAnimation = new RandomTouch(polyView.CurrentTriangulation, 6, touch.X, touch.Y, 250);
+var touchAnimation = new RandomTouch(
+	triangulation: _polyView.CurrentTriangulation,
+	numFrames: 12,
+	x: touch.X,
+	y: touch.Y,
+	radius: 150
+	);
 polyView.AddAnimation(touchAnimation);
 ```
 
+## API
 Show what each parameter does
 
 ## What makes this library different?
@@ -33,9 +62,24 @@ Explain that this does more than create triangulations, but allows you to put an
 
 ## Libraries and tools used
 
+[S-hull][sHullRef]
+Responsible for creating the triangulations. Chosen for its proven speed
+[Auburns/FastNoise_CSharp][fastNoiseRef]
+Responsible for generating noise used in creating source points for triangulation
+[capesean/ColorBru][colorBruRef]
+Binding to the ColorBrewer library developed by Cynthia Brewer
+
+[sHullRef]: http://www.s-hull.org/
+[fastNoiseRef]: https://github.com/Auburns/FastNoise_CSharp
+[colorBruRef]: https://github.com/capesean/ColorBru
+
 ### Alternate Usages
 Describe how to use TriangulationView and AnimationUpdateView seperately with screenshots
 
+## Future plans
+ - Support dynamically resizing the view
+ - Support more platforms
+###### <small>does anyone want to pick up the ball here?
 
 #### Find where to place in this doc:
 framerate
