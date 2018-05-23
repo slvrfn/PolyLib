@@ -62,11 +62,11 @@ Explain that this does more than create triangulations, but allows you to put an
 
 ## Libraries and tools used
 
-[S-hull][sHullRef]
+- [S-hull][sHullRef]
 Responsible for creating the triangulations. Chosen for its proven speed
-[Auburns/FastNoise_CSharp][fastNoiseRef]
+- [Auburns/FastNoise_CSharp][fastNoiseRef]
 Responsible for generating noise used in creating source points for triangulation
-[capesean/ColorBru][colorBruRef]
+- [capesean/ColorBru][colorBruRef]
 Binding to the ColorBrewer library developed by Cynthia Brewer
 
 [sHullRef]: http://www.s-hull.org/
