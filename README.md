@@ -1,4 +1,5 @@
 
+  
  # PolyLib 
  
 Sweep | Touch | Grow
@@ -14,15 +15,25 @@ Sweep | Touch | Grow
 	android:layout_height="match_parent"	<!-- Same here -->
 	android:id="@+id/triangulationView" />
 ```
->iOS
-```
-storyboard info
-```
-#### Reference the view
+>iOS 
+
+Add a `View` instance in your .storyboard or .xib (named polyView here), set `LowPolyView` class
+
+#### Get reference to the view
+
+>Android
 ```c#
 LowPolyView polyView = FindViewById<LowPolyView> (Resource.Id.triangulationView);
+```
 
-polyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize, this)
+>iOS
+>
+Connect `Outlet` in *ViewController.designer.cs*
+```c#
+partial class ViewController{
+    [Outlet]
+    LowPolyLibrary.Views.iOS.LowPolyView polyView { get; set; }
+}
 ```
 #### Create animations
 >Grow Animation
@@ -57,6 +68,18 @@ polyView.AddAnimation(touchAnimation);
 ## API
 Show what each parameter does
 
+Seed G&S
+Frequency G&S
+BleedY G&S
+BleedX G&S
+CellSize G&S
+Variance G&S
+HideLines G&S
+GradientShader G&S
+Points G
+TriangulatedPoints G
+PointToTriangleDic G
+
 ## What makes this library different?
 Explain that this does more than create triangulations, but allows you to put animations on top of the triangulations. Even allows for creation of custom animations
 
@@ -80,6 +103,9 @@ Describe how to use TriangulationView and AnimationUpdateView seperately with sc
  - Support dynamically resizing the view
  - Support more platforms
 ###### <small>does anyone want to pick up the ball here?
+
+## Compatibility
+iOS and Android versions supported
 
 #### Find where to place in this doc:
 framerate
