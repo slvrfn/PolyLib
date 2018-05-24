@@ -1,6 +1,4 @@
-
-  
- # PolyLib 
+# PolyLib 
  
 Sweep | Touch | Grow
 --- | --- | ---
@@ -35,6 +33,9 @@ partial class ViewController{
     LowPolyLibrary.Views.iOS.LowPolyView polyView { get; set; }
 }
 ```
+#### Create Triangulations
+show how to make
+
 #### Create animations
 >Grow Animation
 ```c#
@@ -66,24 +67,42 @@ polyView.AddAnimation(touchAnimation);
 ```
 
 ## API
-Show what each parameter does
 
-Seed G&S
-Frequency G&S
-BleedY G&S
-BleedX G&S
-CellSize G&S
-Variance G&S
-HideLines G&S
-GradientShader G&S
-Points G
-TriangulatedPoints G
-PointToTriangleDic G
+For `LowPolyLibrary.Triangulation`
+
+>Note: Points are initially generated in a grid pattern, then offset by noise.
+
+- `public float Seed { get; set; }`
+	- Seed value used in determining noise for point generation
+- `public float Frequency { get; set; }`
+	- Frequency value used in determining noise for point generation
+- `public float BleedY { get; set; }`
+	- Y direction of how far points can be generated outside bounding rectangle defined by (Left, Top, Right, Bottom) : (0, 0, BoundsWidth, BoundsHeight)
+- `public float BleedX { get; set; }`
+	- X direction of how far points can be generated outside bounding rectangle defined by (Left, Top, Right, Bottom) : (0, 0, BoundsWidth, BoundsHeight)
+- `public float CellSize { get; set; }`
+	- How far apart points are initially generated in the grid
+- `public float Variance { get; set; }`
+	- How far a point can vary (X/Y directions independent) from its initial location in the grid.
+	- Designed to be in (0,1]
+		- Any number can be provided (0, infinity), although behavior is undefined outside of  (0,1]
+	- Used internally as `CellSize * Variance`
+- `public bool HideLines { get; set; }`
+	- Whether or not to draw outer lines of triangles
+- `public SKShader GradientShader { get; set; }`
+	- A [`SKShader`](https://developer.xamarin.com/api/type/SkiaSharp.SKShader/) used for the gradient 
+- `public List<Vertex> Points { get; }`
+	- Copy of internal points used in a `Triangulation`
+- `public List<Triad> TriangulatedPoints { get; }`
+	- Copy of `Triad`(s) used in a `Triangulation`
+	- A `Triad` represents the 3 indices of a triangle in a `Triangulation`
+- `public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic { get; }`
+	- Copy of Dictionary which maps a `Vertex` to the `Triads` it is associated with
 
 ## What makes this library different?
 Explain that this does more than create triangulations, but allows you to put animations on top of the triangulations. Even allows for creation of custom animations
 
-## Libraries and tools used
+## Libraries used
 
 - [S-hull][sHullRef]
 Responsible for creating the triangulations. Chosen for its proven speed
@@ -96,16 +115,20 @@ Binding to the ColorBrewer library developed by Cynthia Brewer
 [fastNoiseRef]: https://github.com/Auburns/FastNoise_CSharp
 [colorBruRef]: https://github.com/capesean/ColorBru
 
-### Alternate Usages
+## Alternate Usages
 Describe how to use TriangulationView and AnimationUpdateView seperately with screenshots
 
 ## Future plans
  - Support dynamically resizing the view
  - Support more platforms
-###### <small>does anyone want to pick up the ball here?
+ - OpenGL support
+###### <small>Does anyone want to pick up the ball here? </small>
 
 ## Compatibility
-iOS and Android versions supported
+Built with 
+- `.Net Standard` 2.0
+- `Xamarin.Android` 8
+- `Xamarin.iOS` 11
 
 #### Find where to place in this doc:
 framerate
