@@ -7,11 +7,11 @@ using CoreGraphics;
 using Foundation;
 using SkiaSharp.Views.iOS;
 using UIKit;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
 using SkiaSharp;
 
 
-namespace LowPolyLibrary.Views.iOS
+namespace PolyLib.Views.iOS
 {
     [Register("AnimationUpdateView"), DesignTimeVisible(true)]
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
@@ -44,7 +44,7 @@ namespace LowPolyLibrary.Views.iOS
 
         void Initialize()
         {
-            _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
+            _animationFlowEngine = new AnimationEngine(this);
             this.Opaque = false;
         }
 

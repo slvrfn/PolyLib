@@ -4,7 +4,7 @@ using System.Text;
 using DelaunayTriangulator;
 using SkiaSharp;
 
-namespace LowPolyLibrary
+namespace PolyLib
 {
     public static class Geometry
     {

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using SkiaSharp;
 
-namespace LowPolyLibrary
+namespace PolyLib
 {
     //interface used for animation update views
     //used by animationengine to ensure proper communication with various animation update view platform implementations

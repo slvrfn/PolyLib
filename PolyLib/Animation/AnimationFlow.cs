@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
 using Gridsum.DataflowEx;
-using LowPolyLibrary.Threading;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
+using PolyLib.Threading;
 using SkiaSharp;
 using Exception = System.Exception;
 using Math = System.Math;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     internal class AnimationFlow : Dataflow<AnimationBase>
     {

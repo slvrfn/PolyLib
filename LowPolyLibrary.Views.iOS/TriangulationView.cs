@@ -6,16 +6,16 @@ using System.Text;
 using CoreGraphics;
 using Foundation;
 using UIKit;
-using LowPolyLibrary;
+using PolyLib;
 using SkiaSharp;
 using SkiaSharp.Views.iOS;
 
-namespace LowPolyLibrary.Views.iOS
+namespace PolyLib.Views.iOS
 {
     [Register("TriangulationView"), DesignTimeVisible(true)]
     public class TriangulationView : SKCanvasView
     {
-        public LowPolyLibrary.Triangulation Triangulation { get; private set; }
+        public Triangulation Triangulation { get; private set; }
 
         float _variance = .75f;
         int _cellSize = 150;
@@ -50,7 +50,7 @@ namespace LowPolyLibrary.Views.iOS
         {
             //Triangulation = new LowPolyLibrary.Triangulation(1920, 1080, Variance, CellSize);
 
-            Triangulation = new LowPolyLibrary.Triangulation(
+            Triangulation = new Triangulation(
                 (int)(Frame.Size.Width * UIScreen.MainScreen.Scale),
                 (int)(Frame.Size.Height * UIScreen.MainScreen.Scale))
             {

@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
 
-namespace LowPolyLibrary.Threading
+namespace PolyLib.Threading
 {
     public delegate void AnimationAddedEventHandler(object sender, EventArgs e);
     public delegate void NoPendingAnimationsEventHandler(object sender, EventArgs e);

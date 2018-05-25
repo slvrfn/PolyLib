@@ -6,7 +6,7 @@ using System.Reflection;
 using DelaunayTriangulator;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     public abstract class Touch : AnimationBase
     {

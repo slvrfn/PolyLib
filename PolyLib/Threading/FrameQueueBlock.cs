@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace LowPolyLibrary.Threading
+namespace PolyLib.Threading
 {
     // Propagates data in a sliding window fashion.
     public class FrameQueueBlock<T> : IPropagatorBlock<T, T>, IReceivableSourceBlock<T>

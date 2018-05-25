@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>LowPolyLibrary</AssemblyName>
-    <RootNamespace>LowPolyLibrary</RootNamespace>
+    <AssemblyName>PolyLib</AssemblyName>
+    <RootNamespace>PolyLib</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

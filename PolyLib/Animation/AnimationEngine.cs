@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     public class AnimationEngine
     {

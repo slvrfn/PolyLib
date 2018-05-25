@@ -60,9 +60,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LowPolyLibrary\LowPolyLibrary.csproj">
+    <ProjectReference Include="..\PolyLib\PolyLib.csproj">
       <Project>{debb4c58-fe30-4796-83df-6bc819ee16fa}</Project>
-      <Name>LowPolyLibrary</Name>
+      <Name>PolyLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

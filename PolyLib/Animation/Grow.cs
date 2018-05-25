@@ -5,7 +5,7 @@ using System.Text;
 using DelaunayTriangulator;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     public class Grow : AnimationBase
     {

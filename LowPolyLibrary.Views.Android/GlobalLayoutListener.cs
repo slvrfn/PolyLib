@@ -1,7 +1,7 @@
 using System;
 using Android.Views;
 
-namespace LowPolyLibrary.Views.Android
+namespace PolyLib.Views.Android
 {
     public class GlobalLayoutListener : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
     {

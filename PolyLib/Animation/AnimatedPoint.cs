@@ -1,6 +1,6 @@
 ﻿using System;
 using SkiaSharp;
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     public class AnimatedPoint
     {

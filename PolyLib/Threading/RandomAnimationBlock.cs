@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
 
-namespace LowPolyLibrary.Threading
+namespace PolyLib.Threading
 {
     // Propagates data in a sliding window fashion.
     public class RandomAnimationBlock : ISourceBlock<AnimationBase>

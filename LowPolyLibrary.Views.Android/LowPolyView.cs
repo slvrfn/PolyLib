@@ -6,10 +6,10 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Views.Android
+namespace PolyLib.Views.Android
 {
     public class LowPolyView : FrameLayout
     {

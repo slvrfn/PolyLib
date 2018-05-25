@@ -7,11 +7,11 @@ using CoreGraphics;
 using Foundation;
 using SkiaSharp.Views.iOS;
 using UIKit;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
 using SkiaSharp;
 
 
-namespace LowPolyLibrary.Views.iOS
+namespace PolyLib.Views.iOS
 {
     [Register("PassthroughView"), DesignTimeVisible(true)]
     public class PassthroughView : UIView

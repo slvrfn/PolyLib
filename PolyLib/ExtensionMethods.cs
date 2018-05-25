@@ -2,7 +2,7 @@
 using DelaunayTriangulator;
 
 
-namespace LowPolyLibrary
+namespace PolyLib
 {
     public static class ExtensionMethods
     {

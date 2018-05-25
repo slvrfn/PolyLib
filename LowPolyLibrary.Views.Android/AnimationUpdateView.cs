@@ -3,15 +3,15 @@ using Android.Content;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using LowPolyLibrary.Animation;
+using PolyLib.Animation;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
 
-namespace LowPolyLibrary.Views.Android
+namespace PolyLib.Views.Android
 {
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
-        private LowPolyLibrary.Animation.AnimationEngine _animationFlowEngine;
+        private AnimationEngine _animationFlowEngine;
 
         #region Constructors
 
@@ -34,7 +34,7 @@ namespace LowPolyLibrary.Views.Android
 
         private void Initialize()
         {
-            _animationFlowEngine = new LowPolyLibrary.Animation.AnimationEngine(this);
+            _animationFlowEngine = new AnimationEngine(this);
         }
 
         protected override void OnDraw(SKSurface surface, SKImageInfo info)

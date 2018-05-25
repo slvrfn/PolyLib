@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     //class used to store data necessary to draw a rendered frame
     public class RenderedFrame

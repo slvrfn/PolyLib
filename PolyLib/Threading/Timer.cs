@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace LowPolyLibrary.Threading
+namespace PolyLib.Threading
 {
     public delegate Task<bool> TimerCallback(object state);
 

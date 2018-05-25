@@ -5,14 +5,14 @@ using Android.Views;
 using Android.Widget;
 using SkiaSharp;
 using SkiaSharp.Views.Android;
-using LowPolyLibrary.Animation;
-using LowPolyLibrary.Views;
+using PolyLib.Animation;
+using PolyLib.Views;
 
-namespace LowPolyLibrary.Views.Android
+namespace PolyLib.Views.Android
 {
     public class TriangulationView : SKCanvasView
     {
-        public LowPolyLibrary.Triangulation Triangulation { get; private set; }
+        public Triangulation Triangulation { get; private set; }
         #region Constructors
 
         public TriangulationView(Context context) : base(context)
@@ -43,7 +43,7 @@ namespace LowPolyLibrary.Views.Android
             {
                 ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
                 // Generate simple Triangulation for initial draw
-                Triangulation = new LowPolyLibrary.Triangulation(Width, Height);
+                Triangulation = new Triangulation(Width, Height);
                 Triangulation.PropertyChanged += Triangulation_PropertyChanged;
                 Invalidate();
             }));

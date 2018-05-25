@@ -6,7 +6,7 @@ using System.Linq;
 using WEB;
 using System.ComponentModel;
 
-namespace LowPolyLibrary
+namespace PolyLib
 {
     public class Triangulation : INotifyPropertyChanged
     {

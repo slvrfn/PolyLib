@@ -6,10 +6,10 @@ using Double = System.Double;
 using Math = System.Math;
 using System;
 using System.Linq;
-using LowPolyLibrary.Threading;
+using PolyLib.Threading;
 using SkiaSharp;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     public abstract class AnimationBase
     {

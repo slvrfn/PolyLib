@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LowPolyLibrary.Animation
+namespace PolyLib.Animation
 {
     class PushTouch : Touch
     {

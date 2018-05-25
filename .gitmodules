@@ -1,6 +1,6 @@
-[submodule "LowPolyLibrary/FastNoise"]
-	path = LowPolyLibrary/FastNoise
+[submodule "PolyLib/FastNoise"]
+	path = PolyLib/FastNoise
 	url = https://github.com/Auburns/FastNoise_CSharp
-[submodule "LowPolyLibrary/ColorBru"]
-	path = LowPolyLibrary/ColorBru
+[submodule "PolyLib/ColorBru"]
+	path = PolyLib/ColorBru
 	url = https://github.com/cameronwhite08/ColorBru.git

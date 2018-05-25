@@ -34,7 +34,7 @@ namespace PolyLibiOS
 
         [Outlet]
         [GeneratedCode("iOS Designer", "1.0")]
-        LowPolyLibrary.Views.iOS.LowPolyView lowPolyView { get; set; }
+        PolyLib.Views.iOS.LowPolyView lowPolyView { get; set; }
 
         void ReleaseDesignerOutlets()
         {
