@@ -142,17 +142,21 @@ namespace PolyLib.Animation
 
         public void UpdateFPS(int fps)
         {
-            _frameQueue.UpdateFPS(fps);
+            if (_randomAnim != null)
+                _frameQueue.UpdateFPS(fps);
         }
 
         private void UpdateRandomAnimTriangulation(Triangulation triangulation)
         {
-            _randomAnim.UpdateTriangulation(triangulation);
+            if (_randomAnim != null)
+                _randomAnim.UpdateTriangulation(triangulation);
+            
         }
 
         public void SetAnimCreatorsForRandomLoop(List<Func<Triangulation, AnimationBase>> animCreators)
         {
-            _randomAnim.SetAnimationCreators(animCreators);
+            if (_randomAnim != null)
+                _randomAnim.SetAnimationCreators(animCreators);
         }
 
         public override ITargetBlock<AnimationBase> InputBlock
