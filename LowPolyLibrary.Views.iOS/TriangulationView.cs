@@ -48,8 +48,6 @@ namespace LowPolyLibrary.Views.iOS
 
         void Initialize()
         {
-
-
             //Triangulation = new LowPolyLibrary.Triangulation(1920, 1080, Variance, CellSize);
 
             Triangulation = new LowPolyLibrary.Triangulation(
@@ -78,22 +76,30 @@ namespace LowPolyLibrary.Views.iOS
             watch.Stop();
         }
 
-
-
-        public void Generate(int boundsWidth, int boundsHeight, float variance, int cellSize, float frequency, float seed)
+        public void UpdateTriangulation(Triangulation triangulation)
         {
-            _variance = variance;
-            _cellSize = cellSize;
-            _frequency = frequency;
-            _seed = seed;
-
-            Triangulation = new LowPolyLibrary.Triangulation(boundsWidth, boundsHeight)
+            //no need to set this to null
+            if (triangulation == null)
             {
-                Variance = _variance,
-                CellSize = _cellSize,
-                Frequency = frequency,
-                Seed = seed
-            };
+                return;
+            }
+
+            //clear previous event
+            if (Triangulation != null)
+            {
+                Triangulation.PropertyChanged -= Triangulation_PropertyChanged;
+            }
+
+            Triangulation = triangulation;
+            Triangulation.PropertyChanged += Triangulation_PropertyChanged;
+
+            SetNeedsDisplay();
+        }
+
+        void Triangulation_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            //force redraw of entire lowpolyview
+            Superview.SetNeedsDisplay();
             SetNeedsDisplay();
         }
     }
