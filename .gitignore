@@ -1,10 +1,8 @@
-Resource.designer.cs
 packages/
 .vs/
 bin/
 obj/
 
 .idea/*
-
 *.user
 *.suo
