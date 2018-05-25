@@ -83,6 +83,11 @@ namespace PolyLib.Animation
             _animationFlow.InputBlock.Post(anim);
         }
 
+        public void UpdateAnimationFPS(int fps)
+        {
+            _animationFlow.UpdateFPS(fps);
+        }
+
         public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
         {
             _randomAnimationTime = msBetweenRandomAnim;

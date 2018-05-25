@@ -11,7 +11,7 @@ namespace PolyLib.Views.Android
 {
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
-        private AnimationEngine _animationFlowEngine;
+        public AnimationEngine _animationFlowEngine { get; private set; }
 
         #region Constructors
 

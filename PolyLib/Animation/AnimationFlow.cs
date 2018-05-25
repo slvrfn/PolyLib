@@ -139,6 +139,11 @@ namespace PolyLib.Animation
             _animations.Complete();
         }
 
+        public void UpdateFPS(int fps)
+        {
+            _frameQueue.UpdateFPS(fps);
+        }
+
         public override ITargetBlock<AnimationBase> InputBlock
         {
             get { return _animations; }

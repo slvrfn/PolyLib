@@ -57,6 +57,7 @@ namespace PolyLib.Threading
             _msource = _source;
 
             //estimated fps
+            //Based on 24 fps, (1sec/24 frames = ~42 ms)
             _tim = new Timer(42, DisplayFrame, false);
             _tim.Start();
         }
@@ -66,6 +67,11 @@ namespace PolyLib.Threading
         {
             var t = await _target.ReceiveAsync();
             return _source.Post(t);
+        }
+
+        public void UpdateFPS(int fps)
+        {
+            _tim.UpdateInterval(fps);
         }
 
         #region IReceivableSourceBlock<TOutput> members

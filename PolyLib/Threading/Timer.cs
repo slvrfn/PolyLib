@@ -36,6 +36,11 @@ namespace PolyLib.Threading
             _timerRunning = false;
         }
 
+        public void UpdateInterval(int interval)
+        {
+            _interval = interval;
+        }
+
         private async Task RunTimer()
         {
             while (_timerRunning)
