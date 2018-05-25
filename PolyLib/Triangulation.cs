@@ -205,10 +205,14 @@ namespace PolyLib
         private SKPoint _pathPointC;
         private SKPoint _center;
         private SKPath _trianglePath;
-        
+
         #endregion
 
-        public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors = null, SKShader gradientShader = null)
+        public Triangulation(int boundsWidth, int boundsHeight) : this(boundsWidth, boundsHeight, null, null) { }
+        public Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors) : this(boundsWidth, boundsHeight, gradientColors, null) { }
+        public Triangulation(int boundsWidth, int boundsHeight, SKShader gradientShader) : this(boundsWidth, boundsHeight, null, gradientShader) { }
+
+        private Triangulation(int boundsWidth, int boundsHeight, SKColor[] gradientColors, SKShader gradientShader)
         {
             BoundsWidth = boundsWidth;
             BoundsHeight = boundsHeight;

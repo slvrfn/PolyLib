@@ -1,3 +1,4 @@
+
 # PolyLib 
  
 Sweep | Touch | Grow
@@ -33,8 +34,29 @@ partial class ViewController{
     LowPolyLibrary.Views.iOS.LowPolyView polyView { get; set; }
 }
 ```
-#### Create Triangulations
-show how to make
+#### Get Reference to a Triangulation
+Create standard `Triangulation`
+```
+var tri = new Triangulation(
+	boundsWidth:1080,
+	boundsHeight:720
+	);
+```
+Create `Triangulation` with custom colors, provided to a random `SKShader`
+```
+var tri = new Triangulation(boundsWidth: 100, boundsHeight: 100, gradientColors: null);
+```
+Create `Triangulation` with provided `SKShader`
+```
+var tri = new Triangulation(boundsWidth: 100, boundsHeight: 100, gradientShader: null);
+```
+__OR__
+
+Get the `Triangulation` hosted by the current `LowPolyView`
+```
+var tri = polyView.CurrentTriangulation;
+```
+
 
 #### Create animations
 >Grow Animation
@@ -82,6 +104,7 @@ For `LowPolyLibrary.Triangulation`
 	- X direction of how far points can be generated outside bounding rectangle defined by (Left, Top, Right, Bottom) : (0, 0, BoundsWidth, BoundsHeight)
 - `public float CellSize { get; set; }`
 	- How far apart points are initially generated in the grid
+	- A grid cell has the dimensions: `CellSize`x`CellSize`
 - `public float Variance { get; set; }`
 	- How far a point can vary (X/Y directions independent) from its initial location in the grid.
 	- Designed to be in (0,1]
