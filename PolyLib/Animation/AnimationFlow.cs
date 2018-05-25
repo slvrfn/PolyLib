@@ -50,6 +50,7 @@ namespace PolyLib.Animation
                 //allows any derived draw function
                 //newest animation determines how all current animations will be drawn
                 var rend = new RenderedFrame(arg[arg.Length - 1].DrawPointFrame);
+                UpdateRandomAnimTriangulation(arg[arg.Length - 1].CurrentTriangulation);
 
                 //no use in "combining" animations unless there is more than 1 anim for this frame
                 if (animFrame.Count > 1)
@@ -142,6 +143,16 @@ namespace PolyLib.Animation
         public void UpdateFPS(int fps)
         {
             _frameQueue.UpdateFPS(fps);
+        }
+
+        private void UpdateRandomAnimTriangulation(Triangulation triangulation)
+        {
+            _randomAnim.UpdateTriangulation(triangulation);
+        }
+
+        public void SetAnimCreatorsForRandomLoop(List<Func<Triangulation, AnimationBase>> animCreators)
+        {
+            _randomAnim.SetAnimationCreators(animCreators);
         }
 
         public override ITargetBlock<AnimationBase> InputBlock

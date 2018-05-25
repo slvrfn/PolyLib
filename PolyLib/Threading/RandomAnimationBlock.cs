@@ -22,7 +22,7 @@ namespace PolyLib.Threading
 
         //functions to be provided by user that specify how an animation should be created
         //ex: a function which randomly assigns touch locations couild be created
-        private readonly List<Func<Triangulation, AnimationBase>> _animCreators;
+        private List<Func<Triangulation, AnimationBase>> _animCreators;
 
         private Timer _tim;
 
@@ -47,12 +47,12 @@ namespace PolyLib.Threading
         }
         #endregion
 
-        public void AddAnimationCreator(Func<Triangulation, AnimationBase> animCreator)
+        public void SetAnimationCreators(List<Func<Triangulation, AnimationBase>> animCreators)
         {
-            _animCreators.Add(animCreator);
+            _animCreators = animCreators;
         }
 
-        public async Task<bool> AddRandomAnimation(object sender)
+        private async Task<bool> AddRandomAnimation(object sender)
         {
             if (_animCreators.Count > 1)
             {
@@ -65,9 +65,14 @@ namespace PolyLib.Threading
             return false;
         }
 
-        public void UpdateTriangulation(Triangulation _tri)
+        public void UpdateTriangulation(Triangulation tri)
         {
-            this._tri = _tri;
+            if (_tri.Equals(tri))
+            {
+                return;
+            }
+
+            _tri = tri;
             _tim.Start();
         }
 

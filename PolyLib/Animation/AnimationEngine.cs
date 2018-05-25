@@ -88,20 +88,6 @@ namespace PolyLib.Animation
             _animationFlow.UpdateFPS(fps);
         }
 
-        public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
-        {
-            _randomAnimationTime = msBetweenRandomAnim;
-            _shouldStartRandomAnim = true;
-
-            _animationFlow.StartRandomAnimationsLoop(_randomAnimationTime);
-        }
-
-        public void StopRandomAnimationsLoop()
-        {
-            _shouldStartRandomAnim = false;
-            _animationFlow.StopRandomAnimationsLoop();
-        }
-
         public void DrawOnMe(SKSurface surface)
         {
             if (_currentRenderedFrame != null)
@@ -117,6 +103,27 @@ namespace PolyLib.Animation
                 }
             }
         }
+
+        #region RandomAnimationInteractions
+        public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
+        {
+            _randomAnimationTime = msBetweenRandomAnim;
+            _shouldStartRandomAnim = true;
+
+            _animationFlow.StartRandomAnimationsLoop(_randomAnimationTime);
+        }
+
+        public void StopRandomAnimationsLoop()
+        {
+            _shouldStartRandomAnim = false;
+            _animationFlow.StopRandomAnimationsLoop();
+        }
+
+        public void SetAnimCreatorsForRandomLoop(List<Func<Triangulation, AnimationBase>> animCreators)
+        {
+            _animationFlow.SetAnimCreatorsForRandomLoop(animCreators);
+        }
+        #endregion
 
         //public void UpdateTriangulationForRandom(Triangulation tri)
         //{
