@@ -105,9 +105,9 @@
       <Project>{debb4c58-fe30-4796-83df-6bc819ee16fa}</Project>
       <Name>PolyLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LowPolyLibrary.Views.Android\LowPolyLibrary.Views.Android.csproj">
+    <ProjectReference Include="..\LowPolyLibrary.Views.Android\PolyLib.Views.Android.csproj">
       <Project>{31af6fe2-02e7-4719-ae56-ddb6b0a6424c}</Project>
-      <Name>LowPolyLibrary.Views.Android</Name>
+      <Name>PolyLib.Views.Android</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

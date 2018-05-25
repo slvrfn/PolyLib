@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolyLibAndroid", "PolyLibAn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolyLib", "PolyLib\PolyLib.csproj", "{DEBB4C58-FE30-4796-83DF-6BC819EE16FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPolyLibrary.Views.Android", "LowPolyLibrary.Views.Android\LowPolyLibrary.Views.Android.csproj", "{31AF6FE2-02E7-4719-AE56-DDB6B0A6424C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolyLib.Views.Android", "PolyLib.Views.Android\PolyLib.Views.Android.csproj", "{31AF6FE2-02E7-4719-AE56-DDB6B0A6424C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPolyLibrary.Views.iOS", "LowPolyLibrary.Views.iOS\LowPolyLibrary.Views.iOS.csproj", "{9D06B86B-038D-4127-BC1A-A37E9220BE6C}"
 EndProject
