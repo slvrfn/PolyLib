@@ -1,6 +1,6 @@
 ﻿using UIKit;
 
-namespace LowPolyiOS
+namespace PolyLibiOS
 {
     public class Application
     {

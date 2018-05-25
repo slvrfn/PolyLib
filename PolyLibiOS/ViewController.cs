@@ -2,7 +2,7 @@
 
 using UIKit;
 
-namespace LowPolyiOS
+namespace PolyLibiOS
 {
     public partial class ViewController : UIViewController
     {

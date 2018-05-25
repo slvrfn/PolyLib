@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPolyLibrary.Views.Androi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPolyLibrary.Views.iOS", "LowPolyLibrary.Views.iOS\LowPolyLibrary.Views.iOS.csproj", "{9D06B86B-038D-4127-BC1A-A37E9220BE6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPolyiOS", "LowPolyiOS\LowPolyiOS.csproj", "{2B226DDD-070D-43D5-B8DB-034481E8C30F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolyLibiOS", "PolyLibiOS\PolyLibiOS.csproj", "{2B226DDD-070D-43D5-B8DB-034481E8C30F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
