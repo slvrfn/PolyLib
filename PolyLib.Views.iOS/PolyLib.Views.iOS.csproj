@@ -8,9 +8,9 @@
     <ProjectGuid>{9D06B86B-038D-4127-BC1A-A37E9220BE6C}</ProjectGuid>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>LowPolyLibrary.Views.iOS</RootNamespace>
+    <RootNamespace>PolyLib.Views.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>LowPolyLibrary.Views.iOS</AssemblyName>
+    <AssemblyName>PolyLib.Views.iOS</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

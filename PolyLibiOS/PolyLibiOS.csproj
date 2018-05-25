@@ -148,9 +148,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LowPolyLibrary.Views.iOS\LowPolyLibrary.Views.iOS.csproj">
+    <ProjectReference Include="..\PolyLib.Views.iOS\PolyLib.Views.iOS.csproj">
       <Project>{9D06B86B-038D-4127-BC1A-A37E9220BE6C}</Project>
-      <Name>LowPolyLibrary.Views.iOS</Name>
+      <Name>PolyLib.Views.iOS</Name>
     </ProjectReference>
     <ProjectReference Include="..\PolyLib\PolyLib.csproj">
       <Project>{debb4c58-fe30-4796-83df-6bc819ee16fa}</Project>
