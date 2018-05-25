@@ -1,6 +1,7 @@
 
-# PolyLib 
- 
+
+# PolyLib
+
 Sweep | Touch | Grow
 --- | --- | ---
 <img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/sweep.gif?raw=true" alt="Demo of the Sweep Animation" title="Demo of the Sweep Animation"> | <img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/touch.gif?raw=true" alt="Demo of the random Touch animation" title="Demo of the random Touch animation"> | <img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/grow.gif?raw=true" alt="Demo of the Grow Animation" title="Demo of the Grow Animation">
@@ -14,7 +15,7 @@ Sweep | Touch | Grow
 	android:layout_height="match_parent"	<!-- Same here -->
 	android:id="@+id/triangulationView" />
 ```
->iOS 
+>iOS
 
 Add a `View` instance in your .storyboard or .xib (named polyView here), set `LowPolyView` class
 
@@ -44,11 +45,19 @@ var tri = new Triangulation(
 ```
 Create `Triangulation` with custom colors, provided to a random `SKShader`
 ```
-var tri = new Triangulation(boundsWidth: 100, boundsHeight: 100, gradientColors: null);
+var tri = new Triangulation(
+	boundsWidth: 100,
+	boundsHeight: 100,
+	gradientColors: new SKColor[]
+	);
 ```
-Create `Triangulation` with provided `SKShader`
+Create `Triangulation` with a provided [`SKShader`](https://developer.xamarin.com/api/type/SkiaSharp.SKShader/)
 ```
-var tri = new Triangulation(boundsWidth: 100, boundsHeight: 100, gradientShader: null);
+var tri = new Triangulation(
+	boundsWidth: 100,
+	boundsHeight: 100,
+	gradientShader: SKShader.Create...(...)
+	);
 ```
 __OR__
 
@@ -113,7 +122,7 @@ For `LowPolyLibrary.Triangulation`
 - `public bool HideLines { get; set; }`
 	- Whether or not to draw outer lines of triangles
 - `public SKShader GradientShader { get; set; }`
-	- A [`SKShader`](https://developer.xamarin.com/api/type/SkiaSharp.SKShader/) used for the gradient 
+	- A [`SKShader`](https://developer.xamarin.com/api/type/SkiaSharp.SKShader/) used for the gradient
 - `public List<Vertex> Points { get; }`
 	- Copy of internal points used in a `Triangulation`
 - `public List<Triad> TriangulatedPoints { get; }`
@@ -148,7 +157,7 @@ Describe how to use TriangulationView and AnimationUpdateView seperately with sc
 ###### <small>Does anyone want to pick up the ball here? </small>
 
 ## Compatibility
-Built with 
+Built with
 - `.Net Standard` 2.0
 - `Xamarin.Android` 8
 - `Xamarin.iOS` 11

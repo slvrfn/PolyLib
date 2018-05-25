@@ -82,7 +82,7 @@ namespace PolyLib
                 if (_cellSize.Equals(value))
                     return;
                 _cellSize = value;
-                _calcVariance = _cellSize * Variance / 2;
+                _calcVariance = _cellSize * Variance;
                 MarkPointsDirty();
                 OnPropertyChanged("CellSize");
             }
@@ -95,7 +95,7 @@ namespace PolyLib
                 if (_variance.Equals(value))
                     return;
                 _variance = value;
-                _calcVariance = CellSize * _variance / 2;
+                _calcVariance = CellSize * _variance;
                 MarkPointsDirty();
                 OnPropertyChanged("Variance");
             }
@@ -111,6 +111,20 @@ namespace PolyLib
                 OnPropertyChanged("HideLines");
             }
         }
+
+        private SKColor _strokeColor = SKColors.Black; 
+ 
+        public SKColor StrokeColor 
+        { 
+            get => _strokeColor; 
+            set
+            {
+                if (_gradientShader.Equals(value))
+                    return;
+                _strokeColor = value;
+                _strokePaint.Color = _strokeColor;
+            }
+        } 
 
         public SKShader GradientShader
         {
@@ -256,7 +270,7 @@ namespace PolyLib
             _strokePaint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
-                Color = SKColors.Black,
+                Color = _strokeColor,
                 IsAntialias = true
             };
 
@@ -378,17 +392,17 @@ namespace PolyLib
         public void KeepInBounds(ref SKPoint center)
         {
             if (center.X < 0)
-                center.X += (int)BleedX;
+                center.X = 0;
             else if (center.X > BoundsWidth)
-                center.X -= (int)BleedX;
-            else if (center.X.Equals(BoundsWidth))
-                center.X -= (int)BleedX - 1;
+                center.X = BoundsWidth;
+            //else if (center.X.Equals(BoundsWidth))
+            //center.X -= (int)BleedX - 1;
             if (center.Y < 0)
-                center.Y += (int)BleedY;
+                center.Y = 0;
             else if (center.Y > BoundsHeight)
-                center.Y -= (int)BleedY + 1;
-            else if (center.Y.Equals(BoundsHeight))
-                center.Y -= (int)BleedY - 1;
+                center.Y = BoundsHeight;
+            //else if (center.Y.Equals(BoundsHeight))
+                //center.Y -= (int)BleedY - 1;
         }
 
         public static SKColor[] getRandomColorBruColors(int colorCount)
