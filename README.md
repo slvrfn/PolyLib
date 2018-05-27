@@ -1,4 +1,8 @@
-# PolyLib
+# PolyLib 
+<p align="center">
+  <img src="https://img.shields.io/badge/.net%20standard-2.0-blue.svg" alt=".Net Standard 2.0" title=".Net Standard 2.0"> <img src="https://img.shields.io/badge/Xamarin.Android-8-green.svg" alt="Xamarin.Android 8" title="Xamarin.Android 8"> <img src="https://img.shields.io/badge/Xamarin.iOS-11-lightgrey.svg" alt="Xamarin.iOS 11" title="Xamarin.iOS 11"> 
+</p>
+<br>
 
 Sweep | Touch | Grow
 --- | --- | ---
@@ -8,20 +12,20 @@ Sweep | Touch | Grow
 #### Create the view
 >Android
 ```xml
-<LowPolyLibrary.Views.Android.LowPolyView
+<PolyLib.Views.Android.PolyLibView
 	android:layout_width="match_parent"		<!-- Any size is possible -->
 	android:layout_height="match_parent"	<!-- Same here -->
 	android:id="@+id/triangulationView" />
 ```
 >iOS
 
-Add a `View` instance in your .storyboard or .xib (named polyView here), set `LowPolyView` class
+Add a `View` instance in your .storyboard or .xib (named polyView here), set `PolyLibView` class
 
 #### Get reference to the view
 
 >Android
 ```c#
-LowPolyView polyView = FindViewById<LowPolyView> (Resource.Id.triangulationView);
+PolyLibView polyView = FindViewById<PolyLibView> (Resource.Id.triangulationView);
 ```
 
 >iOS
@@ -30,7 +34,7 @@ Connect `Outlet` in *ViewController.designer.cs*
 ```c#
 partial class ViewController{
     [Outlet]
-    LowPolyLibrary.Views.iOS.LowPolyView polyView { get; set; }
+    PolyLib.Views.iOS.PolyLibView polyView { get; set; }
 }
 ```
 #### Get Reference to a Triangulation
@@ -59,7 +63,7 @@ var tri = new Triangulation(
 ```
 __OR__
 
-Get the `Triangulation` hosted by the current `LowPolyView`
+Get the `Triangulation` hosted by the current `PolyLibView`
 ```c#
 var tri = polyView.CurrentTriangulation;
 ```
@@ -98,7 +102,7 @@ While two touch animations are provided to you, an abstraction was made in creat
 
 ## API
 
-### `LowPolyLibrary.Triangulation`
+### `PolyLib.Triangulation`
 
 >Note: Points are initially generated in a grid pattern, then offset by noise.
 
@@ -132,7 +136,7 @@ While two touch animations are provided to you, an abstraction was made in creat
 - `public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic { get; }`
 	- Copy of Dictionary which maps a `Vertex` to the `Triads` it is associated with
 
-### `LowPolyLibrary.AnimationEngine`
+### `PolyLib.AnimationEngine`
 This comes pre-hosted in each `PolyLib.Views.*.AnimationUpdateView`
  - `public void AddAnimation(AnimationBase anim)`
 	- Add an animation which derives from `AnimationBase` to be drawn
@@ -159,6 +163,21 @@ This comes pre-hosted in each `PolyLib.Views.*.AnimationUpdateView`
 ## What makes this library different?
 This library does more than just generate Delaunay triangulations. I created this library because other similar libraries did not suit my needs, they just generated the basic triangulations. This library was created with the purpose of adding animations to these Delaunay triangulations. A few animations have been created already, but many *many* more interesting animations can be created following the template set by the presets. If you are *clever* this library can even be used in a to put animations on any set of points, not necessarily involving a `Triangulation`.
 
+## Important Notes
+Describe how to use TriangulationView and AnimationUpdateView seperately with screenshots
+Each `PolyLibView` was created to not only display triangulations, but also animations on the triangulations. This was done by creating three separate views: `AnimationUpdateView`, `PolyLibView`, and `TriangulationView`. `PolyLibView` hosts the other two views sandwiched together with a  `TriangulationView` on the bottom, and a `AnimationUpdateView` on top. The `TriangulationView` is responsible for drawing entire static `Triangulation`s. An `AnimationUpdateView` is a transparent view which displays only updates frame-by-frame on top of the `Triangulation`. For performance reasons it is best to only draw the individual triangles updated in each frame of an animation, instead of the entire `Triangulation` each time. If desired, an `AnimationUpdateView` could be hosted anywhere for custom animation effects.
+
+>An `AnimationUpdateView` demo
+
+<center><img src="https://github.com/cameronwhite08/PolyLib/blob/master/gifs/animationUpdateView.gif?raw=true" alt="Demo of the Animation Update View" title="Demo of the Animation Update View" height="500"></center>
+
+
+## Future plans
+ - Support dynamically resizing the view
+ - Support more platforms (Relatively easy to add a platform. Check out `PolyLib.Views.* `)
+ - OpenGL support
+###### <small>Does anyone want to pick up the ball here? </small>
+
 ## Libraries used
 
 - [S-hull][sHullRef]
@@ -171,22 +190,3 @@ Binding to the ColorBrewer library developed by Cynthia Brewer
 [sHullRef]: http://www.s-hull.org/
 [fastNoiseRef]: https://github.com/Auburns/FastNoise_CSharp
 [colorBruRef]: https://github.com/capesean/ColorBru
-
-## Important Notes
-Describe how to use TriangulationView and AnimationUpdateView seperately with screenshots
-Each `PolyLibView` was created to not only display triangulations, but also animations on the triangulations. This was done by creating three separate views: `AnimationUpdateView`, `PolyLibView`, and `TriangulationView`. `PolyLibView` hosts the other two views sandwiched together with a  `TriangulationView` on the bottom, and a `AnimationUpdateView` on top. The `TriangulationView` is responsible for drawing entire static `Triangulation`s. An `AnimationUpdateView` is a transparent view which displays only updates frame-by-frame on top of the `Triangulation`. For performance reasons it is best to only draw the individual triangles updated in each frame of an animation, instead of the entire `Triangulation` each time. If desired, an `AnimationUpdateView` could be hosted anywhere for custom animation effects.
-
->An `AnimationUpdateView`
-
-
-## Future plans
- - Support dynamically resizing the view
- - Support more platforms (Relatively easy to add a platform. Check out `PolyLib.Views.* `)
- - OpenGL support
-###### <small>Does anyone want to pick up the ball here? </small>
-
-## Compatibility
-Built with
-- `.Net Standard` 2.0
-- `Xamarin.Android` 8
-- `Xamarin.iOS` 11
