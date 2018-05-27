@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>PolyLib</AssemblyName>
+    <RootNamespace>PolyLib</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Gridsum.DataflowEx" Version="2.0.0" />
+    <PackageReference Include="SkiaSharp" Version="1.59.3" />
+  </ItemGroup>
+
+</Project>
