@@ -11,7 +11,7 @@ namespace PolyLib.Views.Android
 {
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
-        public AnimationEngine _animationFlowEngine { get; private set; }
+        public AnimationEngine Engine { get; private set; }
 
         #region Constructors
 
@@ -34,7 +34,7 @@ namespace PolyLib.Views.Android
 
         private void Initialize()
         {
-            _animationFlowEngine = new AnimationEngine(this);
+            Engine = new AnimationEngine(this);
         }
 
         protected override void OnDraw(SKSurface surface, SKImageInfo info)
@@ -48,7 +48,7 @@ namespace PolyLib.Views.Android
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            _animationFlowEngine.DrawOnMe(surf);
+            Engine.DrawOnMe(surf);
             Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedMilliseconds + " ms\n");
         }
 
@@ -59,7 +59,7 @@ namespace PolyLib.Views.Android
 
         public void AddAnimation(AnimationBase anim)
         {
-            _animationFlowEngine.AddAnimation(anim);
+            Engine.AddAnimation(anim);
         }
     }
 }

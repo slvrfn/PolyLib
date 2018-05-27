@@ -115,9 +115,9 @@ namespace PolyLib.Animation
             //limit parallelism so that only one redraw update can occur
             _signalFrameRendered = new ActionBlock<RenderedFrame>(notifyFrameReady, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1, TaskScheduler = uiScheduler });
 
-            _animations.LinkTo(_frameQueue);
-            _frameQueue.LinkTo(_renderFrame);
-            _renderFrame.LinkTo(_signalFrameRendered);
+            _animations.LinkTo(_frameQueue, new DataflowLinkOptions {PropagateCompletion = true});
+            _frameQueue.LinkTo(_renderFrame, new DataflowLinkOptions { PropagateCompletion = true });
+            _renderFrame.LinkTo(_signalFrameRendered, new DataflowLinkOptions { PropagateCompletion = true });
 
             RegisterChild(_animations);
             RegisterChild(_frameQueue);
@@ -133,7 +133,7 @@ namespace PolyLib.Animation
                 return;
             }
             _randomAnim = new RandomAnimationBlock(msBetweenRandomAnim);
-            _randomAnim.LinkTo(_animations, new DataflowLinkOptions());
+            _randomAnim.LinkTo(_animations, new DataflowLinkOptions { PropagateCompletion = true });
             RegisterChild(_randomAnim);
         }
 
@@ -141,7 +141,7 @@ namespace PolyLib.Animation
         {
             //force completion of the flow, which will make the flow get recreated
             //engine determines if a new animation should be added
-            _animations.Complete();
+            _randomAnim.Complete();
         }
 
         internal void UpdateFPS(int fps)
