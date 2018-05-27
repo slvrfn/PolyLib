@@ -50,7 +50,6 @@ namespace PolyLib.Animation
                 //allows any derived draw function
                 //newest animation determines how all current animations will be drawn
                 var rend = new RenderedFrame(arg[arg.Length - 1].DrawPointFrame);
-                UpdateRandomAnimTriangulation(arg[arg.Length - 1].CurrentTriangulation);
 
                 //no use in "combining" animations unless there is more than 1 anim for this frame
                 if (animFrame.Count > 1)
@@ -128,7 +127,12 @@ namespace PolyLib.Animation
 
         public void StartRandomAnimationsLoop(int msBetweenRandomAnim)
         {
-            _randomAnim = new RandomAnimationBlock(_animations, msBetweenRandomAnim);
+            if (_randomAnim != null)
+            {
+                //only want to start one random anim block at a time
+                return;
+            }
+            _randomAnim = new RandomAnimationBlock(msBetweenRandomAnim);
             _randomAnim.LinkTo(_animations, new DataflowLinkOptions());
             RegisterChild(_randomAnim);
         }
@@ -140,20 +144,20 @@ namespace PolyLib.Animation
             _animations.Complete();
         }
 
-        public void UpdateFPS(int fps)
+        internal void UpdateFPS(int fps)
         {
             if (_randomAnim != null)
                 _frameQueue.UpdateFPS(fps);
         }
 
-        private void UpdateRandomAnimTriangulation(Triangulation triangulation)
+        internal void UpdateRandomAnimTriangulations(List<Triangulation> triangulations)
         {
             if (_randomAnim != null)
-                _randomAnim.UpdateTriangulation(triangulation);
+                _randomAnim.UpdateSourceTriangulations(triangulations);
             
         }
 
-        public void SetAnimCreatorsForRandomLoop(List<Func<Triangulation, AnimationBase>> animCreators)
+        internal void SetAnimCreatorsForRandomLoop(List<Func<Triangulation, AnimationBase>> animCreators)
         {
             if (_randomAnim != null)
                 _randomAnim.SetAnimationCreators(animCreators);

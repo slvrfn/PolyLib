@@ -18,7 +18,7 @@ namespace PolyLib.Threading
 
         private readonly BroadcastBlock<AnimationBase> _source;
 
-        private Triangulation _tri;
+        private List<Triangulation> _tris;
 
         //functions to be provided by user that specify how an animation should be created
         //ex: a function which randomly assigns touch locations couild be created
@@ -28,22 +28,18 @@ namespace PolyLib.Threading
 
         #region Constructors
         // Constructs a SlidingWindowBlock object.
-        public RandomAnimationBlock(CurrentAnimationsBlock animBlock, int MSdelayUntilAnimAdded)
+        public RandomAnimationBlock(int MSdelayUntilAnimAdded)
         {
             _source = new BroadcastBlock<AnimationBase>(f => f);
 
             _msource = _source;
 
-            //LinkTo(animBlock, new DataflowLinkOptions());
-
-
-            animBlock.AnimationAdded += AnimBlock_AnimationAdded;
-            animBlock.NoPendingAnimations += AnimBlock_NoPendingAnimations;
-
             //delay until random animation is added
-            _tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation, true);
+            _tim = new Timer(MSdelayUntilAnimAdded, AddRandomAnimation);
+            _tim.Start();
 
             _animCreators = new List<Func<Triangulation, AnimationBase>>();
+            _tris = new List<Triangulation>();
         }
         #endregion
 
@@ -54,36 +50,26 @@ namespace PolyLib.Threading
 
         private async Task<bool> AddRandomAnimation(object sender)
         {
-            if (_animCreators.Count > 1)
+            if (_animCreators.Count > 0 && _tris.Count>0)
             {
                 var index = Random.Rand.Next(_animCreators.Count);
+                var indexforTriangulation = Random.Rand.Next(_tris.Count);
 
-                var randomAnim = _animCreators[index](_tri);
+                var randomAnim = _animCreators[index](_tris[indexforTriangulation]);
                 return await _source.SendAsync(randomAnim);
 
             }
             return false;
         }
 
-        public void UpdateTriangulation(Triangulation tri)
+        public void UpdateSourceTriangulations(List<Triangulation> tris)
         {
-            if (_tri.Equals(tri))
+            if (_tris.Equals(tris))
             {
                 return;
             }
 
-            _tri = tri;
-            _tim.Start();
-        }
-
-        void AnimBlock_AnimationAdded(object sender, EventArgs e)
-        {
-            _tim.Stop();
-        }
-
-        void AnimBlock_NoPendingAnimations(object sender, EventArgs e)
-        {
-            _tim.Start();
+            _tris = tris;
         }
 
         #region ISourceBlock<TOutput> members

@@ -123,6 +123,11 @@ namespace PolyLib.Animation
         {
             _animationFlow.SetAnimCreatorsForRandomLoop(animCreators);
         }
+
+        public void UpdateRandomAnimTriangulations(List<Triangulation> triangulations)
+        {
+            _animationFlow.UpdateRandomAnimTriangulations(triangulations);
+        }
         #endregion
 
         //public void UpdateTriangulationForRandom(Triangulation tri)
