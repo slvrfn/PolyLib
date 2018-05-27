@@ -1,5 +1,3 @@
-
-
 # PolyLib
 
 Sweep | Touch | Grow
@@ -37,14 +35,14 @@ partial class ViewController{
 ```
 #### Get Reference to a Triangulation
 Create standard `Triangulation`
-```
+```c#
 var tri = new Triangulation(
 	boundsWidth:1080,
 	boundsHeight:720
 	);
 ```
 Create `Triangulation` with custom colors, provided to a random `SKShader`
-```
+```c#
 var tri = new Triangulation(
 	boundsWidth: 100,
 	boundsHeight: 100,
@@ -52,7 +50,7 @@ var tri = new Triangulation(
 	);
 ```
 Create `Triangulation` with a provided [`SKShader`](https://developer.xamarin.com/api/type/SkiaSharp.SKShader/)
-```
+```c#
 var tri = new Triangulation(
 	boundsWidth: 100,
 	boundsHeight: 100,
@@ -62,7 +60,7 @@ var tri = new Triangulation(
 __OR__
 
 Get the `Triangulation` hosted by the current `LowPolyView`
-```
+```c#
 var tri = polyView.CurrentTriangulation;
 ```
 
@@ -174,8 +172,12 @@ Binding to the ColorBrewer library developed by Cynthia Brewer
 [fastNoiseRef]: https://github.com/Auburns/FastNoise_CSharp
 [colorBruRef]: https://github.com/capesean/ColorBru
 
-## Alternate Usages
+## Important Notes
 Describe how to use TriangulationView and AnimationUpdateView seperately with screenshots
+Each `PolyLibView` was created to not only display triangulations, but also animations on the triangulations. This was done by creating three separate views: `AnimationUpdateView`, `PolyLibView`, and `TriangulationView`. `PolyLibView` hosts the other two views sandwiched together with a  `TriangulationView` on the bottom, and a `AnimationUpdateView` on top. The `TriangulationView` is responsible for drawing entire static `Triangulation`s. An `AnimationUpdateView` is a transparent view which displays only updates frame-by-frame on top of the `Triangulation`. For performance reasons it is best to only draw the individual triangles updated in each frame of an animation, instead of the entire `Triangulation` each time. If desired, an `AnimationUpdateView` could be hosted anywhere for custom animation effects.
+
+>An `AnimationUpdateView`
+
 
 ## Future plans
  - Support dynamically resizing the view
