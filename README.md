@@ -1,3 +1,4 @@
+
 # PolyLib 
 <p align="center">
   <img src="https://img.shields.io/badge/.net%20standard-2.0-blue.svg" alt=".Net Standard 2.0" title=".Net Standard 2.0"> <img src="https://img.shields.io/badge/Xamarin.Android-8-green.svg" alt="Xamarin.Android 8" title="Xamarin.Android 8"> <img src="https://img.shields.io/badge/Xamarin.iOS-11-lightgrey.svg" alt="Xamarin.iOS 11" title="Xamarin.iOS 11"> 
@@ -132,7 +133,7 @@ While two touch animations are provided to you, an abstraction was made in creat
 	- Copy of internal points used in a `Triangulation`
 - `public List<Triad> TriangulatedPoints { get; }`
 	- Copy of `Triad`(s) used in a `Triangulation`
-	- A `Triad` represents the 3 indices of a triangle in a `Triangulation`
+	- A `Triad` represents the 3 indices of a points in `List<Vertex> Points` that make up a  triangle in a `Triangulation`
 - `public Dictionary<Vertex, HashSet<Triad>> PointToTriangleDic { get; }`
 	- Copy of Dictionary which maps a `Vertex` to the `Triads` it is associated with
 
@@ -150,6 +151,8 @@ This comes pre-hosted in each `PolyLib.Views.*.AnimationUpdateView`
 	- Trigger a loop to start, which draws one of a set of provided Animations
  - `public void StopRandomAnimationsLoop()`
 	- Stop the random animations from being drawn
+- `public void UpdateRandomAnimTriangulations(List<Triangulation> triangulations)`
+	- A list of user-provided `Triangulation`s that are randomly selected among and used as the source for any created animations.
  - `public void SetAnimCreatorsForRandomLoop(List<Func<Triangulation,AnimationBase>> animCreators)`
 	- A list of user-defined `Func`s that given a `Triangulation`, returns some animation which derives from `AnimationBase` (Allows pre-defined or user-defined animations to be randomly selected)
 >ex
@@ -164,7 +167,6 @@ This comes pre-hosted in each `PolyLib.Views.*.AnimationUpdateView`
 This library does more than just generate Delaunay triangulations. I created this library because other similar libraries did not suit my needs, they just generated the basic triangulations. This library was created with the purpose of adding animations to these Delaunay triangulations. A few animations have been created already, but many *many* more interesting animations can be created following the template set by the presets. If you are *clever* this library can even be used in a to put animations on any set of points, not necessarily involving a `Triangulation`.
 
 ## Important Notes
-Describe how to use TriangulationView and AnimationUpdateView seperately with screenshots
 Each `PolyLibView` was created to not only display triangulations, but also animations on the triangulations. This was done by creating three separate views: `AnimationUpdateView`, `PolyLibView`, and `TriangulationView`. `PolyLibView` hosts the other two views sandwiched together with a  `TriangulationView` on the bottom, and a `AnimationUpdateView` on top. The `TriangulationView` is responsible for drawing entire static `Triangulation`s. An `AnimationUpdateView` is a transparent view which displays only updates frame-by-frame on top of the `Triangulation`. For performance reasons it is best to only draw the individual triangles updated in each frame of an animation, instead of the entire `Triangulation` each time. If desired, an `AnimationUpdateView` could be hosted anywhere for custom animation effects.
 
 >An `AnimationUpdateView` demo
