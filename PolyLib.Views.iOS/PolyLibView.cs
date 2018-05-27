@@ -13,8 +13,8 @@ using SkiaSharp;
 
 namespace PolyLib.Views.iOS
 {
-    [Register("LowPolyView"), DesignTimeVisible(true)]
-    public class LowPolyView : UIView
+    [Register("PolyLibView"), DesignTimeVisible(true)]
+    public class PolyLibView : UIView
     {
         public TriangulationView TriangulationView;
         public AnimationUpdateView AnimationUpdateView;
@@ -23,17 +23,17 @@ namespace PolyLib.Views.iOS
         public Triangulation CurrentTriangulation => TriangulationView.Triangulation;
 
         #region Constructors
-        public LowPolyView()
+        public PolyLibView()
         {
             Initialize();
         }
 
-        public LowPolyView(CGRect frame) : base(frame)
+        public PolyLibView(CGRect frame) : base(frame)
         {
             Initialize();
         }
 
-        public LowPolyView(IntPtr p) : base(p)
+        public PolyLibView(IntPtr p) : base(p)
         {
             Initialize();
         }
@@ -84,14 +84,14 @@ namespace PolyLib.Views.iOS
         }
         #endregion
 
-        public LowPolyView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize)
+        public PolyLibView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
 
             if (!boundsWidth.Equals(Frame.Size.Width) || !boundsHeight.Equals(Frame.Size.Height))
             {
 
-                //var newCanvasView = new LowPolyView(Frame);
+                //var newCanvasView = new PolyLibView(Frame);
                 //newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
 //                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
                 //InsertSubviewAbove(newCanvasView, this);
@@ -102,7 +102,7 @@ namespace PolyLib.Views.iOS
             else
             {
 //                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
-                //only called here since a whole new Lowpoly view is created in the other case
+                //only called here since a whole new PolyLib view is created in the other case
                 AnimationUpdateView.SetNeedsDisplay();
                 return this;
             }

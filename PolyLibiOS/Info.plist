@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
-	<string>LowPolyiOS</string>
+	<string>PolyLibiOS</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.camscraft.LowPolyiOS</string>
+	<string>com.camscraft.PolyLibiOS</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>

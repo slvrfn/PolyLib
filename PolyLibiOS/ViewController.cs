@@ -15,8 +15,8 @@ namespace PolyLibiOS
         {
             base.ViewDidLoad();
             // Perform any additional setup after loading the view, typically from a nib.
-            widthInput.Text = $"{lowPolyView.Frame.Size.Width * UIScreen.MainScreen.Scale}";
-            heightInput.Text = $"{lowPolyView.Frame.Size.Height * UIScreen.MainScreen.Scale}";
+            widthInput.Text = $"{PolyLibView.Frame.Size.Width * UIScreen.MainScreen.Scale}";
+            heightInput.Text = $"{PolyLibView.Frame.Size.Height * UIScreen.MainScreen.Scale}";
             varInput.Text = ".75";
             cellSizeInput.Text = "150";
 
@@ -53,7 +53,7 @@ namespace PolyLibiOS
             var variance = float.Parse(varInput.Text);
             var cellSize = int.Parse(cellSizeInput.Text);
 
-            lowPolyView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize);
+            PolyLibView.GenerateNewTriangulation(boundsWidth, boundsHeight, variance, cellSize);
         }
 
         public override void DidReceiveMemoryWarning()

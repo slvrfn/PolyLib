@@ -48,7 +48,7 @@ namespace PolyLib.Views.iOS
 
         void Initialize()
         {
-            //Triangulation = new LowPolyLibrary.Triangulation(1920, 1080, Variance, CellSize);
+            //Triangulation = new PolyLibLibrary.Triangulation(1920, 1080, Variance, CellSize);
 
             Triangulation = new Triangulation(
                 (int)(Frame.Size.Width * UIScreen.MainScreen.Scale),
@@ -98,7 +98,7 @@ namespace PolyLib.Views.iOS
 
         void Triangulation_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            //force redraw of entire lowpolyview
+            //force redraw of entire polylibview
             Superview.SetNeedsDisplay();
             SetNeedsDisplay();
         }

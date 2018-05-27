@@ -86,7 +86,7 @@ namespace PolyLib.Views.Android
 
         void Triangulation_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            //force redraw of entire lowpolyview
+            //force redraw of entire polylibview
             ((View)Parent).Invalidate();
             Invalidate();
         }

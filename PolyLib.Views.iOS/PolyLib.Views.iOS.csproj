@@ -49,7 +49,7 @@
     <Compile Include="AnimationUpdateView.cs" />
     <Compile Include="TriangulationView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="LowPolyView.cs" />
+    <Compile Include="PolyLibView.cs" />
     <Compile Include="PassthroughView.cs" />
   </ItemGroup>
   <ItemGroup>

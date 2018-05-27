@@ -34,7 +34,7 @@ namespace PolyLibiOS
 
         [Outlet]
         [GeneratedCode("iOS Designer", "1.0")]
-        PolyLib.Views.iOS.LowPolyView lowPolyView { get; set; }
+        PolyLib.Views.iOS.PolyLibView PolyLibView { get; set; }
 
         void ReleaseDesignerOutlets()
         {
@@ -56,10 +56,10 @@ namespace PolyLibiOS
                 heightInput = null;
             }
 
-            if (lowPolyView != null)
+            if (PolyLibView != null)
             {
-                lowPolyView.Dispose();
-                lowPolyView = null;
+                PolyLibView.Dispose();
+                PolyLibView = null;
             }
 
             if (varInput != null)

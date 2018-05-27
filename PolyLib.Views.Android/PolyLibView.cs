@@ -11,7 +11,7 @@ using SkiaSharp;
 
 namespace PolyLib.Views.Android
 {
-    public class LowPolyView : FrameLayout
+    public class PolyLibView : FrameLayout
     {
         public TriangulationView TriangulationView { get; private set; }
         public AnimationUpdateView AnimationUpdateView { get; private set; }
@@ -20,22 +20,22 @@ namespace PolyLib.Views.Android
 
         #region Constructors
 
-        protected LowPolyView(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+        protected PolyLibView(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
         {
             Init();
         }
 
-        public LowPolyView(Context context) : base(context)
+        public PolyLibView(Context context) : base(context)
         {
             Init();
         }
 
-        public LowPolyView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public PolyLibView(Context context, IAttributeSet attrs) : base(context, attrs)
         {
             Init();
         }
 
-        public LowPolyView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public PolyLibView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             Init();
         }
@@ -55,14 +55,14 @@ namespace PolyLib.Views.Android
             AddView(AnimationUpdateView);
         }
 
-        public LowPolyView ResizeView(int boundsWidth, int boundsHeight, View.IOnTouchListener listener = null)
+        public PolyLibView ResizeView(int boundsWidth, int boundsHeight, View.IOnTouchListener listener = null)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
 
             var parent = ((ViewGroup)Parent);
             var index = parent.IndexOfChild(this);
             parent.RemoveView(this);
-            var newCanvasView = new LowPolyView(Context);
+            var newCanvasView = new PolyLibView(Context);
 
             //setup listeners
             newCanvasView.SetOnTouchListener(listener);
@@ -86,7 +86,7 @@ namespace PolyLib.Views.Android
         //    ViewTreeObserver.AddOnGlobalLayoutListener(new GlobalLayoutListener((obj) =>
         //    {
         //        ViewTreeObserver.RemoveOnGlobalLayoutListener(obj);
-        //        Triangulation = new LowPolyLibrary.Triangulation(Width, Height, Variance, CellSize);
+        //        Triangulation = new PolyLibLibrary.Triangulation(Width, Height, Variance, CellSize);
         //        Invalidate();
         //    }));
         //}

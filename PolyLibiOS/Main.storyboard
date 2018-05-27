@@ -21,7 +21,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" horizontalCompressionResistancePriority="748" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2563" customClass="LowPolyView" misplaced="YES">
+                            <view contentMode="scaleToFill" horizontalCompressionResistancePriority="748" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2563" customClass="PolyLibView" misplaced="YES">
                                 <rect key="frame" x="0.0" y="20" width="375" height="667"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
@@ -134,7 +134,7 @@
                         <outlet property="cellSizeInput" destination="14042" id="AFY-8A-oOE"/>
                         <outlet property="generateButton" destination="14035" id="rcr-3z-HIu"/>
                         <outlet property="heightInput" destination="14041" id="9vC-rg-xB2"/>
-                        <outlet property="lowPolyView" destination="2563" id="name-outlet-2563"/>
+                        <outlet property="polylibView" destination="2563" id="name-outlet-2563"/>
                         <outlet property="varInput" destination="14043" id="Vro-wK-HOC"/>
                         <outlet property="widthInput" destination="14040" id="7YX-Gp-R0P"/>
                     </connections>

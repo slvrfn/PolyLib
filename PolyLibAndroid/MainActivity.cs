@@ -18,11 +18,11 @@ using SkiaSharp.Views.Android;
 
 namespace PolyLibAndroid
 {
-    [Activity(Label = "LowPoly", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
+    [Activity(Label = "PolyLib", MainLauncher = true, Icon = "@mipmap/icon", Theme = "@android:style/Theme.Holo.NoActionBar.Fullscreen")]
     public class MainActivity : Activity, View.IOnTouchListener, SeekBar.IOnSeekBarChangeListener
     {
         Button _button, _animSButton, _animGButton;
-        LowPolyView _polyView;
+        PolyLibView _polyLibView;
         TextView _widthTB, _heightTB, _varTB, _sizeTB;
 
         Triangulation _currentTriangulation;
@@ -50,10 +50,10 @@ namespace PolyLibAndroid
             _animGButton = FindViewById<Button>(Resource.Id.animGButton);
             _animGButton.Click += growAnimation;
 
-            _polyView = FindViewById<LowPolyView>(Resource.Id.imageView1);
-            _polyView.SetOnTouchListener(this);
+            _polyLibView = FindViewById<PolyLibView>(Resource.Id.imageView1);
+            _polyLibView.SetOnTouchListener(this);
 
-            _currentTriangulation = _polyView.CurrentTriangulation;
+            _currentTriangulation = _polyLibView.CurrentTriangulation;
 
             _widthTB = FindViewById<TextView>(Resource.Id.widthTextBox);
             _heightTB = FindViewById<TextView>(Resource.Id.heightTextBox);
@@ -80,7 +80,7 @@ namespace PolyLibAndroid
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            _polyView = null;
+            _polyLibView = null;
             _widthTB = null;
             _heightTB = null;
             _varTB = null;
@@ -94,7 +94,7 @@ namespace PolyLibAndroid
         {
             if (_currentTriangulation == null)
             {
-                _currentTriangulation = _polyView.CurrentTriangulation;
+                _currentTriangulation = _polyLibView.CurrentTriangulation;
             }
 
             var boundsWidth = Int32.Parse(_widthTB.Text);
@@ -103,10 +103,10 @@ namespace PolyLibAndroid
             var variance = float.Parse(_varTB.Text);
             var cellSize = int.Parse(_sizeTB.Text);
 
-            if (!boundsWidth.Equals(_polyView.Width) || !boundsHeight.Equals(_polyView.Height))
+            if (!boundsWidth.Equals(_polyLibView.Width) || !boundsHeight.Equals(_polyLibView.Height))
             {
-                _polyView = _polyView.ResizeView(boundsWidth, boundsHeight, this);
-                _currentTriangulation = _polyView.CurrentTriangulation;
+                _polyLibView = _polyLibView.ResizeView(boundsWidth, boundsHeight, this);
+                _currentTriangulation = _polyLibView.CurrentTriangulation;
             }
             //set props on triangulation
             _currentTriangulation.Variance = variance;
@@ -143,8 +143,8 @@ namespace PolyLibAndroid
 
             if (startAnim)
             {
-                var touchAnimation = new RandomTouch(_polyView.CurrentTriangulation, 12, touch.X, touch.Y, 150);
-                _polyView.AddAnimation(touchAnimation);
+                var touchAnimation = new RandomTouch(_polyLibView.CurrentTriangulation, 12, touch.X, touch.Y, 150);
+                _polyLibView.AddAnimation(touchAnimation);
             }
 
             return true;
@@ -152,14 +152,14 @@ namespace PolyLibAndroid
 
         private void growAnimation(object sender, EventArgs e)
         {
-            var growAnim = new Grow(_polyView.CurrentTriangulation, _numAnimFrames);
-            _polyView.AddAnimation(growAnim);
+            var growAnim = new Grow(_polyLibView.CurrentTriangulation, _numAnimFrames);
+            _polyLibView.AddAnimation(growAnim);
         }
 
         private void sweepAnimation(object sender, EventArgs e)
         {
-            var sweepAnim = new Sweep(_polyView.CurrentTriangulation, _numAnimFrames);
-            _polyView.AddAnimation(sweepAnim);
+            var sweepAnim = new Sweep(_polyLibView.CurrentTriangulation, _numAnimFrames);
+            _polyLibView.AddAnimation(sweepAnim);
         }
 
         #region seekbar change listener
