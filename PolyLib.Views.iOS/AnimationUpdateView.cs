@@ -16,7 +16,7 @@ namespace PolyLib.Views.iOS
     [Register("AnimationUpdateView"), DesignTimeVisible(true)]
     public class AnimationUpdateView : SKCanvasView, IAnimationUpdateView
     {
-        private AnimationEngine _animationFlowEngine;
+        public AnimationEngine Engine { get; private set; }
 
         #region Constructors
         public AnimationUpdateView()
@@ -44,7 +44,7 @@ namespace PolyLib.Views.iOS
 
         void Initialize()
         {
-            _animationFlowEngine = new AnimationEngine(this);
+            Engine = new AnimationEngine(this);
             this.Opaque = false;
         }
 
@@ -58,7 +58,7 @@ namespace PolyLib.Views.iOS
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            _animationFlowEngine.DrawOnMe(surf);
+            Engine.DrawOnMe(surf);
             Console.WriteLine("Animation Frame drawn in: " + watch.ElapsedMilliseconds + " ms\n");
         }
 
@@ -69,7 +69,7 @@ namespace PolyLib.Views.iOS
 
         public void AddAnimation(AnimationBase anim)
         {
-            _animationFlowEngine.AddAnimation(anim);
+            Engine.AddAnimation(anim);
         }
     }
 }

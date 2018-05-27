@@ -16,8 +16,10 @@ namespace PolyLib.Views.iOS
     [Register("PolyLibView"), DesignTimeVisible(true)]
     public class PolyLibView : UIView
     {
-        public TriangulationView TriangulationView;
-        public AnimationUpdateView AnimationUpdateView;
+        public TriangulationView TriangulationView { get; private set; }
+        public AnimationUpdateView AnimationUpdateView { get; private set; }
+
+        public AnimationEngine CurrentAnimationEngine => AnimationUpdateView.Engine;
 
 
         public Triangulation CurrentTriangulation => TriangulationView.Triangulation;

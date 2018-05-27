@@ -10,13 +10,11 @@ namespace PolyLibiOS
 {
     public partial class ViewController : UIViewController
     {
-
-
         Triangulation _currentTriangulation;
-        PolyLibView polyLibViewRef;
+        PolyLibView _polyLibViewRef;
 
-        UITapGestureRecognizer tapGestureRecognizer;
-        UIPanGestureRecognizer panGestureRecognizer;
+        UITapGestureRecognizer _tapGestureRecognizer;
+        UIPanGestureRecognizer _panGestureRecognizer;
 
         protected ViewController(IntPtr handle) : base(handle)
         {
@@ -27,15 +25,15 @@ namespace PolyLibiOS
         {
             base.ViewDidLoad();
             // Perform any additional setup after loading the view, typically from a nib.
-            polyLibViewRef = polylibView;
+            _polyLibViewRef = polylibView;
             //set inputs in pixel width/height
-            widthInput.Text = $"{polyLibViewRef.Frame.Width * UIScreen.MainScreen.Scale}";
-            heightInput.Text = $"{polyLibViewRef.Frame.Height * UIScreen.MainScreen.Scale}";
+            widthInput.Text = $"{_polyLibViewRef.Frame.Width * UIScreen.MainScreen.Scale}";
+            heightInput.Text = $"{_polyLibViewRef.Frame.Height * UIScreen.MainScreen.Scale}";
             varInput.Text = ".75";
             cellSizeInput.Text = "150";
 
-            tapGestureRecognizer = new UITapGestureRecognizer(HandleTap);
-            panGestureRecognizer = new UIPanGestureRecognizer(HandlePanTouch);
+            _tapGestureRecognizer = new UITapGestureRecognizer(HandleTap);
+            _panGestureRecognizer = new UIPanGestureRecognizer(HandlePanTouch);
 
             widthInput.ShouldReturn = (textField) =>
             {
@@ -61,12 +59,12 @@ namespace PolyLibiOS
             generateButton.TouchUpInside += Generate;
 
 
-            polyLibViewRef.AddGestureRecognizer(tapGestureRecognizer);
-            polyLibViewRef.AddGestureRecognizer(panGestureRecognizer);
+            _polyLibViewRef.AddGestureRecognizer(_tapGestureRecognizer);
+            _polyLibViewRef.AddGestureRecognizer(_panGestureRecognizer);
 
             if (_currentTriangulation == null)
             {
-                _currentTriangulation = polyLibViewRef.CurrentTriangulation;
+                _currentTriangulation = _polyLibViewRef.CurrentTriangulation;
             }
         }
 
@@ -79,10 +77,10 @@ namespace PolyLibiOS
             var variance = float.Parse(varInput.Text);
             var cellSize = int.Parse(cellSizeInput.Text);
 
-            if (!(boundsWidth == polyLibViewRef.Frame.Width) || !(boundsHeight == polyLibViewRef.Frame.Height))
+            if (!(boundsWidth == _polyLibViewRef.Frame.Width) || !(boundsHeight == _polyLibViewRef.Frame.Height))
             {
-                polyLibViewRef = polyLibViewRef.ResizeView(boundsWidth, boundsHeight, new List<UIGestureRecognizer>{ tapGestureRecognizer, panGestureRecognizer});
-                _currentTriangulation = polyLibViewRef.CurrentTriangulation;
+                _polyLibViewRef = _polyLibViewRef.ResizeView(boundsWidth, boundsHeight, new List<UIGestureRecognizer>{ _tapGestureRecognizer, _panGestureRecognizer});
+                _currentTriangulation = _polyLibViewRef.CurrentTriangulation;
             }
             //set props on triangulation
             _currentTriangulation.Variance = variance;
@@ -107,7 +105,7 @@ namespace PolyLibiOS
             //state doesnt matter here, only executed if tap gesture
             var loc = recognizer.LocationOfTouch(0, recognizer.View);
             var touchAnimation = new RandomTouch(_currentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y * UIScreen.MainScreen.Scale), 250);
-            polyLibViewRef.AddAnimation(touchAnimation);
+            _polyLibViewRef.AddAnimation(touchAnimation);
         }
 
         void HandlePanTouch(UIPanGestureRecognizer recognizer)
@@ -123,7 +121,7 @@ namespace PolyLibiOS
             {
                 var loc = recognizer.LocationOfTouch(0, recognizer.View);
                 var touchAnimation = new RandomTouch(_currentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y * UIScreen.MainScreen.Scale), 250);
-                polyLibViewRef.AddAnimation(touchAnimation);
+                _polyLibViewRef.AddAnimation(touchAnimation);
             }
         }
         #endregion
