@@ -8,7 +8,7 @@ using Foundation;
 using System;
 using System.CodeDom.Compiler;
 
-namespace LowPolyLibrary.Views.iOS
+namespace PolyLib.Views.iOS
 {
     [Register ("PassthroughView")]
     partial class PassthroughView

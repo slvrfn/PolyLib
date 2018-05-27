@@ -57,55 +57,30 @@ namespace PolyLib.Views.iOS
             AddSubview(AnimationUpdateView);
         }
 
-        #region Touch
-        public override void TouchesBegan(NSSet touches, UIEvent evt)
-        {
-            base.TouchesBegan(touches, evt);
-            UITouch touch = touches.AnyObject as UITouch;
-            if (touch != null)
-            {
-                var loc = touch.LocationInView(this);
-                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y * UIScreen.MainScreen.Scale), 250);
-                AddAnimation(touchAnimation);
-            }
-
-        }
-
-        public override void TouchesMoved(NSSet touches, UIEvent evt)
-        {
-            base.TouchesMoved(touches, evt);
-            UITouch touch = touches.AnyObject as UITouch;
-            if (touch != null)
-            {
-                var loc = touch.LocationInView(this);
-                var touchAnimation = new RandomTouch(CurrentTriangulation, 6, (float)(loc.X * UIScreen.MainScreen.Scale), (float)(loc.Y * UIScreen.MainScreen.Scale), 250);
-                AddAnimation(touchAnimation);
-            }
-        }
-        #endregion
-
-        public PolyLibView GenerateNewTriangulation(int boundsWidth, int boundsHeight, float variance, int cellSize)
+        public PolyLibView ResizeView(int boundsWidth, int boundsHeight, List<UIGestureRecognizer> recognizers)//, View.IOnTouchListener listener = null)
         {
             //SKCanvasView cannot change size. Instead, generate a new one in this views place
+            var newFrame = new CGRect(Frame.Location, new CGSize(boundsWidth, boundsHeight));
 
-            if (!boundsWidth.Equals(Frame.Size.Width) || !boundsHeight.Equals(Frame.Size.Height))
-            {
+            var newCanvasView = new PolyLibView(newFrame);
 
-                //var newCanvasView = new PolyLibView(Frame);
-                //newCanvasView.TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize);
-//                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
-                //InsertSubviewAbove(newCanvasView, this);
-                //RemoveFromSuperview();
-                AnimationUpdateView.SetNeedsDisplay();
-                return this;
-            }
-            else
+            //setup gesture recognizers
+            foreach (var recognizer in recognizers)
             {
-//                TriangulationView.Generate(boundsWidth, boundsHeight, variance, cellSize, .01f, 0);
-                //only called here since a whole new PolyLib view is created in the other case
-                AnimationUpdateView.SetNeedsDisplay();
-                return this;
+                newCanvasView.AddGestureRecognizer(recognizer);
+                RemoveGestureRecognizer(recognizer);
             }
+
+            Superview.InsertSubviewAbove(newCanvasView, this);
+            RemoveFromSuperview();
+
+            return newCanvasView;
+        }
+
+        public void UpdateTriangulation(Triangulation tri)
+        {
+            TriangulationView.UpdateTriangulation(tri);
+            SetNeedsDisplay();
         }
 
         public void AddAnimation(AnimationBase anim) => AnimationUpdateView.AddAnimation(anim);

@@ -8,10 +8,10 @@ using Foundation;
 using System;
 using System.CodeDom.Compiler;
 
-namespace LowPolyLibrary.Views.iOS
+namespace PolyLib.Views.iOS
 {
-    [Register ("LowPolyView")]
-    partial class LowPolyView
+    [Register ("PolyLibView")]
+    partial class PolyLibView
     {
         void ReleaseDesignerOutlets ()
         {

@@ -17,11 +17,6 @@ namespace PolyLib.Views.iOS
     {
         public Triangulation Triangulation { get; private set; }
 
-        float _variance = .75f;
-        int _cellSize = 150;
-        float _frequency = .01f;
-        float _seed = 0;
-
         #region Constructors
         public TriangulationView()
         {
@@ -48,19 +43,12 @@ namespace PolyLib.Views.iOS
 
         void Initialize()
         {
-            //Triangulation = new PolyLibLibrary.Triangulation(1920, 1080, Variance, CellSize);
+            //converting to pixels for library's use
 
             Triangulation = new Triangulation(
                 (int)(Frame.Size.Width * UIScreen.MainScreen.Scale),
-                (int)(Frame.Size.Height * UIScreen.MainScreen.Scale))
-            {
-                Variance = _variance,
-                CellSize = _cellSize,
-                Frequency = _frequency,
-                Seed = _seed
-            };
-
-            //SetNeedsDisplay();
+                (int)(Frame.Size.Height * UIScreen.MainScreen.Scale));
+            Triangulation.PropertyChanged += Triangulation_PropertyChanged;
         }
 
         public override void DrawInSurface(SKSurface surface, SKImageInfo info)
