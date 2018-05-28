@@ -1,4 +1,5 @@
 
+  
 # PolyLib 
 <p align="center">
   <img src="https://img.shields.io/badge/.net%20standard-2.0-blue.svg" alt=".Net Standard 2.0" title=".Net Standard 2.0"> <img src="https://img.shields.io/badge/Xamarin.Android-8-green.svg" alt="Xamarin.Android 8" title="Xamarin.Android 8"> <img src="https://img.shields.io/badge/Xamarin.iOS-11-lightgrey.svg" alt="Xamarin.iOS 11" title="Xamarin.iOS 11"> 
@@ -182,12 +183,16 @@ Each `PolyLibView` was created to not only display triangulations, but also anim
 
 ## Libraries used
 
+- [mono/SkiaSharp](https://github.com/mono/SkiaSharp)
+Used to allow for cross-platform drawing
 - [S-hull][sHullRef]
 Responsible for creating the Delaunay triangulations. Chosen for its proven speed
 - [Auburns/FastNoise_CSharp][fastNoiseRef]
 Responsible for generating noise used in creating source points for triangulation
 - [capesean/ColorBru][colorBruRef]
 Binding to the ColorBrewer library developed by Cynthia Brewer
+- [gridsum/DataflowEx](https://github.com/gridsum/DataflowEx)
+Wraps animation loop in re-usable dataflow
 
 [sHullRef]: http://www.s-hull.org/
 [fastNoiseRef]: https://github.com/Auburns/FastNoise_CSharp
